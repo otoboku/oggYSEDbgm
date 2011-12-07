@@ -1,0 +1,50 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ogg", "ogg.vcproj", "{A09FBD07-606E-41CD-B055-88B68D6E8809}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		64|Win32 = 64|Win32
+		64|x64 = 64|x64
+		Debug|Win32 = Debug|Win32
+		Debug|x64 = Debug|x64
+		nsse|Win32 = nsse|Win32
+		nsse|x64 = nsse|x64
+		Release|Win32 = Release|Win32
+		Release|x64 = Release|x64
+		sse2|Win32 = sse2|Win32
+		sse2|x64 = sse2|x64
+		uni|Win32 = uni|Win32
+		uni|x64 = uni|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A09FBD07-606E-41CD-B055-88B68D6E8809}.64|Win32.ActiveCfg = 64|Win32
+		{A09FBD07-606E-41CD-B055-88B68D6E8809}.64|Win32.Build.0 = 64|Win32
+		{A09FBD07-606E-41CD-B055-88B68D6E8809}.64|x64.ActiveCfg = 64|x64
+		{A09FBD07-606E-41CD-B055-88B68D6E8809}.64|x64.Build.0 = 64|x64
+		{A09FBD07-606E-41CD-B055-88B68D6E8809}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A09FBD07-606E-41CD-B055-88B68D6E8809}.Debug|Win32.Build.0 = Debug|Win32
+		{A09FBD07-606E-41CD-B055-88B68D6E8809}.Debug|x64.ActiveCfg = Debug|x64
+		{A09FBD07-606E-41CD-B055-88B68D6E8809}.Debug|x64.Build.0 = Debug|x64
+		{A09FBD07-606E-41CD-B055-88B68D6E8809}.nsse|Win32.ActiveCfg = nsse|Win32
+		{A09FBD07-606E-41CD-B055-88B68D6E8809}.nsse|Win32.Build.0 = nsse|Win32
+		{A09FBD07-606E-41CD-B055-88B68D6E8809}.nsse|x64.ActiveCfg = nsse|x64
+		{A09FBD07-606E-41CD-B055-88B68D6E8809}.nsse|x64.Build.0 = nsse|x64
+		{A09FBD07-606E-41CD-B055-88B68D6E8809}.Release|Win32.ActiveCfg = Release|Win32
+		{A09FBD07-606E-41CD-B055-88B68D6E8809}.Release|Win32.Build.0 = Release|Win32
+		{A09FBD07-606E-41CD-B055-88B68D6E8809}.Release|x64.ActiveCfg = Release|x64
+		{A09FBD07-606E-41CD-B055-88B68D6E8809}.Release|x64.Build.0 = Release|x64
+		{A09FBD07-606E-41CD-B055-88B68D6E8809}.sse2|Win32.ActiveCfg = sse2|Win32
+		{A09FBD07-606E-41CD-B055-88B68D6E8809}.sse2|Win32.Build.0 = sse2|Win32
+		{A09FBD07-606E-41CD-B055-88B68D6E8809}.sse2|x64.ActiveCfg = sse2|x64
+		{A09FBD07-606E-41CD-B055-88B68D6E8809}.sse2|x64.Build.0 = sse2|x64
+		{A09FBD07-606E-41CD-B055-88B68D6E8809}.uni|Win32.ActiveCfg = uni|Win32
+		{A09FBD07-606E-41CD-B055-88B68D6E8809}.uni|Win32.Build.0 = uni|Win32
+		{A09FBD07-606E-41CD-B055-88B68D6E8809}.uni|x64.ActiveCfg = uni|x64
+		{A09FBD07-606E-41CD-B055-88B68D6E8809}.uni|x64.Build.0 = uni|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
