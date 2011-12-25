@@ -3941,7 +3941,7 @@ void COggDlg::timerp()
 			dc.BitBlt(8*5,0,88*2+170,24,&dcsub,mcnt,0,SRCCOPY);
 			if(si-mcnt<MDC){
 				mcnt2++;
-				dc.BitBlt(MDC-mcnt2+8*5,0,88*2+170,16,&dcsub,0,0,SRCCOPY);
+				dc.BitBlt(MDC-mcnt2+8*5,0,88*2+170,24,&dcsub,0,0,SRCCOPY);
 				if(MDC-mcnt2<=0){mcnt2=0;mcnt=0;}
 			}else mcnt2=0;
 			mcnt++;
