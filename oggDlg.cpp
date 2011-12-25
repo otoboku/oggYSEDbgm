@@ -497,7 +497,12 @@ BOOL COggDlg::OnInitDialog()
 	
 	// TODO: 特別な初期化を行う時はこの場所に追加してください。
 	//フォント設定
-	hFont = CreateFont(16,8,0,0,500,FALSE,FALSE,FALSE,
+	hFont = CreateFont(22,8,0,0,0,FALSE,FALSE,FALSE,
+		               DEFAULT_CHARSET,OUT_TT_PRECIS,CLIP_DEFAULT_PRECIS,
+					   DRAFT_QUALITY,FIXED_PITCH  | /*TMPF_TRUETYPE |*/ FF_MODERN,
+					   _T("Consolas"));
+	if(hFont==NULL)
+		hFont = CreateFont(16,8,0,0,500,FALSE,FALSE,FALSE,
 		               SHIFTJIS_CHARSET,OUT_TT_PRECIS,CLIP_DEFAULT_PRECIS,
 					   DRAFT_QUALITY,FIXED_PITCH  | /*TMPF_TRUETYPE |*/ FF_MODERN,
 					   _T("ＭＳ ゴシック"));
@@ -659,9 +664,9 @@ BOOL COggDlg::OnInitDialog()
 	bmp.CreateCompatibleBitmap(cdc0,740,400);
 	bmpsub.CreateCompatibleBitmap(cdc0,3000,20);
 	dc.SelectObject(&bmp);
-	dc.FillSolidRect(0,0,739,399,RGB(192,192,192));
+	dc.FillSolidRect(0,0,739,399,RGB(0,0,0));
 	dcsub.SelectObject(&bmpsub);
-	dcsub.FillSolidRect(0,0,739,399,RGB(192,192,192));
+	dcsub.FillSolidRect(0,0,739,399,RGB(0,0,0));
 	ReleaseDC(cdc0);
 	mode=modesub=0;
 	m_supe.SetCheck(savedata.supe);
@@ -840,7 +845,7 @@ void COggDlg::OnPaint()
 	else
 	{
 		//if(plf!=0) 
-			dcc.BitBlt(5,0,MDCP,81+16,&dc,0,0,SRCCOPY);
+			dcc.BitBlt(5,0,MDCP,81+16+4,&dc,0,0,SRCCOPY);
 		CDialog::OnPaint();
 	}
 }
@@ -3761,35 +3766,11 @@ void COggDlg::timerp()
 		int tbl2=t1%60;
 		int tcl2=tt%100;
 
-		dc.FillSolidRect(0,0,500,100,RGB(1,1,1));
+		dc.FillSolidRect(0,0,500,150,RGB(0,0,0));
 //		dcsub.FillSolidRect(0,0,3000,30,RGB(1,1,1));
 
 		if(m_supe.GetCheck()==TRUE && plf==1 && (wav || ogg)) Speana();
 
-		s="";ss="";
-		s="name:";
-		moji(s,1,0,0xffffff);
-		if(fnn!="")		ss=fnn;
-		if(mode==-10) ss=tagfile;
-		if(stitle!="" && mode==-1)	ss=stitle;
-		int si=mojisub(ss,1,0,0xffffff);
-		if(si>MDC){
-			ss=fnn+_T("》---《");
-			if(mode==-10) ss=tagfile+_T("》---《");
-			si=mojisub(ss,1,0,0xffffff);
-		}
-		//枠はみ出し時スクロール処理
-		if(si>MDC){
-			dc.BitBlt(8*5,0,88*2+170,16,&dcsub,mcnt,0,SRCCOPY);
-			if(si-mcnt<MDC){
-				mcnt2++;
-				dc.BitBlt(MDC-mcnt2+8*5,0,88*2+170,16,&dcsub,0,0,SRCCOPY);
-				if(MDC-mcnt2<=0){mcnt2=0;mcnt=0;}
-			}else mcnt2=0;
-			mcnt++;
-		}else{
-			dc.BitBlt(8*5,0,88*2+170,16,&dcsub,0,0,SRCCOPY);
-		}
 		//mcnt1++;
 		if(modesub==5||modesub==7||modesub==8||modesub==9||modesub==10)	s.Format(_T("file:%s"),filen);
 		else			s.Format(_T("file:%s"),filen);
@@ -3942,6 +3923,33 @@ void COggDlg::timerp()
 		}
 
 //	}
+
+		s="";ss="";
+		s="name:";
+		moji(s,1,0,0xffffff);
+		if(fnn!="")		ss=fnn;
+		if(mode==-10) ss=tagfile;
+		if(stitle!="" && mode==-1)	ss=stitle;
+		int si=mojisub(ss,1,0,0xffffff);
+		if(si>MDC){
+			ss=fnn+_T("》---《");
+			if(mode==-10) ss=tagfile+_T("》---《");
+			si=mojisub(ss,1,0,0xffffff);
+		}
+		//枠はみ出し時スクロール処理
+		if(si>MDC){
+			dc.BitBlt(8*5,0,88*2+170,24,&dcsub,mcnt,0,SRCCOPY);
+			if(si-mcnt<MDC){
+				mcnt2++;
+				dc.BitBlt(MDC-mcnt2+8*5,0,88*2+170,16,&dcsub,0,0,SRCCOPY);
+				if(MDC-mcnt2<=0){mcnt2=0;mcnt=0;}
+			}else mcnt2=0;
+			mcnt++;
+		}else{
+			dc.BitBlt(8*5,0,88*2+170,24,&dcsub,0,0,SRCCOPY);
+		}
+
+
 
 	if(pl&&plw){
 		if(pl->m_renzoku.GetCheck()){
@@ -5775,7 +5783,7 @@ int COggDlg::mojisub(CString s,int x,int y,COLORREF rgb)
     fo = (HFONT)SelectObject(dcsub, hFont);
     SetTextColor(dcsub, rgb);
     SetBkColor(dcsub, RGB(0,0,0));
-    SetBkMode(dcsub, OPAQUE);
+    SetBkMode(dcsub, TRANSPARENT);
     szinfo=dcsub.GetOutputTextExtent(s);
 	if(szinfo.cx<MDC+8)
 		dcsub.FillSolidRect(0,0,MDC+8,30,RGB(0,0,0));
