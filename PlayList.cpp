@@ -1373,7 +1373,7 @@ void CPlayList::Load()
 		MoveWindow(x,y,cx,cy,TRUE);
 		RECT r;
 		GetClientRect(&r);
-	m_lc.SetWindowPos(&wndNoTopMost,0,0,r.right-20,r.bottom-45,SWP_NOMOVE|SWP_NOOWNERZORDER|SWP_NOZORDER);
+	m_lc.SetWindowPos(&wndNoTopMost,0,0,r.right-20,r.bottom-65,SWP_NOMOVE|SWP_NOOWNERZORDER|SWP_NOZORDER);
 	}
 }
 int SC=0;
@@ -1448,7 +1448,7 @@ void CPlayList::OnSize(UINT nType, int cx, int cy)
 	RECT r;
 	GetClientRect(&r);
 	if( ::IsWindow( this->GetSafeHwnd()) == TRUE &&  this->IsWindowVisible() == TRUE)
-	m_lc.SetWindowPos(&wndNoTopMost,0,0,r.right-20,r.bottom-45,SWP_NOMOVE|SWP_NOOWNERZORDER|SWP_NOZORDER);
+	m_lc.SetWindowPos(&wndNoTopMost,0,0,r.right-20,r.bottom-65,SWP_NOMOVE|SWP_NOOWNERZORDER|SWP_NOZORDER);
 	if(plw){
 		if (nType == SIZE_MINIMIZED){
 			if(m_saisyo.GetCheck())
