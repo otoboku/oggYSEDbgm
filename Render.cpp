@@ -79,6 +79,8 @@ BEGIN_MESSAGE_MAP(CRender, CDialog)
 	ON_BN_CLICKED(IDC_CHECK44, &CRender::Onkpi25)
 	ON_BN_CLICKED(IDC_CHECK46, &CRender::Onkpi30)
 	ON_BN_CLICKED(IDCANCEL3, &CRender::Onkpi)
+	ON_BN_CLICKED(IDC_FONT, &CRender::OnFontMain)
+	ON_BN_CLICKED(IDC_FONT2, &CRender::OnFontList)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -377,4 +379,33 @@ void CRender::Onkpi()
 	// TODO: ここにコントロール通知ハンドラ コードを追加します。
 	CKpilist k;
 	k.DoModal();
+}
+
+extern HFONT	hFont;
+#include "afxdlgs.h"
+void CRender::OnFontMain()
+{
+	// TODO: ここにコントロール通知ハンドラ コードを追加します。
+	LOGFONT      logFont;
+	CFont* f=CFont::FromHandle(hFont);
+	f->GetLogFont(&logFont);
+	CFontDialog fontDlg(&logFont);
+	if (fontDlg.DoModal() == IDOK){
+		DeleteObject(hFont);
+		hFont=CreateFontIndirect(fontDlg.m_cf.lpLogFont);
+	}
+
+}
+#include "PlayList.h"
+extern CPlayList *pl;
+void CRender::OnFontList()
+{
+	// TODO: ここにコントロール通知ハンドラ コードを追加します。
+	LOGFONT      logFont;
+	CFont* f=pl->m_lc.GetFont();
+	f->GetLogFont(&logFont);
+	CFontDialog fontDlg(&logFont,CF_SCREENFONTS);
+	if (fontDlg.DoModal() == IDOK && pl){
+		pl->m_lc.SetFont(fontDlg.GetFont());
+	}
 }

@@ -144,6 +144,9 @@ struct save{
 	int spc;
 	int mp3;
 	int kpivol;
+
+	TCHAR font1[1024];
+	TCHAR font2[1024];
 };
 
 //{{AFX_INSERT_LOCATION}}

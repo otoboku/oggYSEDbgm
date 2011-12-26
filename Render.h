@@ -83,6 +83,8 @@ public:
 	afx_msg void Onkpi30();
 	afx_msg void Onkpi();
 	CButton m_kpi;
+	afx_msg void OnFontMain();
+	afx_msg void OnFontList();
 };
 
 //{{AFX_INSERT_LOCATION}}

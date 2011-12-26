@@ -113,6 +113,7 @@ extern int fade1;
 extern IMediaPosition *pMediaPosition;
 extern int mode,videoonly,playf;
 extern int plcnt;
+extern save savedata;
 BOOL CPlayList::OnInitDialog()
 {
 	CDialog::OnInitDialog();
@@ -183,7 +184,12 @@ BOOL CPlayList::OnInitDialog()
 	SetTimer(50,100,NULL);
 
 //	CFont pFont;
-//	BOOL retfont=pFont.CreateFont(0,0,0,0,FW_NORMAL,FALSE,FALSE,0,ANSI_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,DEFAULT_QUALITY,DEFAULT_PITCH | FF_SWISS,_T("ÉÅÉCÉäÉI"));
+//	BOOL retfont=pFont.CreateFont(-15,0,0,0,400,0,0,0,128,3,2,1,50,savedata.font2);
+//	if(retfont){
+//		m_lc.SetFont(&pFont,TRUE);
+//		m_find.SetFont(&pFont,TRUE);
+//	}
+//	pFont.DeleteObject();
 //	if(retfont==0)
 //		retfont=pFont.CreateFont(0,0,0,0,FW_NORMAL,FALSE,FALSE,0,ANSI_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,DEFAULT_QUALITY,DEFAULT_PITCH | FF_SWISS,_T("MS UI Gothic"));
 //	if(retfont==0)

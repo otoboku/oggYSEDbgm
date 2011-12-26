@@ -1018,10 +1018,10 @@ DWORD CButtonST::SetIcon(int nIconIn, int nIconOut)
   	// Set icon when the mouse is OUT the button
 	if (nIconOut)
 	{
-		if (nIconOut == (int)BTNST_AUTO_GRAY)
-			hIconOut = BTNST_AUTO_GRAY;
+		if (nIconOut == (int)(BTNST_AUTO_GRAY))
+			hIconOut = (BTNST_AUTO_GRAY);
 		else
-			hIconOut = (HICON)::LoadImage(hInstResource, MAKEINTRESOURCE(nIconOut), IMAGE_ICON, 0, 0, 0);
+			hIconOut = ((HICON)::LoadImage(hInstResource, MAKEINTRESOURCE(nIconOut), IMAGE_ICON, 0, 0, 0));
 	} // if
 
 	return SetIcon(hIconIn, hIconOut);

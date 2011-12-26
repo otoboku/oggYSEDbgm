@@ -134,6 +134,8 @@ BOOL COggApp::InitInstance()
 	savedata.spc=1;
 	savedata.mp3=1;
 	savedata.kpivol=1;
+	_tcscpy(savedata.font1,_T("Consolas"));
+	_tcscpy(savedata.font2,_T("ƒƒCƒŠƒI"));
 
 #if _UNICODE
 	if(GetKeyState(VK_CONTROL) < 0){

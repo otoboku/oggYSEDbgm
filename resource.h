@@ -196,6 +196,8 @@
 #define IDC_BUTTON57                    1068
 #define IDC_Link                        1069
 #define ID_OK                           1071
+#define IDC_FONT                        1072
+#define IDC_FONT2                       1073
 #define ID_MENUITEM32771                32771
 #define ID_MENUITEM32772                32772
 #define ID_MENUITEM32773                32773
@@ -235,7 +237,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        177
 #define _APS_NEXT_COMMAND_VALUE         32804
-#define _APS_NEXT_CONTROL_VALUE         1072
+#define _APS_NEXT_CONTROL_VALUE         1073
 #define _APS_NEXT_SYMED_VALUE           104
 #endif
 #endif
