@@ -117,7 +117,6 @@ CWinThread* m_thread1;
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV のサポート
 	//}}AFX_VIRTUAL
-
 // インプリメンテーション
 protected:
 	CToolTipCtrl m_tooltip;

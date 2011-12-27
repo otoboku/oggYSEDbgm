@@ -497,16 +497,22 @@ BOOL COggDlg::OnInitDialog()
 	
 	// TODO: ì¡ï Ç»èâä˙âªÇçsÇ§éûÇÕÇ±ÇÃèÍèäÇ…í«â¡ÇµÇƒÇ≠ÇæÇ≥Ç¢ÅB
 	//ÉtÉHÉìÉgê›íË
-	hFont = CreateFont(16,8,0,0,500,FALSE,FALSE,FALSE,
+    LOGFONT LogFont; 
+	CClientDC dc1(this);
+	dc1.GetCurrentFont()->GetLogFont(&LogFont);
+	_tcscpy(LogFont.lfFaceName,_T("ÇlÇr ÉSÉVÉbÉN"));
+	LogFont.lfWeight=100;
+	hFont= CreateFontIndirect(&LogFont);
+/*	hFont = CreateFont(16,8,0,0,500,FALSE,FALSE,FALSE,
 		               SHIFTJIS_CHARSET,OUT_TT_PRECIS,CLIP_DEFAULT_PRECIS,
-					   DRAFT_QUALITY,FIXED_PITCH  | /*TMPF_TRUETYPE |*/ FF_MODERN,
+					   DRAFT_QUALITY,FIXED_PITCH | FF_MODERN,
 					   _T("Arphic Gothic JIS"));
 	if(hFont==NULL)
 		hFont = CreateFont(16,8,0,0,500,FALSE,FALSE,FALSE,
 		               SHIFTJIS_CHARSET,OUT_TT_PRECIS,CLIP_DEFAULT_PRECIS,
-					   DRAFT_QUALITY,FIXED_PITCH  | /*TMPF_TRUETYPE |*/ FF_MODERN,
+					   DRAFT_QUALITY,FIXED_PITCH  | FF_MODERN,
 					   _T("ÇlÇr ÉSÉVÉbÉN"));
-	
+*/	
 	
 	ogg=NULL;wav=NULL;adbuf2=NULL;
 	plf=0;
