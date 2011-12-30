@@ -501,6 +501,7 @@ BOOL COggDlg::OnInitDialog()
 	CClientDC dc1(this);
 	dc1.GetCurrentFont()->GetLogFont(&LogFont);
 	_tcscpy(LogFont.lfFaceName,_T("ÇlÇr ÉSÉVÉbÉN"));
+	LogFont.lfHeight--;
 	LogFont.lfWeight=100;
 	hFont= CreateFontIndirect(&LogFont);
 /*	hFont = CreateFont(16,8,0,0,500,FALSE,FALSE,FALSE,
@@ -5775,7 +5776,7 @@ void COggDlg::moji(CString s,int x,int y,COLORREF rgb)
     fo = (HFONT)SelectObject(dc, hFont);
     SetTextColor(dc, rgb);
     SetBkColor(dc, RGB(0,0,0));
-    SetBkMode(dc, TRANSPARENT);
+    dc.SetBkMode(TRANSPARENT);
     GetTextExtentPoint32(dc, s, s.GetLength(), &szinfo);
     dc.TextOut(x, y ,s, s.GetLength());
     SelectObject(dc, fo);
