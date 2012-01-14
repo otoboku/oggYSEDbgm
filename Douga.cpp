@@ -543,13 +543,13 @@ void CDouga::plays(TCHAR* s)
 				hr=pSplitter->QueryInterface(IID_IFileSourceFilter,reinterpret_cast<void **>(&Haali));
 				Haali->Load(ss,NULL);
 				audionum=0;
-				hr=pGraphBuilder->AddFilter(pSplitter,L"Splitter");
+				hr=pGraphBuilder->AddFilter(pSplitter,L"Haali Splitter");
 				CntPin(pSplitter);
 				if(audionum<=1){
-					if(ssss.Right(3)==_T(".ts") || ssss.Right(4)==_T("m3ts") || ssss.Right(3)==_T("mkv") || ssss.Right(3)==_T("mp4")){}else{ 
+					if(ssss.Right(3)==_T(".ts") || ssss.Right(4)==_T("m2ts") || ssss.Right(3)==_T("mkv") || ssss.Right(3)==_T("mp4")){}else{ 
 						pGraphBuilder->RemoveFilter(pSplitter);
-						RELEASE(Haali);
 						RELEASE(pSplitter);
+						RELEASE(Haali);
 						flg=1;
 						hr=pGraphBuilder->AddSourceFilter(ss, ss, &pSourceFilter);
 						hr=CoCreateInstance(CLSID_MPEG1Splitter, NULL, CLSCTX_INPROC_SERVER,IID_IBaseFilter, reinterpret_cast<void **>(&pSplitter));

@@ -1894,13 +1894,16 @@ void CPlayList::OnFindUp()
 
 	int flg=0;
 	for(int i=pnt2;i<playcnt;i++){
-		CString ss;
+		CString ss,ssl;
 		ss=pc[i].name;
-		if(ss.Find(s)!=-1 && pnt2!=i) {flg=1;break;}
+		ssl=ss;ssl.MakeLower();
+		if(ssl.Find(s)!=-1 && pnt2!=i) {flg=1;break;}
 		ss=pc[i].alb;
-		if(ss.Find(s)!=-1 && pnt2!=i) {flg=1;break;}
+		ssl=ss;ssl.MakeLower();
+		if(ssl.Find(s)!=-1 && pnt2!=i) {flg=1;break;}
 		ss=pc[i].art;
-		if(ss.Find(s)!=-1 && pnt2!=i) {flg=1;break;}
+		ssl=ss;ssl.MakeLower();
+		if(ssl.Find(s)!=-1 && pnt2!=i) {flg=1;break;}
 	}
 
 	if(flg){
@@ -1933,13 +1936,16 @@ void CPlayList::OnFindDown()
 
 	int flg=0;
 	for(int i=pnt2;i>=0;i--){
-		CString ss;
+		CString ss,ssl;
 		ss=pc[i].name;
-		if(ss.Find(s)!=-1 && pnt2!=i) {flg=1;break;}
+		ssl=ss;ssl.MakeLower();
+		if(ssl.Find(s)!=-1 && pnt2!=i) {flg=1;break;}
 		ss=pc[i].alb;
-		if(ss.Find(s)!=-1 && pnt2!=i) {flg=1;break;}
+		ssl=ss;ssl.MakeLower();
+		if(ssl.Find(s)!=-1 && pnt2!=i) {flg=1;break;}
 		ss=pc[i].art;
-		if(ss.Find(s)!=-1 && pnt2!=i) {flg=1;break;}
+		ssl=ss;ssl.MakeLower();
+		if(ssl.Find(s)!=-1 && pnt2!=i) {flg=1;break;}
 	}
 
 	if(flg){
