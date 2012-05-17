@@ -642,10 +642,10 @@ BEGIN
         BEGIN
             VALUE "Comments", "ファルコム簡易プレイヤ＋メディアプレイヤ+kpiプレイヤ"
             VALUE "CompanyName", "Pre Prayer Power Soft"
-            VALUE "FileDescription", "ogg/wav簡易プレイヤ Ver 0.6h Rel.8e No.14.2"
+            VALUE "FileDescription", "ogg/wav簡易プレイヤ Ver 0.6h Rel.8e No.14.3"
             VALUE "FileVersion", "0, 6, 8, 8"
             VALUE "InternalName", "ogg"
-            VALUE "LegalCopyright", "Copyright (C) 2011.12.25 ちゃちゃ"
+            VALUE "LegalCopyright", "Copyright (C) 2012.04.30 ちゃちゃ"
             VALUE "LegalTrademarks", "Pre Prayer Power Soft"
             VALUE "OriginalFilename", "oggYSEDbgm.exe"
             VALUE "ProductName", "ファルコム簡易プレイヤ＋メディアプレイヤ"

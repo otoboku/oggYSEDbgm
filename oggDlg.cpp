@@ -934,7 +934,7 @@ OggVorbis_File vf;
 DWORD hw;
 PCMWAVEFORMAT p;
 CFile cc;
-CString filen=_T("     ");
+CString filen=_T("");
 CSemaphore	m_Smp;
 
 PCMWAVEFORMAT    wfx;
@@ -4481,6 +4481,29 @@ void timerog1(UINT nIDEvent)
 		if(savedata.pl==1){
 			pl = new CPlayList;
 			pl->Create(og);
+			if(!plw)
+				DoEvent();
+			if(pl&&plw&&filen!=""){
+				int plc;
+				if(mode==-10)
+					plc=pl->Add(tagfile,mode,loop1,loop2,tagname,tagalbum,filen,0,oggsize/(2*wavch*wavbit/4),1);
+				else if(mode==-3){
+					if(oggsize==0)
+						plc=pl->Add(tagfile,mode,loop1,loop2,tagname,tagalbum,filen,0,-1,1);
+					else
+						plc=pl->Add(tagfile,mode,loop1,loop2,tagname,tagalbum,filen,0,oggsize/(2*wavch*wavbit),1);
+				}else
+					plc=pl->Add(fnn,mode,loop1,loop2,tagname,tagalbum,filen,ret2,oggsize/(2*wavch*wavbit));
+				if(plc==-1){
+					int i=pl->m_lc.GetItemCount()-1;
+					plcnt=i;
+					pl->SIcon(i);
+				}else{
+					plcnt=plc;
+					pl->SIcon(plc);
+				}
+			}
+
 		}
 	}
 
