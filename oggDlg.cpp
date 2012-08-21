@@ -5931,13 +5931,13 @@ void COggDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 							ZeroMemory(bufwav3,sizeof(bufwav3));
 							syukai=1;syukai2=0;
 							if(thn==FALSE) for(;;){if(syukai2==1)break;DoEvent();}
-							if(mp3_.seek(playb/4,wavch)==FALSE){fade1=1;if(thn==FALSE){if(m_dsb)m_dsb->Stop();}return;}
+							if(mp3_.seek(playb/(wavch==2?4:1),wavch)==FALSE){fade1=1;if(thn==FALSE){if(m_dsb)m_dsb->Stop();}return;}
 							poss=0;sek=TRUE;
 							timer.SetEvent();
 							syukai=0;
 							OnPause();
 						}else
-							if(mp3_.seek(playb/4,wavch)==FALSE){fade1=1;return;}
+							if(mp3_.seek(playb/(wavch==2?4:1),wavch)==FALSE){fade1=1;return;}
 					}else{
 						playb=curpos;
 						seekadpcm((int)playb);
@@ -6005,13 +6005,13 @@ void COggDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 							ZeroMemory(bufwav3,sizeof(bufwav3));
 							syukai=1;syukai2=0;
 							if(thn==FALSE) for(;;){if(syukai2==1)break;DoEvent();}
-							if(mp3_.seek(playb/4,wavch)==FALSE){fade1=1;if(thn==FALSE){if(m_dsb)m_dsb->Stop();}return;}
+							if(mp3_.seek(playb/(wavch==2?4:1),wavch)==FALSE){fade1=1;if(thn==FALSE){if(m_dsb)m_dsb->Stop();}return;}
 							poss=0;sek=TRUE;
 							timer.SetEvent();
 							syukai=0;
 							OnPause();
 						}else
-							if(mp3_.seek(playb/4,wavch)==FALSE){return;}
+							if(mp3_.seek(playb/(wavch==2?4:1),wavch)==FALSE){return;}
 					}else{
 						playb=curpos;
 						seekadpcm((int)playb);
@@ -6072,13 +6072,13 @@ void COggDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 							ZeroMemory(bufwav3,sizeof(bufwav3));
 							syukai=1;syukai2=0;
 							if(thn==FALSE) for(;;){if(syukai2==1)break;DoEvent();}
-							if(mp3_.seek(playb/4,wavch)==FALSE){fade1=1;if(thn==FALSE){if(m_dsb)m_dsb->Stop();}return;}
+							if(mp3_.seek(playb/(wavch==2?4:1),wavch)==FALSE){fade1=1;if(thn==FALSE){if(m_dsb)m_dsb->Stop();}return;}
 							poss=0;sek=TRUE;
 							timer.SetEvent();
 							syukai=0;
 							OnPause();
 						}else
-							if(mp3_.seek(playb/4,wavch)==FALSE){return;}
+							if(mp3_.seek(playb/(wavch==2?4:1),wavch)==FALSE){return;}
 					}else{
 						seekadpcm((int)playb);
 						sek=TRUE;
@@ -6190,7 +6190,7 @@ LRESULT COggDlg::OnHotKey(WPARAM wp, LPARAM a)
 				}
 				hsc=0;
 			}else{
-				playb+=wavbit*10;
+				playb+=wavbit*(wavch==2?10:5);
 				if((loop1+loop2) < (int)playb && endf==0) playb=(loop1+loop2);
 				if(mode!=-10)m_time.SetPos((int)playb);
 				if(pMainFrame1){
@@ -6198,21 +6198,21 @@ LRESULT COggDlg::OnHotKey(WPARAM wp, LPARAM a)
 				}
 				if((mode>=10 && mode<=20) || mode<=-10){
 					if(mode==-10){
-						playb-=wavbit*10;
+						playb-=wavbit*(wavch==2?10:5);
 						playb*=400;
-						playb+=wavbit*40;
+						playb+=wavbit*(wavch==2?40:20);
 						if(ps==0){
 							OnPause();
 							ZeroMemory(bufwav3,sizeof(bufwav3));
 							syukai=1;syukai2=0;
 							if(thn==FALSE) for(;;){if(syukai2==1)break;DoEvent();}
-							if(mp3_.seek(playb/4,wavch)==FALSE){fade1=1;if(thn==FALSE){if(m_dsb)m_dsb->Stop();}return 0;}
+							if(mp3_.seek(playb/(wavch==2?4:1),wavch)==FALSE){fade1=1;if(thn==FALSE){if(m_dsb)m_dsb->Stop();}return 0;}
 							poss=0;sek=TRUE;
 							timer.SetEvent();
 							syukai=0;
 							OnPause();
 						}else
-							if(mp3_.seek(playb/4,wavch)==FALSE){return 0;}
+							if(mp3_.seek(playb/(wavch==2?4:1),wavch)==FALSE){return 0;}
 //						m_time.SetPos((int)playb/400);
 					}else{
 						seekadpcm((int)playb);
@@ -6246,7 +6246,7 @@ LRESULT COggDlg::OnHotKey(WPARAM wp, LPARAM a)
 				}
 				hsc=0;
 			}else{
-				playb-=wavbit*10;
+				playb-=wavbit*(wavch==2?10:5);
 				if((loop1+loop2) < (int)playb && endf==0) playb=(loop1+loop2);
 				if(mode!=-10)m_time.SetPos((int)playb);
 				if(pMainFrame1){
@@ -6254,22 +6254,22 @@ LRESULT COggDlg::OnHotKey(WPARAM wp, LPARAM a)
 				}
 				if((mode>=10 && mode<=20) || mode<=-10){
 					if(mode==-10){
-						playb+=wavbit*10;
+						playb+=wavbit*(wavch==2?10:5);
 						playb*=400;
-						playb-=wavbit*40;
+						playb-=wavbit*(wavch==2?40:20);
 						if(playb<0)playb=0;
 						if(ps==0){
 							OnPause();
 							ZeroMemory(bufwav3,sizeof(bufwav3));
 							syukai=1;syukai2=0;
 							if(thn==FALSE) for(;;){if(syukai2==1)break;DoEvent();}
-							if(mp3_.seek(playb/4,wavch)==FALSE){fade1=1;if(thn==FALSE){if(m_dsb)m_dsb->Stop();}return 0;}
+							if(mp3_.seek(playb/(wavch==2?4:1),wavch)==FALSE){fade1=1;if(thn==FALSE){if(m_dsb)m_dsb->Stop();}return 0;}
 							poss=0;sek=TRUE;
 							timer.SetEvent();
 							syukai=0;
 							OnPause();
 						}else
-							if(mp3_.seek(playb/4,wavch)==FALSE){return 0;}
+							if(mp3_.seek(playb/(wavch==2?4:1),wavch)==FALSE){return 0;}
 //						m_time.SetPos((int)playb/400);
 					}else{
 						seekadpcm((int)playb);
