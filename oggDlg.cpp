@@ -243,7 +243,10 @@ BOOL CAboutDlg::OnInitDialog()
 			if(in.dwMinorVersion==0){
 				ss=_T("Windows Vista"); break;
 			}else{
-				ss=_T("Windows 7"); break;
+				if(in.dwMinorVersion==1)
+					ss=_T("Windows 7"); break;
+				if(in.dwMinorVersion==2)
+					ss=_T("Windows 8"); break;
 			}
 		}
 	}

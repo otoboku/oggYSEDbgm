@@ -113,6 +113,7 @@ IBaseFilter   *pRenderer=NULL;
 IBaseFilter   *pRenderer0=NULL;
 IBaseFilter   *pRenderer0_=NULL;
 IBaseFilter   *pRenderer1=NULL;
+IBaseFilter   *pRenderer2=NULL;
 IBaseFilter   *pACM=NULL;
 IBaseFilter   *pDSRenderer=NULL;
 IBaseFilter   *pDSRenderer2=NULL;
@@ -496,9 +497,16 @@ void CDouga::plays(TCHAR* s)
 							}
 						}
 					}
+					if(_wcsnicmp(varName.bstrVal,L"CyberLink H.264/AVC Decoder",len*2-2)==0 && savedata.ffd==1){
+						if((s2.Right(4)==".vob" && savedata.vob==0) || s2.Right(3)==".dat" || mode!=-2){}else{
+							if(savedata.haali==FALSE && pRenderer2==NULL){
+								hr = pMoniker->BindToObject(NULL, NULL, IID_IBaseFilter, (void**)&pRenderer2);
+							}
+						}
+					}
 					if(_wcsnicmp(varName.bstrVal,L"Microsoft DTV-DVD Video Decoder",len*2-2)==0 && savedata.ffd==1){
 						if((s2.Right(4)==".vob" && savedata.vob==0) || s2.Right(3)==".dat" || mode!=-2){}else{
-							if(savedata.haali==FALSE){
+							if(savedata.haali==FALSE && pRenderer1==NULL){
 								hr = pMoniker->BindToObject(NULL, NULL, IID_IBaseFilter, (void**)&pRenderer1);
 							}
 						}
@@ -581,30 +589,36 @@ void CDouga::plays(TCHAR* s)
 				RELEASE(pRenderer);
 				renderr=1;
 
-	 			hr=ConnectFilter(pSplitter,pRenderer0,MEDIATYPE_Video,L"Video 1");
-				HRESULT hr2=ConnectFilter(pSplitter,pRenderer0_,MEDIATYPE_Video,L"Video 1");
-
-  			    if(!(hr==S_OK||hr2==S_OK)){
-					renderr=2;
-					pGraphBuilder->RemoveFilter(pRenderer0);
-					hr=ConnectFilter(pSplitter,pRenderer1,MEDIATYPE_Video,L"Video 1");
-					if(pRenderer1)
-						hr=pGraphBuilder->AddFilter(pRenderer1,L"microsoft Video Decoder");
-					RELEASE(pRenderer0);
+				hr=ConnectFilter(pSplitter,pRenderer2,MEDIATYPE_Video,L"Video 1");
+				if(hr==S_OK){
+					hr=pGraphBuilder->AddFilter(pRenderer2,L"CyberLink H.264/AVC Decoder");
+					renderr=3;
 				}else{
-					renderr=1;
-					pGraphBuilder->RemoveFilter(pRenderer1);
-					if(pRenderer0){
-						switch(cflg){
-							case 1:
-								hr=pGraphBuilder->AddFilter(pRenderer0_,L"InterVideo Video Decoder");break;
-							case 2:
-								hr=pGraphBuilder->AddFilter(pRenderer0,L"CyberLink Video Decoder (PDVD10)");break;
-							case 3:
-								hr=pGraphBuilder->AddFilter(pRenderer0,L"CyberLink Video Decoder");break;
+	 				hr=ConnectFilter(pSplitter,pRenderer0,MEDIATYPE_Video,L"Video 1");
+					HRESULT hr2=ConnectFilter(pSplitter,pRenderer0_,MEDIATYPE_Video,L"Video 1");
+
+  					if(!(hr==S_OK||hr2==S_OK)){
+						renderr=2;
+						pGraphBuilder->RemoveFilter(pRenderer0);
+						hr=ConnectFilter(pSplitter,pRenderer1,MEDIATYPE_Video,L"Video 1");
+						if(pRenderer1)
+							hr=pGraphBuilder->AddFilter(pRenderer1,L"Microsoft Video Decoder");
+						RELEASE(pRenderer0);
+					}else{
+						renderr=1;
+						pGraphBuilder->RemoveFilter(pRenderer1);
+						if(pRenderer0){
+							switch(cflg){
+								case 1:
+									hr=pGraphBuilder->AddFilter(pRenderer0_,L"InterVideo Video Decoder");break;
+								case 2:
+									hr=pGraphBuilder->AddFilter(pRenderer0,L"CyberLink Video Decoder (PDVD10)");break;
+								case 3:
+									hr=pGraphBuilder->AddFilter(pRenderer0,L"CyberLink Video Decoder");break;
+							}
 						}
+						RELEASE(pRenderer1);
 					}
-					RELEASE(pRenderer1);
 				}
 			}
 		}
@@ -725,6 +739,9 @@ void CDouga::plays(TCHAR* s)
 				break;
 	case 2:
 				ConnectFilter(pRenderer1,prend,MEDIATYPE_Video,L"Video Output 1");break;
+	case 3:
+				ConnectFilter(pRenderer2,prend,MEDIATYPE_Video,L"Video Out");
+				break;
 			}
 //			else
 //				ConnectFilter(pSplitter,prend,MEDIATYPE_Video,NULL);
@@ -744,11 +761,14 @@ void CDouga::plays(TCHAR* s)
 				break;
 	case 2:
 				ConnectFilter(pRenderer1,prend,MEDIATYPE_Video,L"Video Output 1");break;
+	case 3:
+				ConnectFilter(pRenderer2,prend,MEDIATYPE_Video,L"Video Out");
+				break;
 			}
 //			else
 //				ConnectFilter(pSplitter,prend,MEDIATYPE_Video,NULL);
 		}
-//		if(pGraphBuilder&&Haali==NULL||audionum<=1||savedata.haali==TRUE)
+		if(pGraphBuilder&&Haali==NULL||audionum<=1||savedata.haali==TRUE)
 			pGraphBuilder->RenderFile(ss,NULL);
 		if(audionum>=1)
 			Filtersdown(pGraphBuilder);

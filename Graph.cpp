@@ -57,7 +57,7 @@ HRESULT CGraph::EnumFilters (IGraphBuilder *pGraph)
 
     HRESULT hr = pGraph->EnumFilters(&pEnum);
     if (FAILED(hr)) return hr;
-
+	int flg01=0;
     while(pEnum->Next(1, &pFilter, &cFetched) == S_OK)
     {
 		IEnumPins *p;
@@ -88,11 +88,13 @@ HRESULT CGraph::EnumFilters (IGraphBuilder *pGraph)
 					WideCharToMultiByte(CP_ACP, 0, FilterInfo1.achName,
 						-1, szName1, MAX_FILTER_NAME, 0, 0);
 					s+=szName1;sss=ss+s;
-					if(!(szName[1]==':'||sss.Find('.')!=-1)){
+					if(sss.Find(_T("Haali"))>=0) flg01=1;
+					if(!(szName[1]==':'||sss.Find('\\')!=-1)){
 						m_l.AddString(sss);
 					}else{
 						sss=_T("Source")+s;
-						m_l.AddString(sss);
+						if(flg01==0)
+							m_l.AddString(sss);
 					}	
 					s=" -> ";pn->Release();
 				}else{

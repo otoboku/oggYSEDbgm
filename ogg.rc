@@ -558,7 +558,7 @@ CAPTION "グラフフィルタ一覧"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "閉じる",IDOK,101,114,50,14
-    LISTBOX         IDC_LIST1,7,7,239,104,LBS_SORT | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP,WS_EX_CLIENTEDGE
+    LISTBOX         IDC_LIST1,7,7,239,104,LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP,WS_EX_CLIENTEDGE
 END
 
 IDD_SYOSAI DIALOGEX 0, 0, 259, 190
@@ -645,7 +645,7 @@ BEGIN
             VALUE "FileDescription", "ogg/wav簡易プレイヤ Ver 0.6h Rel.8e No.14.4"
             VALUE "FileVersion", "0, 6, 8, 8"
             VALUE "InternalName", "ogg"
-            VALUE "LegalCopyright", "Copyright (C) 2012.08.21 ちゃちゃ"
+            VALUE "LegalCopyright", "Copyright (C) 2012.08.30 ちゃちゃ"
             VALUE "LegalTrademarks", "Pre Prayer Power Soft"
             VALUE "OriginalFilename", "oggYSEDbgm.exe"
             VALUE "ProductName", "ファルコム簡易プレイヤ＋メディアプレイヤ"
