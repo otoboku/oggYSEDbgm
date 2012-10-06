@@ -1457,6 +1457,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ringbuf.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\San1.cpp"
 				>
 			</File>
@@ -1651,6 +1655,10 @@
 			</File>
 			<File
 				RelativePath=".\resource.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ringbuf.h"
 				>
 			</File>
 			<File

@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include "vbrtag.h"
 #include "libmad\decoder.h"
+#include "ringbuf.h"
 
 #define MPG_MD_STEREO       0
 #define MPG_MD_JOINT_STEREO 1
@@ -105,6 +106,7 @@ private:
 	dither        m_left_dither;
 	dither        m_right_dither;
 	BYTE          m_tmp[10000];
+	KbRingBuffer  m_ringbuf;
 
 public:	
 	CWread(); 
@@ -832,6 +834,12 @@ public:
 	dither        m_left_dither;
 	dither        m_right_dither;
 	BYTE          m_tmp[10000];
+	KbRingBuffer  m_ringbuf;
+	mad_stream    m_stream;
+    mad_header    m_header;
+    mad_frame     m_frame;
+    mad_synth     m_synth;
+    BYTE          m_buffer[16384];
 
 
 static int GetVbrTag(VBRTAGDATA *pTagData,  unsigned char *buf)
@@ -1369,12 +1377,15 @@ static inline signed long linear_dither(unsigned int bits, mad_fixed_t sample,
 
 	float fade; 
 
-		BOOL seek(__int64 seek,int ch){
+
+
+	BOOL seek(__int64 seek,int ch){
 			__int64 seek2=(__int64)seek; //seek2*=100;
 			if(m_hFile==INVALID_HANDLE_VALUE) return FALSE;
 			input_seek(m_hFile, m_mp3info.hpos, FILE_BEGIN);
 			__int64 cnt=0;
 			if(seek==0) return TRUE;
+			m_ringbuf.Reset();
 			for(;;){
 				input_read(m_hFile,m_tmp,4);
 				input_seek(m_hFile, -4, FILE_CURRENT);
@@ -1395,14 +1406,86 @@ static inline signed long linear_dither(unsigned int bits, mad_fixed_t sample,
 				if(seek2*2*ch<cnt) return TRUE;
 			}
 		}
-		int Render(BYTE* buf,int len)
+	#if 0
+DWORD seek(DWORD dwPos,int ch)
+{//シーク（戻り値はシーク後の再生位置）
+    m_ringbuf.Reset();
+    if(m_hFile == INVALID_HANDLE_VALUE){
+        return 0;
+    }
+    m_clipped = 0;
+    m_clipping = 0;
+    m_dwBufLen = 0;
+    mad_header_finish(&m_header);
+    mad_stream_finish(&m_stream);
+    mad_frame_finish(&m_frame);
+    mad_synth_finish(&m_synth);
+
+    mad_stream_init(&m_stream);
+    mad_header_init(&m_header);
+    mad_frame_init(&m_frame);
+    mad_synth_init(&m_synth);
+    ZeroMemory(&m_left_dither, sizeof(m_left_dither));
+    ZeroMemory(&m_right_dither, sizeof(m_right_dither));
+
+    input_seek(m_hFile, m_mp3info.hpos, FILE_BEGIN);
+    DWORD bytes;
+    bytes = input_read(m_hFile, m_buffer + m_dwBufLen, sizeof(m_buffer) - m_dwBufLen);
+    if(bytes == 0){
+        return 0;
+    }
+    m_dwBufLen += bytes;
+    bytes = (DWORD)-1;
+    DWORD dwRet = 0;
+    mad_timer_t timer = mad_timer_zero;
+    while(dwRet < dwPos) {
+        if (m_stream.error == MAD_ERROR_BUFLEN ||
+            m_dwBufLen < sizeof(m_buffer)/4) {
+            bytes = input_read(m_hFile, m_buffer + m_dwBufLen, sizeof(m_buffer) - m_dwBufLen);
+            m_dwBufLen += bytes;
+        }
+        mad_stream_buffer(&m_stream, m_buffer, m_dwBufLen);
+        while(dwRet < dwPos) {
+            if (mad_header_decode(&m_header, &m_stream) == -1) {
+                if(m_stream.error == MAD_ERROR_BUFLEN){
+                    if(bytes == 0){
+                        goto END;
+                    }
+                    break;
+                }
+                if(!MAD_RECOVERABLE(m_stream.error)){
+	                break;
+                }
+                mad_frame_decode(&m_frame, &m_stream);
+    	        //if (do_error(&m_stream, 0, m_hFile, 0))
+                //     continue;
+            }
+            mad_timer_add(&timer, m_header.duration);
+            dwRet = (DWORD)((float)mad_timer_count(m_header2.duration, MAD_UNITS_MILLISECONDS)*4.0f);
+        }
+        memmove(m_buffer, m_stream.next_frame, &m_buffer[m_dwBufLen] - m_stream.next_frame);
+        m_dwBufLen -= m_stream.next_frame - &m_buffer[0];
+    }
+END:
+    m_dwSkipRemain = m_dwSkipBytes;
+    m_dwBytesDecoded = MulDiv(dwRet, m_mp3info.freq, 1000)*(m_mp3info.nch*(abs((int)m_dwBitsPerSample)/8));
+    if(m_dwBytesDecoded > m_dwTotalBytes){
+   //     m_dwBytesDecoded = m_dwTotalBytes;
+    }
+    return TRUE;   
+}
+#endif
+
+
+#if 0
+	int Render(BYTE* buf,int len)
 	{
 			if(m_hFile==INVALID_HANDLE_VALUE) return 0;
 		{
 		int cnt=0;
 //		input_seek(m_hFile, m_mp3info.hpos, FILE_BEGIN);
 		for(;;){
-			input_read(m_hFile,m_tmp,4);
+/*			input_read(m_hFile,m_tmp,4);
 			input_seek(m_hFile, -4, FILE_CURRENT);
 			BYTE a3=(m_tmp[1]>>3)&0x03;
 			BYTE a2=(m_tmp[1]>>1)&0x03;
@@ -1413,9 +1496,15 @@ static inline signed long linear_dither(unsigned int bits, mad_fixed_t sample,
 			a1=(m_tmp[2]&0x2)>>1;
 			int pb=(int)a1;
 			int size=(144*tb*1000)/fr+pb;
-	//		ZeroMemory(m_tmp,size*2);
 			BOOL i=input_read(m_hFile, m_tmp, size+MAD_BUFFER_GUARD);
-			if(i<ERROR_HANDLE_EOF){return cnt;}
+			if(i<ERROR_HANDLE_EOF){return cnt;}*/
+        if(m_stream.error == MAD_ERROR_BUFLEN ||
+           m_dwBufLen < sizeof(m_buffer)/4) {
+            bytes = input_read(m_hFile, m_buffer + m_dwBufLen, sizeof(m_buffer) - m_dwBufLen);
+            m_dwBufLen += bytes;
+        }
+        mad_stream_buffer(&m_stream, m_buffer, m_dwBufLen);
+
 			input_seek(m_hFile, -MAD_BUFFER_GUARD, FILE_CURRENT);
 			mad_stream_buffer(&m_stream2, m_tmp, size+MAD_BUFFER_GUARD);
 			mad_frame_decode(&m_frame2, &m_stream2);
@@ -1436,6 +1525,109 @@ static inline signed long linear_dither(unsigned int bits, mad_fixed_t sample,
 		}
 
 	}
+#endif
+	int Render(BYTE* out, DWORD dwSize)
+	{
+//    if(m_bWatchDither){
+//        CheckDither();
+//    }
+    DWORD dwRet = 0;
+    DWORD bytes = (DWORD)-1;
+    int err_count = 0;
+    while (dwRet < dwSize) {
+        if(m_dwSkipRemain){
+            m_dwSkipRemain -= m_ringbuf.Read(m_tmp, m_dwSkipRemain);
+        }
+        if(m_dwTotalBytes){
+            DWORD dwWritten = m_ringbuf.GetWritten();
+            if(m_dwBytesDecoded + dwWritten >= m_dwTotalBytes){
+                dwWritten = m_dwTotalBytes - m_dwBytesDecoded;
+            }
+            if(dwWritten > dwSize){
+                dwWritten  = dwSize;
+            }
+            dwWritten = m_ringbuf.Read(out + dwRet, dwWritten);
+            dwRet += dwWritten;
+            m_dwBytesDecoded += dwWritten;
+            if(m_dwBytesDecoded >= m_dwTotalBytes){
+                return dwRet;
+            }
+        }
+        else{
+            dwRet += m_ringbuf.Read(out + dwRet, dwSize-dwRet);
+            if(dwRet == dwSize){
+                break;
+            }
+        }
+        if(m_stream.error == MAD_ERROR_BUFLEN ||
+           m_dwBufLen < sizeof(m_buffer)/4) {
+            bytes = input_read(m_hFile, m_buffer + m_dwBufLen, sizeof(m_buffer) - m_dwBufLen);
+            m_dwBufLen += bytes;
+        }
+        mad_stream_buffer(&m_stream, m_buffer, m_dwBufLen);
+        while (1) {
+            if(mad_frame_decode(&m_frame, &m_stream) == -1) {
+                if(bytes == 0){
+                    return dwRet;
+                }
+                if(m_stream.error == MAD_ERROR_BUFLEN){
+                    break;
+                }
+                if(!MAD_RECOVERABLE(m_stream.error)){
+	                return dwRet;
+                }
+                if(++err_count > 65536){
+                    return dwRet;
+                }
+                continue;
+                /*if (do_error(&m_stream, 0, m_hFile, 0)){
+                    continue;
+                }
+                else{
+                    return dwRet;
+                }*/
+            }
+            mad_synth_frame(&m_synth, &m_frame);
+            int nch = m_synth.pcm.channels;
+            mad_fixed_t *ch1 = m_synth.pcm.samples[0];
+            mad_fixed_t *ch2 = m_synth.pcm.samples[1];
+            if(nch == 1){
+                ch2 = NULL;
+            }
+            int pcm_length = m_synth.pcm.length;
+            BYTE *tmp = NULL;
+            m_ringbuf.LockBuffer(&tmp, pcm_length*m_synth.pcm.channels * m_dwBitsPerSample/8);
+            if(!tmp){
+                tmp = m_tmp;
+            }
+            pack_pcm(tmp, 
+                     pcm_length, 
+                     ch1, 
+                     ch2, 
+                     m_dwBitsPerSample, 
+                     &m_clipped, &m_clipping);
+            if(tmp == m_tmp){
+                m_ringbuf.Write(tmp, pcm_length*m_synth.pcm.channels * m_dwBitsPerSample/8);
+            }
+            else{
+                m_ringbuf.UnlockBuffer();
+            }
+            /*pack_pcm(out+dwRet, 
+                     pcm_length, 
+                     ch1, 
+                     ch2, 
+                     m_dwBitsPerSample, 
+                     &m_clipped, &m_clipping);
+            dwRet += pcm_length * m_synth.pcm.channels * m_dwBitsPerSample/8;
+            */
+            break;
+        }
+        memmove(m_buffer, m_stream.next_frame, &m_buffer[sizeof(m_buffer)] - m_stream.next_frame);
+        m_dwBufLen -= m_stream.next_frame - m_buffer;
+    }
+	return dwRet;
+}
+
 	//static
 	unsigned int pack_pcm(unsigned char *data, unsigned int nsamples,
 				  mad_fixed_t const *left, mad_fixed_t const *right,
