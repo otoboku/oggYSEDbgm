@@ -1303,7 +1303,7 @@ static inline signed long linear_dither(unsigned int bits, mad_fixed_t sample,
 			struct mad_frame     m_frame2;
 			struct mad_synth     m_synth2;
 
-		bool Open(const TCHAR *cszFileName, SOUNDINFO *pInfo)
+	bool Open(const TCHAR *cszFileName, SOUNDINFO *pInfo)
 	{
 	    Close();
 		m_dwWritten=m_dwAllocSize =m_dwBufferSize= OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM;
@@ -1347,10 +1347,37 @@ static inline signed long linear_dither(unsigned int bits, mad_fixed_t sample,
 		mad_frame_init(&m_frame2);
 		mad_synth_init(&m_synth2);
 		input_seek(m_hFile, m_mp3info.hpos, FILE_BEGIN);
+		m_dwBytesDecoded=0;
+		m_dwSkipRemain=0;
+		m_ringbuf.Reset();
+		m_clipped = 0;
+		m_clipping = 0;
+		m_dwBufLen = 0;
+    mad_header_finish(&m_header);
+    mad_stream_finish(&m_stream);
+    mad_frame_finish(&m_frame);
+    mad_synth_finish(&m_synth);
+
+    mad_stream_init(&m_stream);
+    mad_header_init(&m_header);
+    mad_frame_init(&m_frame);
+    mad_synth_init(&m_synth);
+    ZeroMemory(&m_left_dither, sizeof(m_left_dither));
+    ZeroMemory(&m_right_dither, sizeof(m_right_dither));
+
+    input_seek(m_hFile, m_mp3info.hpos, FILE_BEGIN);
+    DWORD bytes;
+//    bytes = input_read(m_hFile, m_buffer + m_dwBufLen, sizeof(m_buffer) - m_dwBufLen);
 		return true;
 	}
 		void Close(void)
 	{
+		m_dwBytesDecoded=0;
+		m_dwSkipRemain=0;
+		m_ringbuf.Reset();
+		m_ringbuf.SetSize(1);
+		m_clipped = 0;
+		m_clipping = 0;
 		m_dwBufLen = 0;
 		if(m_hFile != INVALID_HANDLE_VALUE){
 			CloseHandle(m_hFile);
@@ -1363,9 +1390,9 @@ static inline signed long linear_dither(unsigned int bits, mad_fixed_t sample,
 			ZeroMemory(&m_header2, sizeof(m_header2));
 			ZeroMemory(&m_frame2, sizeof(m_frame2));
 			ZeroMemory(&m_synth2, sizeof(m_synth2));
-//			ZeroMemory(&m_mp3info, sizeof(m_mp3info));
-//			ZeroMemory(&m_left_dither, sizeof(m_left_dither));
-//			ZeroMemory(&m_right_dither, sizeof(m_right_dither));
+			ZeroMemory(&m_mp3info, sizeof(m_mp3info));
+			ZeroMemory(&m_left_dither, sizeof(m_left_dither));
+			ZeroMemory(&m_right_dither, sizeof(m_right_dither));
 			m_clipped = 0;
 			m_clipping = 0;
 		}
