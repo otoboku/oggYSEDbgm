@@ -1822,10 +1822,14 @@ void COggDlg::play()
 		si1.dwChannels=2;
 		si1.dwBitsPerSample=16;
 		mp3_.Open(ss,&si1);
+		CMp3Info mp3__;
+		mp3__.Load(ss);
+
 		wavch=si1.dwChannels;
 		wavbit=si1.dwSamplesPerSec;
 		loop1=0;stitle="";
-		loop2=(int)(((float)(((float)si1.dwLength)*44.1f))/(44100.0f/((float)((wavch==2)?wavbit:(wavbit/2)))));
+//		loop2=(int)(((float)(((float)si1.dwLength)*44.1f))/(44100.0f/((float)((wavch==2)?wavbit:(wavbit/2)))));
+		loop2=(int)((float)(mp3__.GetMSec())*44.1f/(wavch==2?1.0f:2.0f));
 		data_size=oggsize=loop2;
 		loop3=loop2;loop2=0;
 		m_time.SetRange(0,(data_size)/(100),TRUE);

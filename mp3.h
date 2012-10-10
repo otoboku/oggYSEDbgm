@@ -995,6 +995,49 @@ static void __fastcall SkipRIFF(HANDLE hFile, DWORD *pSkip, DWORD *pEndPos)
     }
 }
 
+static DWORD SkipZipHeader(HANDLE hFile, DWORD *pdwUncompressed)
+{
+    const int SIZEZIPLOCALHEADER = (0x1e);
+#pragma pack(push, 1) 
+    struct zip_info{
+        DWORD magic;                // 0x4034b50 
+        WORD  version;              // version made by                 2 bytes
+        WORD  flag;                 // general purpose bit flag        2 bytes
+        WORD  compression_method;   // compression method              2 bytes
+        DWORD dosDate;              // last mod file date in Dos fmt   4 bytes
+        DWORD crc;                  // crc-32                          4 bytes
+        DWORD compressed_size;      // compressed size                 4 bytes
+        DWORD uncompressed_size;    // uncompressed size               4 bytes
+        WORD  size_filename;        // filename length                 2 bytes
+        WORD  size_file_extra;      // extra field length              2 bytes
+        WORD  size_file_comment;    // file comment length             2 bytes
+    };
+#pragma pack(pop)
+    *pdwUncompressed = 0;
+    input_seek(hFile, 0, SEEK_SET);
+    zip_info zi;
+    if(input_read(hFile, &zi, sizeof(zi)) != sizeof(zi)){
+        return 0;
+    }
+    DWORD dwUncompressed = 0;
+    int ret = 0;
+    int cur = 0;
+    int offset = 0;
+    while(zi.magic == 0x04034b50){
+        dwUncompressed = zi.uncompressed_size;
+        offset = zi.size_filename + zi.size_file_extra + SIZEZIPLOCALHEADER;
+        cur += offset;
+        zi.magic = 0;
+        input_seek(hFile, cur, SEEK_SET);
+        if(input_read(hFile, &zi, sizeof(zi)) != sizeof(zi)){
+            break;
+        }
+    }
+    ret = cur;
+    *pdwUncompressed = dwUncompressed;
+    return ret;
+}
+
 static int getmp3info(HANDLE hFile, mp3info *info,id3tag *id3,VBRTAGDATA *vbr)
 {
     unsigned long head;
@@ -1008,7 +1051,7 @@ static int getmp3info(HANDLE hFile, mp3info *info,id3tag *id3,VBRTAGDATA *vbr)
     DWORD dwFileSize = input_seek(hFile, 0, FILE_END);
     info->isStream = 0;
     info->nbytes = dwFileSize;
-    int skip_zip = 0;
+    int skip_zip = SkipZipHeader(hFile, &dwUncompressed);
     input_seek(hFile, skip_zip, FILE_BEGIN);
     bool Riff = false;
 
@@ -1137,7 +1180,7 @@ static int getmp3info(HANDLE hFile, mp3info *info,id3tag *id3,VBRTAGDATA *vbr)
             info->length = info->nbytes/framesize*576.0*(lsf?1:2)/freqs[srate];
             info->hasVbrtag = 0;
             info->bitrate = tabsel_123[lsf][lay-1][bitrate_index]*1000;
-            info->length = info->nbytes * 8.0 / info->bitrate;
+            //info->length = info->nbytes * 8 / info->bitrate;
         }
         const int POST_DELAY = 1152;
         const int DECODE_DELAY_LAYER1 = 0;
@@ -1161,7 +1204,6 @@ static int getmp3info(HANDLE hFile, mp3info *info,id3tag *id3,VBRTAGDATA *vbr)
     }
     return 1; 
 }
-
 
 enum channel {
   CHANNEL_STEREO  = 0,
@@ -1405,7 +1447,7 @@ static inline signed long linear_dither(unsigned int bits, mad_fixed_t sample,
 	float fade; 
 
 
-
+	#if 0
 	BOOL seek(__int64 seek,int ch){
 			__int64 seek2=(__int64)seek; //seek2*=100;
 			if(m_hFile==INVALID_HANDLE_VALUE) return FALSE;
@@ -1433,9 +1475,11 @@ static inline signed long linear_dither(unsigned int bits, mad_fixed_t sample,
 				if(seek2*2*ch<cnt) return TRUE;
 			}
 		}
-	#if 0
+#endif
+
 DWORD seek(DWORD dwPos,int ch)
 {//シーク（戻り値はシーク後の再生位置）
+	DWORD seek2=dwPos;
     m_ringbuf.Reset();
     if(m_hFile == INVALID_HANDLE_VALUE){
         return 0;
@@ -1464,16 +1508,16 @@ DWORD seek(DWORD dwPos,int ch)
     m_dwBufLen += bytes;
     bytes = (DWORD)-1;
     DWORD dwRet = 0;
-    mad_timer_t timer = mad_timer_zero;
-    while(dwRet < dwPos) {
+	mad_timer_t timer = mad_timer_zero;
+    while(dwRet < seek2*2*ch) {
         if (m_stream.error == MAD_ERROR_BUFLEN ||
             m_dwBufLen < sizeof(m_buffer)/4) {
             bytes = input_read(m_hFile, m_buffer + m_dwBufLen, sizeof(m_buffer) - m_dwBufLen);
             m_dwBufLen += bytes;
         }
         mad_stream_buffer(&m_stream, m_buffer, m_dwBufLen);
-        while(dwRet < dwPos) {
-            if (mad_header_decode(&m_header, &m_stream) == -1) {
+        while(dwRet < seek2*2*ch) {
+            if (mad_header_decode(&m_header2, &m_stream) == -1) {
                 if(m_stream.error == MAD_ERROR_BUFLEN){
                     if(bytes == 0){
                         goto END;
@@ -1487,21 +1531,22 @@ DWORD seek(DWORD dwPos,int ch)
     	        //if (do_error(&m_stream, 0, m_hFile, 0))
                 //     continue;
             }
-            mad_timer_add(&timer, m_header.duration);
-            dwRet = (DWORD)((float)mad_timer_count(m_header2.duration, MAD_UNITS_MILLISECONDS)*4.0f);
-        }
+            //mad_timer_add(&timer, m_header.duration);
+            //dwRet = (DWORD)((float)mad_timer_count(m_header2.duration, MAD_UNITS_MILLISECONDS)*4.0f);
+            dwRet += (DWORD)((float)mad_timer_count(m_header2.duration, MAD_UNITS_MILLISECONDS)*44.1f*4.0f)+22;
+       }
         memmove(m_buffer, m_stream.next_frame, &m_buffer[m_dwBufLen] - m_stream.next_frame);
         m_dwBufLen -= m_stream.next_frame - &m_buffer[0];
     }
 END:
-    m_dwSkipRemain = m_dwSkipBytes;
-    m_dwBytesDecoded = MulDiv(dwRet, m_mp3info.freq, 1000)*(m_mp3info.nch*(abs((int)m_dwBitsPerSample)/8));
-    if(m_dwBytesDecoded > m_dwTotalBytes){
+//    m_dwSkipRemain = m_dwSkipBytes;
+//    m_dwBytesDecoded = MulDiv(dwRet, m_mp3info.freq, 1000)*(m_mp3info.nch*(abs((int)m_dwBitsPerSample)/8));
+//    if(m_dwBytesDecoded > m_dwTotalBytes){
    //     m_dwBytesDecoded = m_dwTotalBytes;
-    }
+//    }
     return TRUE;   
 }
-#endif
+
 
 
 #if 0
