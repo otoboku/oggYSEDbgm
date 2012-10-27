@@ -1476,9 +1476,9 @@ int kk=0;
 extern int lenl;
 int tlg=0;
 extern CPlayList*pl;
-void timerpl(UINT nIDEvent);
-void timerpl1(UINT nIDEvent);
-void timerpl1(UINT nIDEvent)
+void timerpl(UINT nIDEvent,CPlayList* pl);
+void timerpl1(UINT nIDEvent,CPlayList* pl);
+void timerpl1(UINT nIDEvent,CPlayList* pl)
 {
 	if(nIDEvent==50){
 		pl->KillTimer(50);
@@ -1494,6 +1494,7 @@ void timerpl1(UINT nIDEvent)
 		SC++;SC=SC % 2;
 	}
 	if(nIDEvent==20){
+		
 		if(pl->w_flg==FALSE) return;
 		if(pl->GetFocus()==NULL){return;}
 		if(pl->m_find.GetFocus()->m_hWnd==pl->m_find.m_hWnd){return;}
@@ -1542,11 +1543,11 @@ void timerpl1(UINT nIDEvent)
 		}
 	}
 }
-void timerpl(UINT nIDEvent)
+void timerpl(UINT nIDEvent,CPlayList* pl)
 {
 	try{
 		_set_se_translator( trans_func1 );
-		timerpl1(nIDEvent);
+		timerpl1(nIDEvent,pl);
 //	}__except(EXCEPTION_EXECUTE_HANDLER){}
 	}catch(SE_Exception1 e){
 	}
@@ -1561,7 +1562,8 @@ void CPlayList::OnTimer(UINT_PTR nIDEvent)
 void CPlayList::OnTimer(UINT nIDEvent) 
 #endif
 {
-	timerpl(nIDEvent);
+	CPlayList* pl=(CPlayList*)this;
+	timerpl(nIDEvent,pl);
 	CDialog::OnTimer(nIDEvent);
 }
 

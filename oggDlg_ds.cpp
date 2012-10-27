@@ -138,7 +138,7 @@ BOOL COggDlg::ReleaseDXSound(void)
 extern void playwavds2(char* bw,int old,int l1,int l2);
 extern void playwavkpi(char* bw,int old,int l1,int l2);
 extern void playwavmp3(char* bw,int old,int l1,int l2);
-extern char bufwav3[OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM*3];
+extern char bufwav3[OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM*60];
 extern int ps;
 extern COggDlg *og;
 extern BOOL thn;

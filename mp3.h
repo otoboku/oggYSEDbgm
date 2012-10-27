@@ -66,7 +66,7 @@ struct dither {
 #define BUFSZ			(8192*2)
 #define OUTPUT_BUFFER_SIZE  BUFSZ
 #define OUTPUT_BUFFER_NUM   10
-extern char bufwav3[OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM*3];
+extern char bufwav3[OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM*60];
 extern BOOL wavwait,thend;
 extern char *adbuf,*adbuf2;
 extern ULONG WAVDALen;
@@ -806,41 +806,32 @@ static inline signed long linear_dither(unsigned int bits, mad_fixed_t sample,
 class mp3
 {
 public:
-
-	HANDLE m_hHeap;
-	DWORD  m_dwReadPos;   //読み取り位置
-	DWORD  m_dwWritePos;  //書き込み位置
-	DWORD  m_dwWritten;   //書き込んだバッファのサイズ
-	DWORD  m_dwBufferSize;//リングバッファのサイズ
-	DWORD  m_dwAllocSize; //実際にメモリを割り当てたサイズ
-	DWORD  m_dwLockedSize;
-	HANDLE        m_hFile;
-
-	mp3info       m_mp3info;
-	DWORD         m_dwBufLen;
-	DWORD         m_dwBitsPerSample;
-	//ギャップレス再生用
-	DWORD         m_dwTotalBytes;//曲長（バイト単位）
-	DWORD         m_dwSkipBytes; //曲頭のスキップバイト数
-	DWORD         m_dwBytesDecoded;//デコード済みバイト数
-	DWORD         m_dwSkipRemain;  //スキップバイト数残り
-	//
-	//DITHER 関係
-	HANDLE        m_hNotification;
-	BOOL          m_bWatchDither;//INI ファイルの変更を監視するかどうか
-	BOOL          m_bEnableDither;
-	unsigned long m_clipped;
-	mad_fixed_t   m_clipping;
-	dither        m_left_dither;
-	dither        m_right_dither;
-	BYTE          m_tmp[10000];
-	KbRingBuffer  m_ringbuf;
-	mad_stream    m_stream;
+    HANDLE        m_hFile;
+    mad_stream    m_stream;
     mad_header    m_header;
     mad_frame     m_frame;
     mad_synth     m_synth;
+    mp3info       m_mp3info;
     BYTE          m_buffer[16384];
+    DWORD         m_dwBufLen;
+    DWORD         m_dwBitsPerSample;
+    //ギャップレス再生用
+    DWORD         m_dwTotalBytes;//曲長（バイト単位）
+    DWORD         m_dwSkipBytes; //曲頭のスキップバイト数
+    DWORD         m_dwBytesDecoded;//デコード済みバイト数
+    DWORD         m_dwSkipRemain;  //スキップバイト数残り
+    //
+    //DITHER 関係
+    HANDLE        m_hNotification;
+    BOOL          m_bWatchDither;//INI ファイルの変更を監視するかどうか
+    BOOL          m_bEnableDither;
+    unsigned long m_clipped;
+    mad_fixed_t   m_clipping;
+    dither        m_left_dither;
+    dither        m_right_dither;
 
+    KbRingBuffer  m_ringbuf;
+    BYTE          m_tmp[576*2*(32/4)];
 
 static int GetVbrTag(VBRTAGDATA *pTagData,  unsigned char *buf)
 {
@@ -1321,9 +1312,9 @@ static inline signed long linear_dither(unsigned int bits, mad_fixed_t sample,
 }
 
 
-	DWORD GetWritten(void){//書き込んだバッファのサイズ
-			return m_dwWritten;
-		}
+//	DWORD GetWritten(void){//書き込んだバッファのサイズ
+//			return m_dwWritten;
+//		}
 
 	void mp3init(void)
 	{
@@ -1348,7 +1339,7 @@ static inline signed long linear_dither(unsigned int bits, mad_fixed_t sample,
 	bool Open(const TCHAR *cszFileName, SOUNDINFO *pInfo)
 	{
 	    Close();
-		m_dwWritten=m_dwAllocSize =m_dwBufferSize= OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM;
+		//m_dwWritten=m_dwAllocSize =m_dwBufferSize= OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM;
 		if(!pInfo)return false;
 		DWORD dwBitsPerSample =pInfo->dwBitsPerSample;
 		ZeroMemory(pInfo, sizeof(SOUNDINFO));
@@ -1417,7 +1408,6 @@ static inline signed long linear_dither(unsigned int bits, mad_fixed_t sample,
 		m_dwBytesDecoded=0;
 		m_dwSkipRemain=0;
 		m_ringbuf.Reset();
-		m_ringbuf.SetSize(1);
 		m_clipped = 0;
 		m_clipping = 0;
 		m_dwBufLen = 0;
@@ -1447,8 +1437,7 @@ static inline signed long linear_dither(unsigned int bits, mad_fixed_t sample,
 	float fade; 
 
 
-	#if 0
-	BOOL seek(__int64 seek,int ch){
+	BOOL seek2(__int64 seek,int ch){
 			__int64 seek2=(__int64)seek; //seek2*=100;
 			if(m_hFile==INVALID_HANDLE_VALUE) return FALSE;
 			input_seek(m_hFile, m_mp3info.hpos, FILE_BEGIN);
@@ -1475,7 +1464,7 @@ static inline signed long linear_dither(unsigned int bits, mad_fixed_t sample,
 				if(seek2*2*ch<cnt) return TRUE;
 			}
 		}
-#endif
+
 
 DWORD seek(DWORD dwPos,int ch)
 {//シーク（戻り値はシーク後の再生位置）
@@ -1549,15 +1538,14 @@ END:
 
 
 
-#if 0
-	int Render(BYTE* buf,int len)
+
+	int Render2(BYTE* buf,int len)
 	{
 			if(m_hFile==INVALID_HANDLE_VALUE) return 0;
 		{
 		int cnt=0;
-//		input_seek(m_hFile, m_mp3info.hpos, FILE_BEGIN);
 		for(;;){
-/*			input_read(m_hFile,m_tmp,4);
+			input_read(m_hFile,m_tmp,4);
 			input_seek(m_hFile, -4, FILE_CURRENT);
 			BYTE a3=(m_tmp[1]>>3)&0x03;
 			BYTE a2=(m_tmp[1]>>1)&0x03;
@@ -1569,12 +1557,8 @@ END:
 			int pb=(int)a1;
 			int size=(144*tb*1000)/fr+pb;
 			BOOL i=input_read(m_hFile, m_tmp, size+MAD_BUFFER_GUARD);
-			if(i<ERROR_HANDLE_EOF){return cnt;}*/
-        if(m_stream.error == MAD_ERROR_BUFLEN ||
-           m_dwBufLen < sizeof(m_buffer)/4) {
-            bytes = input_read(m_hFile, m_buffer + m_dwBufLen, sizeof(m_buffer) - m_dwBufLen);
-            m_dwBufLen += bytes;
-        }
+			if(i<ERROR_HANDLE_EOF){return cnt;}
+
         mad_stream_buffer(&m_stream, m_buffer, m_dwBufLen);
 
 			input_seek(m_hFile, -MAD_BUFFER_GUARD, FILE_CURRENT);
@@ -1597,12 +1581,9 @@ END:
 		}
 
 	}
-#endif
+
 	int Render(BYTE* out, DWORD dwSize)
 	{
-//    if(m_bWatchDither){
-//        CheckDither();
-//    }
     DWORD dwRet = 0;
     DWORD bytes = (DWORD)-1;
     int err_count = 0;

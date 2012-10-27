@@ -964,7 +964,7 @@ int tt=0;
 int killw;
 ULONG PlayCursora,WriteCursora;
 double oggsize2=0;
-	char bufwav3[OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM*3];
+	char bufwav3[OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM*60];
 //////////////////////////////////////////////////////////////////////////////
 long LoadOggVorbis(const TCHAR *file_name, int word, char **ogg,CSliderCtrl &m_time)
 {
@@ -1838,6 +1838,8 @@ void COggDlg::play()
 		si2->Load(ss,TRUE);
 		kbps=si2->GetBps();
 		Vbr=si2->IsVbr();
+		savedata.mp3orig=0;
+		if(Vbr==1) savedata.mp3orig=1;
 		delete si2;
 		CId3tagv1 ta1;
 		CId3tagv2 ta2;
@@ -3045,7 +3047,7 @@ void playwavkpi(char* bw,int old,int l1,int l2)
 	}
 }
 
-BYTE bufkpi[OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM*2];
+BYTE bufkpi[OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM*60];
 int readkpi(char*bw,int cnt)
 {
 	_set_se_translator( trans_func );
@@ -3158,7 +3160,10 @@ void playwavmp3(char* bw,int old,int l1,int l2)
 int readmp3(char*bw,int cnt)
 {
 	int r=1,rr=cnt-poss;
-	r=mp3_.Render(bufkpi+poss,rr);//4608
+	if(savedata.mp3orig)
+		r=mp3_.Render2(bufkpi+poss,rr);//4608
+	else
+		r=mp3_.Render(bufkpi+poss,rr);//4608
 	poss+=r;
 	memcpy(bw,bufkpi,cnt);
 	if(cnt<=poss){
@@ -5694,7 +5699,7 @@ void COggDlg::Speana()
 //	if(loc==locs) return;
 	locs=loc;
 	//ステレオ44.1k(char)→モノラル44.1k(short)へ
-	short buf2[BUFSZ*3],bufL[BUFSZ*3],bufR[BUFSZ*3],buf3[BUFSZ*3];
+	short buf2[BUFSZ*6],bufL[BUFSZ*6],bufR[BUFSZ*6],buf3[BUFSZ*6];
 	char *buf4; buf4=(char*)buf3;
 	int bui;
 	//プレイ位置から獲得
@@ -5938,13 +5943,21 @@ void COggDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 							ZeroMemory(bufwav3,sizeof(bufwav3));
 							syukai=1;syukai2=0;
 							if(thn==FALSE) for(;;){if(syukai2==1)break;DoEvent();}
-							if(mp3_.seek(playb/(wavch==2?4:1),wavch)==FALSE){fade1=1;if(thn==FALSE){if(m_dsb)m_dsb->Stop();}return;}
+							if(savedata.mp3orig){
+								if(mp3_.seek2(playb/(wavch==2?4:1),wavch)==FALSE){fade1=1;if(thn==FALSE){if(m_dsb)m_dsb->Stop();}return;}
+							}else{
+								if(mp3_.seek(playb/(wavch==2?4:1),wavch)==FALSE){fade1=1;if(thn==FALSE){if(m_dsb)m_dsb->Stop();}return;}
+							}
 							poss=0;sek=TRUE;
 							timer.SetEvent();
 							syukai=0;
 							OnPause();
 						}else
-							if(mp3_.seek(playb/(wavch==2?4:1),wavch)==FALSE){fade1=1;return;}
+							if(savedata.mp3orig){
+								if(mp3_.seek2(playb/(wavch==2?4:1),wavch)==FALSE){return;}
+							}else{
+								if(mp3_.seek(playb/(wavch==2?4:1),wavch)==FALSE){return;}
+							}
 					}else{
 						playb=curpos;
 						seekadpcm((int)playb);
@@ -6012,13 +6025,21 @@ void COggDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 							ZeroMemory(bufwav3,sizeof(bufwav3));
 							syukai=1;syukai2=0;
 							if(thn==FALSE) for(;;){if(syukai2==1)break;DoEvent();}
-							if(mp3_.seek(playb/(wavch==2?4:1),wavch)==FALSE){fade1=1;if(thn==FALSE){if(m_dsb)m_dsb->Stop();}return;}
+							if(savedata.mp3orig){
+								if(mp3_.seek2(playb/(wavch==2?4:1),wavch)==FALSE){fade1=1;if(thn==FALSE){if(m_dsb)m_dsb->Stop();}return;}
+							}else{
+								if(mp3_.seek(playb/(wavch==2?4:1),wavch)==FALSE){fade1=1;if(thn==FALSE){if(m_dsb)m_dsb->Stop();}return;}
+							}
 							poss=0;sek=TRUE;
 							timer.SetEvent();
 							syukai=0;
 							OnPause();
 						}else
-							if(mp3_.seek(playb/(wavch==2?4:1),wavch)==FALSE){return;}
+							if(savedata.mp3orig){
+								if(mp3_.seek2(playb/(wavch==2?4:1),wavch)==FALSE){return;}
+							}else{
+								if(mp3_.seek(playb/(wavch==2?4:1),wavch)==FALSE){return;}
+							}
 					}else{
 						playb=curpos;
 						seekadpcm((int)playb);
@@ -6079,13 +6100,21 @@ void COggDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 							ZeroMemory(bufwav3,sizeof(bufwav3));
 							syukai=1;syukai2=0;
 							if(thn==FALSE) for(;;){if(syukai2==1)break;DoEvent();}
-							if(mp3_.seek(playb/(wavch==2?4:1),wavch)==FALSE){fade1=1;if(thn==FALSE){if(m_dsb)m_dsb->Stop();}return;}
+							if(savedata.mp3orig){
+								if(mp3_.seek2(playb/(wavch==2?4:1),wavch)==FALSE){fade1=1;if(thn==FALSE){if(m_dsb)m_dsb->Stop();}return;}
+							}else{
+								if(mp3_.seek(playb/(wavch==2?4:1),wavch)==FALSE){fade1=1;if(thn==FALSE){if(m_dsb)m_dsb->Stop();}return;}
+							}
 							poss=0;sek=TRUE;
 							timer.SetEvent();
 							syukai=0;
 							OnPause();
 						}else
-							if(mp3_.seek(playb/(wavch==2?4:1),wavch)==FALSE){return;}
+							if(savedata.mp3orig){
+								if(mp3_.seek2(playb/(wavch==2?4:1),wavch)==FALSE){return;}
+							}else{
+								if(mp3_.seek(playb/(wavch==2?4:1),wavch)==FALSE){return;}
+							}
 					}else{
 						seekadpcm((int)playb);
 						sek=TRUE;
