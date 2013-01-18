@@ -106,6 +106,7 @@ BOOL COggApp::InitInstance()
 	savedata.evr=1;
 	savedata.con=1;
 	savedata.ffd=1;
+	savedata.audiost=1;
 	_tcscpy(savedata.ysf,_T("C:\\FALCOM\\YSF_WIN"));
 	_tcscpy(savedata.ys6,_T("C:\\FALCOM\\YS6_WIN"));
 	_tcscpy(savedata.ed6sc,_T("C:\\FALCOM\\ED_SORA2"));

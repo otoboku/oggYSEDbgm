@@ -336,7 +336,7 @@ HRESULT GetPin(IBaseFilter *pFilter,PIN_DIRECTION dir,IPin *&pPin,GUID majorType
 }
 // ƒtƒBƒ‹ƒ^‚Ì“¯Žm‚ðÚ‘±‚·‚é
 HRESULT ConnectFilter(IBaseFilter *pSrc,IBaseFilter *pDest,GUID majorType,WCHAR *name){
-	HRESULT hr=NOERROR;
+	HRESULT hr=-1;
 	IPin *pPinOut=NULL;
 	IPin *pPinIn=NULL;
 	if(pSrc==NULL || pDest==NULL) return hr;
@@ -359,7 +359,7 @@ HRESULT ConnectFilter(IBaseFilter *pSrc,IBaseFilter *pDest,GUID majorType,WCHAR 
 	return hr;
 }
 	long p;
-
+#include "AudioSelect.h"
 int bit=0;
 double rate;
 extern int wavch,wavbit;
@@ -386,12 +386,12 @@ void CDouga::plays(TCHAR* s)
 	memcpy((TCHAR*)douga,(TCHAR*)ss,len*2+2);
 	vr=NULL;
 	rate=30.0;
-	hr=CoCreateInstance(CLSID_MediaDet,NULL,CLSCTX_INPROC_SERVER,IID_IMediaDet,(LPVOID *)&vr);
+	hr=CoCreateInstance(CLSID_MediaDet,NULL,CLSCTX_INPROC,IID_IMediaDet,(LPVOID *)&vr);
 	double rate1=0.0;
 	if(vr){rate=0.0;
 		vr->put_Filename(ss);
 		vr->get_OutputStreams(&p);
-		for(int i=0;i<p;i++){
+		for(int i=0;i<p+1;i++){
 			vr->put_CurrentStream(i);
 				vr->get_FrameRate(&rate1);
 			if(rate1!=0.0){
@@ -483,6 +483,13 @@ void CDouga::plays(TCHAR* s)
 							}
 						}
 					}
+					if(_wcsnicmp(varName.bstrVal,L"CyberLink Video Decoder (PDVD12)",len*2-2)==0 && savedata.ffd==1){
+						if((s2.Right(4)==".vob" && savedata.vob==0) || s2.Right(3)==".dat" || mode!=-2){}else{
+							if(savedata.haali==FALSE && pRenderer0==NULL){
+								hr = pMoniker->BindToObject(NULL, NULL, IID_IBaseFilter, (void**)&pRenderer0);cflg=2;
+							}
+						}
+					}
 					if(_wcsnicmp(varName.bstrVal,L"CyberLink Video Decoder (PDVD10)",len*2-2)==0 && savedata.ffd==1){
 						if((s2.Right(4)==".vob" && savedata.vob==0) || s2.Right(3)==".dat" || mode!=-2){}else{
 							if(savedata.haali==FALSE && pRenderer0==NULL){
@@ -508,6 +515,13 @@ void CDouga::plays(TCHAR* s)
 						if((s2.Right(4)==".vob" && savedata.vob==0) || s2.Right(3)==".dat" || mode!=-2){}else{
 							if(savedata.haali==FALSE && pRenderer1==NULL){
 								hr = pMoniker->BindToObject(NULL, NULL, IID_IBaseFilter, (void**)&pRenderer1);
+							}
+						}
+					}
+					if(_wcsnicmp(varName.bstrVal,L"LAV Video Decoder",len*2-2)==0 && savedata.ffd==1){
+						if((s2.Right(4)==".vob" && savedata.vob==0) || s2.Right(3)==".dat" || mode!=-2){}else{
+							if(savedata.haali==FALSE && pRenderer0==NULL){
+								hr = pMoniker->BindToObject(NULL, NULL, IID_IBaseFilter, (void**)&pRenderer0);cflg=1;
 							}
 						}
 					}
@@ -803,6 +817,16 @@ void CDouga::plays(TCHAR* s)
 		break;}
 	}	
 	savedata.render=sr;
+
+	if(savedata.audiost==1)
+		if(audionum>1){
+			CAudioSelect as;
+			as.no=audionum;
+			int rett=as.DoModal();
+			if(as.no<0)as.no=0;
+			st12=as.no;
+			if(pGraphBuilder)EnumFilters(pGraphBuilder,0);
+		}
 }
 
 void CDouga::Filtersdown(IGraphBuilder *pGraph,WCHAR *filter) 

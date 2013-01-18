@@ -86,6 +86,7 @@ public:
 	afx_msg void OnFontMain();
 	afx_msg void OnFontList();
 	CButton m_mp3orig;
+	CButton m_audiost;
 };
 
 //{{AFX_INSERT_LOCATION}}

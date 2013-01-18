@@ -57,6 +57,7 @@ void CRender::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_CHECK46, m_kpi30);
 	DDX_Control(pDX, IDCANCEL3, m_kpi);
 	DDX_Control(pDX, IDC_CHECK47, m_mp3orig);
+	DDX_Control(pDX, IDC_CHECK48, m_audiost);
 }
 
 
@@ -133,6 +134,7 @@ BOOL CRender::OnInitDialog()
 		m_a.EnableWindow(FALSE);
 	}
 	m_mp3orig.SetCheck(savedata.mp3orig);
+	m_audiost.SetCheck(savedata.audiost);
 
 	m_tooltip.Create(this);
 	m_tooltip.Activate(TRUE);
@@ -162,6 +164,7 @@ BOOL CRender::OnInitDialog()
 	m_tooltip.AddTool(GetDlgItem(IDC_CHECK44),_T("kpiの音量を2.5倍にします。"));
 	m_tooltip.AddTool(GetDlgItem(IDC_CHECK46),_T("kpiの音量を3倍にします。"));
 	m_tooltip.AddTool(GetDlgItem(IDC_CHECK47),_T("mp3のデコーダをオリジナルのデコーダを使わずに、独自で使ったデコーダを使う。\nエラーなどで演奏できないときにチェック入れて下さい。\nまた独自で正常にならない時ははずして下さい。"));
+	m_tooltip.AddTool(GetDlgItem(IDC_CHECK48),_T("複数音声のある動画を再生する時に、再生前に\n音声ストリームの選択画面を表示します。\n通常ストリーム1がメインとして使われ、ストリーム2以降はコメンタリや英語音声などに使われています。"));
 	m_tooltip.SetDelayTime( TTDT_AUTOPOP, 10000 );
 	m_tooltip.SendMessage(TTM_SETMAXTIPWIDTH, 0, 512);
 
@@ -186,6 +189,7 @@ void CRender::OnOK()
 	savedata.ffd=m_ffd.GetCheck();
 	savedata.vob=m_vob.GetCheck();
 	savedata.haali=m_haali.GetCheck();
+	savedata.audiost=m_audiost.GetCheck();
 //	savedata.mp3orig=m_mp3orig.GetCheck();
 	CDialog::OnOK();
 }

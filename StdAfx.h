@@ -149,6 +149,8 @@ struct save{
 	TCHAR font2[1024];
 
 	int mp3orig;
+
+	int audiost;
 };
 
 //{{AFX_INSERT_LOCATION}}

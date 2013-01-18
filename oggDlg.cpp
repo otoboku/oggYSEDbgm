@@ -3697,6 +3697,7 @@ void CALLBACK TimeCallback(UINT uTimerID, UINT uMsg, DWORD_PTR dwUser, DWORD_PTR
 */
 
 extern IBasicAudio *pBasicAudio;
+extern IBaseFilter   *prend;
 extern double rate;
 extern RECT rcm;
 DWORD videocnt=0;
@@ -3850,6 +3851,15 @@ void COggDlg::timerp()
 			s.Format(_T("time:%2d:%02d:%02d/%2d:%02d:%02d"),ta1/60,(ta1%60),tb1,ta/60,(ta%60),tb);
 		}
 		moji(s,1,32,0xffffff);
+
+		if(videocnt==0)
+		if(prend&&ps==0){
+			int framerate;
+			CComQIPtr< IQualProp, &IID_IQualProp > ptr(prend);
+			ptr->get_AvgFrameRate(&framerate);
+			rate=((double)framerate)/100.0;
+		}
+
 		if((mode==-2||videoonly) && rate!=0.0){
 			s.Format(_T("size:%d x %d"),rcm.right,rcm.bottom);
 			moji(s,1,48,0x7fffff);
