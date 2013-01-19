@@ -3852,7 +3852,7 @@ void COggDlg::timerp()
 		}
 		moji(s,1,32,0xffffff);
 
-		if(videocnt==0)
+		if(videocnt==1)
 		if(prend&&ps==0){
 			int framerate;
 			CComQIPtr< IQualProp, &IID_IQualProp > ptr(prend);
