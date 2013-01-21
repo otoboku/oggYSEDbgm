@@ -125,4 +125,5 @@ public:
 	afx_msg void OnFindDown();
 	CButtonST m_findup;
 	CButtonST m_finddown;
+	CButton m_savecheck;
 };

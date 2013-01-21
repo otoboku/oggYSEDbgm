@@ -151,6 +151,8 @@ struct save{
 	int mp3orig;
 
 	int audiost;
+
+	int savecheck;
 };
 
 //{{AFX_INSERT_LOCATION}}

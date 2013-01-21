@@ -362,6 +362,8 @@ HRESULT ConnectFilter(IBaseFilter *pSrc,IBaseFilter *pDest,GUID majorType,WCHAR 
 #include "AudioSelect.h"
 int bit=0;
 double rate;
+int rateflg = 0;
+extern DWORD videocnt3;
 extern int wavch,wavbit;
 CString s2;
 #if WIN64
@@ -387,8 +389,8 @@ void CDouga::plays(TCHAR* s)
 	vr=NULL;
 	rate=30.0;
 	hr=CoCreateInstance(CLSID_MediaDet,NULL,CLSCTX_INPROC,IID_IMediaDet,(LPVOID *)&vr);
-	double rate1=0.0;
-	if(vr){rate=0.0;
+	double rate1=0.0;rate=0.0;
+	if(vr){
 		vr->put_Filename(ss);
 		vr->get_OutputStreams(&p);
 		for(int i=0;i<p+1;i++){
@@ -416,6 +418,10 @@ void CDouga::plays(TCHAR* s)
 		vr->Release(); vr=NULL;
 	}
 
+	rateflg=0;
+	if(rate==0.0){
+		rateflg=1;
+	}
 	Haali=NULL;pSplitter=NULL;
 	CoCreateInstance(CLSID_FilterGraph,NULL,CLSCTX_INPROC_SERVER,IID_IGraphBuilder,(LPVOID *)&pGraphBuilder);
 	if(pGraphBuilder){
@@ -1680,6 +1686,7 @@ HRESULT CDouga::EnumFilters (IGraphBuilder *pGraph,int no)
 
 void CDouga::plays2()
 {
+	videocnt3=0;
 	long height=0, width=0;
 //	if(pGraphBuilder)pGraphBuilder->RenderFile(douga,NULL);
 	if(pGraphBuilder)EnumFilters(pGraphBuilder,0);
@@ -2120,6 +2127,7 @@ void CDouga::OnTimer(UINT nIDEvent)
 #endif
 {
 	// TODO: この位置にメッセージ ハンドラ用のコードを追加するかまたはデフォルトの処理を呼び出してください
+
 	if(nIDEvent==1255){
 		if(savedata.fs==0){
 			CRect r,rr;

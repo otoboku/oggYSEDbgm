@@ -53,6 +53,7 @@ void CPlayList::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_EDIT2, m_find);
 	DDX_Control(pDX, IDC_BUTTON16, m_findup);
 	DDX_Control(pDX, IDC_BUTTON20, m_finddown);
+	DDX_Control(pDX, IDC_CHECK5, m_savecheck);
 }
 
 
@@ -148,6 +149,7 @@ BOOL CPlayList::OnInitDialog()
 	m_tooltip.AddTool(GetDlgItem(IDC_CHECK4), _T("選択した曲をループさせます。\n再生する前にチェックを入れる必要があります。\nそうでないとループはかかりません。\nループポイントが0のもの(mp3やループしない曲)が対象です。"));
 	m_tooltip.AddTool(GetDlgItem(IDC_CHECK28), _T("ツールチップを表示します。"));
 	m_tooltip.AddTool(GetDlgItem(IDC_CHECK29), _T("最小化、最小化からの復帰時、メイン画面とプレイリスト画面も同時に最小化、最小化からの復帰を行います。"));
+	m_tooltip.AddTool(GetDlgItem(IDC_CHECK5), _T("途中で演奏を停止した位置を自動保存します。"));
 	m_tooltip.SetDelayTime( TTDT_AUTOPOP, 10000 );
 	m_tooltip.SendMessage(TTM_SETMAXTIPWIDTH, 0, 512);
 
@@ -174,6 +176,9 @@ BOOL CPlayList::OnInitDialog()
 	pnt=pnt1=-1;
 	nnn=1;
 	pc=NULL;
+
+	m_savecheck.SetCheck(savedata.savecheck);
+
 	Load();
 	if(pc==NULL){
 		pc = (playlistdata0*)malloc(sizeof(playlistdata0));
@@ -1562,6 +1567,7 @@ void CPlayList::OnTimer(UINT_PTR nIDEvent)
 void CPlayList::OnTimer(UINT nIDEvent) 
 #endif
 {
+	savedata.savecheck=m_savecheck.GetCheck();
 	CPlayList* pl=(CPlayList*)this;
 	timerpl(nIDEvent,pl);
 	CDialog::OnTimer(nIDEvent);

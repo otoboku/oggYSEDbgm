@@ -209,7 +209,7 @@ BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
 		// メッセージ ハンドラがありません。
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
-
+double aa1_=0;
 BOOL CAboutDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
@@ -473,6 +473,7 @@ BOOL COggDlg::OnInitDialog()
 	extn="";
 	mod=NULL;
 	kmp=NULL;
+	aa1_=0.0;
 	hDLLk=NULL;
 	mp3_.mp3init();
 	// "バージョン情報..." メニュー項目をシステム メニューへ追加します。
@@ -1980,9 +1981,44 @@ void COggDlg::play()
 	memcpy(pdsb,bufwav3,dwDataLen1);
 	m_dsb->Unlock(pdsb,dwDataLen1,NULL,0);
 	m_dsb->SetVolume((savedata.dsvol-1)*10);
-	if(pGraphBuilder)pMainFrame1->plays2();
-	if(pMediaControl){for(int y=0;y<45;y++){Sleep(10);DoEvent();}pMediaControl->Run();}
-	if(pMainFrame1){pMainFrame1->seek(0);}
+	CFile f123;
+	int flggg=0;
+	if(f123.Open(filen+_T(".save"),CFile::modeRead,NULL)==TRUE){
+		f123.Close();
+		if(IDYES==MessageBox(_T("途中再生データが存在します。\n前回中断した部分から再生しますか？\nはい = 途中から再生\nいいえ = はじめから再生"),_T("再生確認"),MB_YESNO)){
+			flggg=1;
+		}else{
+			CFile::Remove(filen+_T(".save"));
+		}
+	}
+	if(f123.Open(filen+_T(".save"),CFile::modeRead,NULL)==TRUE&&flggg==1){
+		f123.Close();
+		if(pGraphBuilder)pMainFrame1->plays2();
+		if(pMediaControl){for(int y=0;y<45;y++){Sleep(10);DoEvent();}pMediaControl->Run();}
+		if(mode==-10){
+			if(f123.Open(filen+_T(".save"),CFile::modeRead,NULL)==TRUE){
+				f123.Read(&playb,sizeof(__int64));
+				if(savedata.mp3orig){
+					mp3_.seek2(playb/(wavch==2?4:1),wavch);
+				}else{
+					mp3_.seek(playb/(wavch==2?4:1),wavch);
+				}
+				f123.Close();
+			}
+		}
+		if(mode==-2){
+			if(f123.Open(filen+_T(".save"),CFile::modeRead,NULL)==TRUE){
+				f123.Read(&aa1_,sizeof(double));
+				pMainFrame1->seek((LONGLONG)(((float)((float)aa1_*100.0f*100000.0f))));
+				f123.Close();
+			}
+		}
+	}else{
+		if(pGraphBuilder)pMainFrame1->plays2();
+		if(pMediaControl){for(int y=0;y<45;y++){Sleep(10);DoEvent();}pMediaControl->Run();}
+		if(pMainFrame1){pMainFrame1->seek(0);}
+	}
+
 	syukai=0;
 	m_dsb->Play(0,0,DSBPLAY_LOOPING );
 	fade1=0;
@@ -3344,8 +3380,45 @@ void COggDlg::dp(CString a)
 		pMainFrame1->Create(GetSafeHwnd());
 		pMainFrame1->ShowWindow(SW_HIDE);
 		pMainFrame1->play(0);
+	CFile f123;
+	int flggg=0;
+	if(f123.Open(filen+_T(".save"),CFile::modeRead,NULL)==TRUE){
+		f123.Close();
+		if(IDYES==MessageBox(_T("途中再生データが存在します。\n前回中断した部分から再生しますか？\nはい = 途中から再生\nいいえ = はじめから再生"),_T("再生確認"),MB_YESNO)){
+			flggg=1;
+		}else{
+			CFile::Remove(filen+_T(".save"));
+		}
+	}
+	if(f123.Open(filen+_T(".save"),CFile::modeRead,NULL)==TRUE&&flggg==1){
+		f123.Close();
 		if(pGraphBuilder)pMainFrame1->plays2();
-		if(pMediaControl)pMediaControl->Run();
+		if(pMediaControl){for(int y=0;y<45;y++){Sleep(10);DoEvent();}pMediaControl->Run();}
+		if(mode==-10){
+			if(f123.Open(filen+_T(".save"),CFile::modeRead,NULL)==TRUE){
+				f123.Read(&playb,sizeof(__int64));
+				if(savedata.mp3orig){
+					mp3_.seek2(playb/(wavch==2?4:1),wavch);
+				}else{
+					mp3_.seek(playb/(wavch==2?4:1),wavch);
+				}
+				f123.Close();
+			}
+		}
+		if(mode==-2){
+			if(f123.Open(filen+_T(".save"),CFile::modeRead,NULL)==TRUE){
+				f123.Read(&aa1_,sizeof(double));
+				pMainFrame1->seek((LONGLONG)(((float)((float)aa1_*100.0f*100000.0f))));
+				f123.Close();
+			}
+		}
+	}else{
+		if(pGraphBuilder)pMainFrame1->plays2();
+		if(pMediaControl){for(int y=0;y<45;y++){Sleep(10);DoEvent();}pMediaControl->Run();}
+		if(pMainFrame1){pMainFrame1->seek(0);}
+	}
+//		if(pGraphBuilder)pMainFrame1->plays2();
+//		if(pMediaControl)pMediaControl->Run();
 		int a=0;aa2=0;
 		REFTIME aa=0;
 		aa2=0;
@@ -3428,6 +3501,47 @@ void COggDlg::stop()
 	videoonly=FALSE;
 	fade1=0;
 
+	if(savedata.savecheck==1&&(mode==-10||mode==-2)){
+		try{
+			int flg=0;
+			if(mode==-10){
+				if(oggsize<=playb&&oggsize!=0){
+					try{
+						CFile::Remove(filen+_T(".save"));
+					}catch(...){
+					}
+					flg=1;
+				}
+				if(playb==0)
+					flg=1;
+			}
+			if(mode==-2){
+				if(oggsize2<=aa1_&&oggsize2!=0.0){
+					try{
+						CFile::Remove(filen+_T(".save"));
+					}catch(...){
+					}
+					flg=1;
+				}
+				if(aa1_==0.0){
+					flg=1;
+				}
+			}
+			if(flg==0){
+				CFile f;
+				if(f.Open(filen+_T(".save"),CFile::modeCreate|CFile::modeWrite,NULL)==TRUE){
+					if(mode==-10)
+						f.Write(&playb,sizeof(__int64));
+					if(mode==-2)
+						f.Write(&aa1_,sizeof(double));
+					f.Close();
+				}
+			}else{
+			}
+		}catch(...){
+		}
+	}
+	playb=0;
 	if(ptl)ptl->SetProgressValue(m_hWnd, (LONGLONG)0, (LONGLONG)1);
 	if(ptl)ptl->SetProgressState(m_hWnd, TBPF_NOPROGRESS);
 	if((ogg||adbuf2||mod||wav) && mode!=-2)
@@ -3699,9 +3813,10 @@ void CALLBACK TimeCallback(UINT uTimerID, UINT uMsg, DWORD_PTR dwUser, DWORD_PTR
 extern IBasicAudio *pBasicAudio;
 extern IBaseFilter   *prend;
 extern double rate;
+extern int rateflg;
 extern RECT rcm;
-DWORD videocnt=0;
-double aa1_=0;
+DWORD videocnt=0,videocnt2=0,videocnt3;
+
 void COggDlg::timerp()
 {
 	if(playy==0)return;
@@ -3852,13 +3967,18 @@ void COggDlg::timerp()
 		}
 		moji(s,1,32,0xffffff);
 
-		if(videocnt==1)
-		if(prend&&ps==0){
-			int framerate;
-			CComQIPtr< IQualProp, &IID_IQualProp > ptr(prend);
-			ptr->get_AvgFrameRate(&framerate);
-			rate=((double)framerate)/100.0;
+		if(rateflg)
+		if(videocnt2>30){
+			videocnt2=0;
+			if(prend&&ps==0){
+				int framerate;
+				CComQIPtr< IQualProp, &IID_IQualProp > ptr(prend);
+				ptr->get_AvgFrameRate(&framerate);
+				rate=((double)framerate)/100.0;
+			}
 		}
+		videocnt2++;
+		videocnt3++;
 
 		if((mode==-2||videoonly) && rate!=0.0){
 			s.Format(_T("size:%d x %d"),rcm.right,rcm.bottom);
@@ -3868,7 +3988,7 @@ void COggDlg::timerp()
 		}else if((mode==-2||videoonly) && rcm.right>1){
 			s.Format(_T("size:%d x %d"),rcm.right,rcm.bottom);
 			moji(s,1,48,0x7fffff);
-			s.Format(_T("rate:不明"));
+			s.Format(_T("rate:算出中……"));
 			moji(s,1,64,0x7fffff);
 		}else if(mode==-2 && wavbit!=0){
 			s.Format(_T("sample:%dHz"),wavbit);
@@ -5662,9 +5782,46 @@ void COggDlg::OnRestart()
 			pMainFrame1->Create(GetSafeHwnd());
 			pMainFrame1->ShowWindow(SW_HIDE);
 			pMainFrame1->play(0);
-			if(pGraphBuilder)pMainFrame1->plays2();
-			if(pMediaControl)pMediaControl->Run();
-			if(pMediaPosition)pMediaPosition->put_CurrentPosition(0);
+	CFile f123;
+	int flggg=0;
+	if(f123.Open(filen+_T(".save"),CFile::modeRead,NULL)==TRUE){
+		f123.Close();
+		if(IDYES==MessageBox(_T("途中再生データが存在します。\n前回中断した部分から再生しますか？\nはい = 途中から再生\nいいえ = はじめから再生"),_T("再生確認"),MB_YESNO)){
+			flggg=1;
+		}else{
+			CFile::Remove(filen+_T(".save"));
+		}
+	}
+	if(f123.Open(filen+_T(".save"),CFile::modeRead,NULL)==TRUE&&flggg==1){
+		f123.Close();
+		if(pGraphBuilder)pMainFrame1->plays2();
+		if(pMediaControl){for(int y=0;y<45;y++){Sleep(10);DoEvent();}pMediaControl->Run();}
+		if(mode==-10){
+			if(f123.Open(filen+_T(".save"),CFile::modeRead,NULL)==TRUE){
+				f123.Read(&playb,sizeof(__int64));
+				if(savedata.mp3orig){
+					mp3_.seek2(playb/(wavch==2?4:1),wavch);
+				}else{
+					mp3_.seek(playb/(wavch==2?4:1),wavch);
+				}
+				f123.Close();
+			}
+		}
+		if(mode==-2){
+			if(f123.Open(filen+_T(".save"),CFile::modeRead,NULL)==TRUE){
+				f123.Read(&aa1_,sizeof(double));
+				pMainFrame1->seek((LONGLONG)(((float)((float)aa1_*100.0f*100000.0f))));
+				f123.Close();
+			}
+		}
+	}else{
+		if(pGraphBuilder)pMainFrame1->plays2();
+		if(pMediaControl){for(int y=0;y<45;y++){Sleep(10);DoEvent();}pMediaControl->Run();}
+		if(pMainFrame1){pMainFrame1->seek(0);}
+	}
+//			if(pGraphBuilder)pMainFrame1->plays2();
+//			if(pMediaControl)pMediaControl->Run();
+//			if(pMediaPosition)pMediaPosition->put_CurrentPosition(0);
 			int a=0;aa2=0;
 			REFTIME aa=0;
 			aa2=0;

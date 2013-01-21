@@ -134,6 +134,7 @@ BOOL COggApp::InitInstance()
 	savedata.kaisuu=2;
 	savedata.spc=1;
 	savedata.mp3=1;
+	savedata.savecheck=0;
 	savedata.kpivol=1;
 	_tcscpy(savedata.font1,_T("Consolas"));
 	_tcscpy(savedata.font2,_T("ƒƒCƒŠƒI"));
