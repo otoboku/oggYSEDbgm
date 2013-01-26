@@ -149,7 +149,7 @@ BOOL CPlayList::OnInitDialog()
 	m_tooltip.AddTool(GetDlgItem(IDC_CHECK4), _T("選択した曲をループさせます。\n再生する前にチェックを入れる必要があります。\nそうでないとループはかかりません。\nループポイントが0のもの(mp3やループしない曲)が対象です。"));
 	m_tooltip.AddTool(GetDlgItem(IDC_CHECK28), _T("ツールチップを表示します。"));
 	m_tooltip.AddTool(GetDlgItem(IDC_CHECK29), _T("最小化、最小化からの復帰時、メイン画面とプレイリスト画面も同時に最小化、最小化からの復帰を行います。"));
-	m_tooltip.AddTool(GetDlgItem(IDC_CHECK5), _T("途中で演奏を停止した位置を自動保存します。"));
+	m_tooltip.AddTool(GetDlgItem(IDC_CHECK5), _T("途中で演奏を停止した位置を自動保存します。\nmp3系と動画(avi,mp4など)のみ対応。\n停止ボタンもしくは終了したときのみ保存します。\n再生中に違う曲を選んだ時は位置は保存しません。"));
 	m_tooltip.SetDelayTime( TTDT_AUTOPOP, 10000 );
 	m_tooltip.SendMessage(TTM_SETMAXTIPWIDTH, 0, 512);
 

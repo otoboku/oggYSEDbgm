@@ -3493,7 +3493,7 @@ BOOL CALLBACK pp(HWND hwnd,LPARAM p)
 	return TRUE;
 }
 
-
+CString filenback;
 void COggDlg::stop()
 {
 	KillTimer(1250);
@@ -3501,7 +3501,7 @@ void COggDlg::stop()
 	videoonly=FALSE;
 	fade1=0;
 
-	if(savedata.savecheck==1&&(mode==-10||mode==-2)){
+	if(savedata.savecheck==1&&(mode==-10||mode==-2)&&filenback==filen){
 		try{
 			int flg=0;
 			if(mode==-10){
@@ -3541,6 +3541,7 @@ void COggDlg::stop()
 		}catch(...){
 		}
 	}
+	filenback=filen;
 	playb=0;
 	if(ptl)ptl->SetProgressValue(m_hWnd, (LONGLONG)0, (LONGLONG)1);
 	if(ptl)ptl->SetProgressState(m_hWnd, TBPF_NOPROGRESS);
