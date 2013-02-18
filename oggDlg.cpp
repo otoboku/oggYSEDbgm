@@ -6407,13 +6407,21 @@ LRESULT COggDlg::OnHotKey(WPARAM wp, LPARAM a)
 							ZeroMemory(bufwav3,sizeof(bufwav3));
 							syukai=1;syukai2=0;
 							if(thn==FALSE) for(;;){if(syukai2==1)break;DoEvent();}
-							if(mp3_.seek(playb/(wavch==2?4:1),wavch)==FALSE){fade1=1;if(thn==FALSE){if(m_dsb)m_dsb->Stop();}return 0;}
+							if(savedata.mp3orig){
+								if(mp3_.seek2(playb/(wavch==2?4:1),wavch)==FALSE){fade1=1;if(thn==FALSE){if(m_dsb)m_dsb->Stop();}return 0;}
+							}else{
+								if(mp3_.seek(playb/(wavch==2?4:1),wavch)==FALSE){fade1=1;if(thn==FALSE){if(m_dsb)m_dsb->Stop();}return 0;}
+							}
 							poss=0;sek=TRUE;
 							timer.SetEvent();
 							syukai=0;
 							OnPause();
 						}else
-							if(mp3_.seek(playb/(wavch==2?4:1),wavch)==FALSE){return 0;}
+							if(savedata.mp3orig){
+								if(mp3_.seek2(playb/(wavch==2?4:1),wavch)==FALSE){return 0;}
+							}else{
+								if(mp3_.seek(playb/(wavch==2?4:1),wavch)==FALSE){return 0;}
+							}
 //						m_time.SetPos((int)playb/400);
 					}else{
 						seekadpcm((int)playb);
@@ -6464,13 +6472,21 @@ LRESULT COggDlg::OnHotKey(WPARAM wp, LPARAM a)
 							ZeroMemory(bufwav3,sizeof(bufwav3));
 							syukai=1;syukai2=0;
 							if(thn==FALSE) for(;;){if(syukai2==1)break;DoEvent();}
-							if(mp3_.seek(playb/(wavch==2?4:1),wavch)==FALSE){fade1=1;if(thn==FALSE){if(m_dsb)m_dsb->Stop();}return 0;}
+							if(savedata.mp3orig){
+								if(mp3_.seek2(playb/(wavch==2?4:1),wavch)==FALSE){fade1=1;if(thn==FALSE){if(m_dsb)m_dsb->Stop();}return 0;}
+							}else{
+								if(mp3_.seek(playb/(wavch==2?4:1),wavch)==FALSE){fade1=1;if(thn==FALSE){if(m_dsb)m_dsb->Stop();}return 0;}
+							}
 							poss=0;sek=TRUE;
 							timer.SetEvent();
 							syukai=0;
 							OnPause();
 						}else
-							if(mp3_.seek(playb/(wavch==2?4:1),wavch)==FALSE){return 0;}
+							if(savedata.mp3orig){
+								if(mp3_.seek2(playb/(wavch==2?4:1),wavch)==FALSE){return 0;}
+							}else{
+								if(mp3_.seek(playb/(wavch==2?4:1),wavch)==FALSE){return 0;}
+							}
 //						m_time.SetPos((int)playb/400);
 					}else{
 						seekadpcm((int)playb);
