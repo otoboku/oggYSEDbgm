@@ -638,7 +638,7 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,6,8,1408
+ FILEVERSION 0,6,8,1409
  PRODUCTVERSION 1,0,0,1
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -656,10 +656,10 @@ BEGIN
         BEGIN
             VALUE "Comments", "ファルコム簡易プレイヤ＋メディアプレイヤ+kpiプレイヤ"
             VALUE "CompanyName", "Pre Prayer Power Soft"
-            VALUE "FileDescription", "ogg/wav簡易プレイヤ+メディアプレイヤ Ver 0.6h Rel.8e No.14.8"
-            VALUE "FileVersion", "0, 6, 8, 1408"
+            VALUE "FileDescription", "ogg/wav簡易プレイヤ+メディアプレイヤ Ver 0.6h Rel.8e No.14.9"
+            VALUE "FileVersion", "0, 6, 8, 1409"
             VALUE "InternalName", "ogg"
-            VALUE "LegalCopyright", "Copyright (C) 2013.01.20 ちゃちゃ/大原隆誠"
+            VALUE "LegalCopyright", "Copyright (C) 2013.04.16 ちゃちゃ/大原隆誠"
             VALUE "LegalTrademarks", "Pre Prayer Power Soft"
             VALUE "OriginalFilename", "oggYSEDbgm.exe"
             VALUE "ProductName", "ファルコム簡易プレイヤ＋メディアプレイヤ"

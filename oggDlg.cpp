@@ -1830,13 +1830,19 @@ void COggDlg::play()
 		wavbit=si1.dwSamplesPerSec;
 		loop1=0;stitle="";
 //		loop2=(int)(((float)(((float)si1.dwLength)*44.1f))/(44100.0f/((float)((wavch==2)?wavbit:(wavbit/2)))));
-		loop2=(int)((float)(mp3__.GetMSec())*((float)mp3__.GetFreqs()/1000.0f)/(wavch==2?1.0f:2.0f));
+		loop2=(int)((float)(mp3_.m_mp3info.total_samples)/(wavch==2?1.0f:2.0f));
+		if(loop2==0){
+			loop2=(int)(((float)(((float)si1.dwLength)*44.1f))/(44100.0f/((float)((wavch==2)?wavbit:(wavbit/2)))));
+		}
 		data_size=oggsize=loop2;
 		loop3=loop2;loop2=0;
 		m_time.SetRange(0,(data_size)/(100),TRUE);
 		lenl= 0;
-		kbps=mp3__.GetBps();
-		Vbr=mp3__.IsVbr();
+		if(mp3_.m_mp3info.total_samples==0)
+			kbps=mp3_.m_mp3info.bitrate/1000;
+		else
+			kbps=mp3_.m_mp3info.total_samples/mp3_.m_mp3info.freq;
+		Vbr=mp3_.m_mp3info.hasVbrtag;
 		savedata.mp3orig=0;
 		if(Vbr==1) savedata.mp3orig=1;
 		CId3tagv1 ta1;
@@ -3194,7 +3200,7 @@ int readmp3(char*bw,int cnt)
 {
 	int r=1,rr=cnt-poss;
 	if(savedata.mp3orig)
-		r=mp3_.Render2(bufkpi+poss,rr);//4608
+		r=mp3_.Render2(bufkpi+poss,rr,kbps);//4608
 	else
 		r=mp3_.Render(bufkpi+poss,rr);//4608
 	poss+=r;

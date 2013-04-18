@@ -429,6 +429,7 @@ static int getmp3info(HANDLE hFile, mp3info *info,id3tag *id3,VBRTAGDATA *vbr)
             info->hasVbrtag = 0;
             info->bitrate = tabsel_123[lsf][lay-1][bitrate_index]*1000;
             info->length = info->nbytes * 8.0 / info->bitrate;
+			info->total_samples = framesize*freqs[srate];
         }
         const int POST_DELAY = 1152;
         const int DECODE_DELAY_LAYER1 = 0;
@@ -1054,8 +1055,22 @@ static int getmp3info(HANDLE hFile, mp3info *info,id3tag *id3,VBRTAGDATA *vbr)
         }
         if(tmp[0] == 'I' && tmp[1] == 'D' && tmp[2] == '3'){
             //Skip ID3v2 tag
-            hpos = tmp[6]*2097152+tmp[7]*16384+tmp[8]*128+tmp[9];
-        }
+            hpos = tmp[6]*2097152+tmp[7]*16384+tmp[8]*128+tmp[9]+10;
+	        input_seek(hFile, hpos, FILE_BEGIN);
+			if(input_read(hFile, tmp, sizeof(tmp)) != sizeof(tmp)){
+				return 0;
+			}
+	        if(tmp[0] == 'I' && tmp[1] == 'D' && tmp[2] == '3'){
+				hpos += tmp[6]*2097152+tmp[7]*16384+tmp[8]*128+tmp[9]+10;
+				input_seek(hFile, hpos, FILE_BEGIN);
+				if(input_read(hFile, tmp, sizeof(tmp)) != sizeof(tmp)){
+					return 0;
+				}
+				if(tmp[0] == 'I' && tmp[1] == 'D' && tmp[2] == '3'){
+					hpos += tmp[6]*2097152+tmp[7]*16384+tmp[8]*128+tmp[9]+10;
+				}
+			}
+		}
         else if(*(DWORD*)tmp == *(DWORD*)"RIFF"){
             //Skip RIFF chunk
             DWORD dwSkip, dwEndPos;
@@ -1539,7 +1554,7 @@ END:
 
 
 
-	int Render2(BYTE* buf,int len)
+	int Render2(BYTE* buf,int len,int fr)
 	{
 			if(m_hFile==INVALID_HANDLE_VALUE) return 0;
 		{
@@ -1558,8 +1573,10 @@ END:
 			int size=(144*tb*1000)/fr+pb;
 			BOOL i=input_read(m_hFile, m_tmp, size+MAD_BUFFER_GUARD);
 			if(i<ERROR_HANDLE_EOF){return cnt;}
-
-        mad_stream_buffer(&m_stream, m_buffer, m_dwBufLen);
+			if(fr<0){
+				int a;
+				a = 1;
+			}
 
 			input_seek(m_hFile, -MAD_BUFFER_GUARD, FILE_CURRENT);
 			mad_stream_buffer(&m_stream2, m_tmp, size+MAD_BUFFER_GUARD);
