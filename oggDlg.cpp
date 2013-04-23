@@ -1838,10 +1838,11 @@ void COggDlg::play()
 		loop3=loop2;loop2=0;
 		m_time.SetRange(0,(data_size)/(100),TRUE);
 		lenl= 0;
-		if(mp3_.m_mp3info.total_samples==0)
+		if(mp3_.m_mp3info.hasVbrtag==0)
 			kbps=mp3_.m_mp3info.bitrate/1000;
 		else
-			kbps=mp3_.m_mp3info.total_samples/mp3_.m_mp3info.freq;
+			kbps=mp3_.m_mp3info.bitrate/1000;
+			//kbps=mp3_.m_mp3info.total_samples/mp3_.m_mp3info.freq;
 		Vbr=mp3_.m_mp3info.hasVbrtag;
 		savedata.mp3orig=0;
 		if(Vbr==1) savedata.mp3orig=1;

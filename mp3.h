@@ -429,7 +429,7 @@ static int getmp3info(HANDLE hFile, mp3info *info,id3tag *id3,VBRTAGDATA *vbr)
             info->hasVbrtag = 0;
             info->bitrate = tabsel_123[lsf][lay-1][bitrate_index]*1000;
             info->length = info->nbytes * 8.0 / info->bitrate;
-			info->total_samples = framesize*freqs[srate];
+			//info->total_samples = framesize*freqs[srate];
         }
         const int POST_DELAY = 1152;
         const int DECODE_DELAY_LAYER1 = 0;
