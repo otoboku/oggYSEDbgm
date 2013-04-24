@@ -166,6 +166,46 @@ BOOL CMp3Info::Load(const TCHAR *szFileName,BOOL bVbrScan)
 		lDataPtr = (((long )(id3v2head[6]&0x7f)<<21) | ((long )(id3v2head[7]&0x7f)<<14) | ((long )(id3v2head[8]&0x7f)<<7) | (long )(id3v2head[9]&0x7f));
 		lDataPtr += 10;
 	}
+	SetFilePointer(hFile,lDataPtr,NULL,FILE_BEGIN);
+	if(ReadFile(hFile,&id3v2head,sizeof(id3v2head),&dwRet,NULL) &&
+		(dwRet == sizeof(id3v2head)) &&
+		(memcmp(id3v2head,"ID3",3) == 0) )
+	{
+		lDataPtr += (((long )(id3v2head[6]&0x7f)<<21) | ((long )(id3v2head[7]&0x7f)<<14) | ((long )(id3v2head[8]&0x7f)<<7) | (long )(id3v2head[9]&0x7f));
+		lDataPtr += 10;
+	}
+	SetFilePointer(hFile,lDataPtr,NULL,FILE_BEGIN);
+	if(ReadFile(hFile,&id3v2head,sizeof(id3v2head),&dwRet,NULL) &&
+		(dwRet == sizeof(id3v2head)) &&
+		(memcmp(id3v2head,"ID3",3) == 0) )
+	{
+		lDataPtr += (((long )(id3v2head[6]&0x7f)<<21) | ((long )(id3v2head[7]&0x7f)<<14) | ((long )(id3v2head[8]&0x7f)<<7) | (long )(id3v2head[9]&0x7f));
+		lDataPtr += 10;
+	}
+	SetFilePointer(hFile,lDataPtr,NULL,FILE_BEGIN);
+	if(ReadFile(hFile,&id3v2head,sizeof(id3v2head),&dwRet,NULL) &&
+		(dwRet == sizeof(id3v2head)) &&
+		(memcmp(id3v2head,"ID3",3) == 0) )
+	{
+		lDataPtr += (((long )(id3v2head[6]&0x7f)<<21) | ((long )(id3v2head[7]&0x7f)<<14) | ((long )(id3v2head[8]&0x7f)<<7) | (long )(id3v2head[9]&0x7f));
+		lDataPtr += 10;
+	}
+	SetFilePointer(hFile,lDataPtr,NULL,FILE_BEGIN);
+	if(ReadFile(hFile,&id3v2head,sizeof(id3v2head),&dwRet,NULL) &&
+		(dwRet == sizeof(id3v2head)) &&
+		(memcmp(id3v2head,"ID3",3) == 0) )
+	{
+		lDataPtr += (((long )(id3v2head[6]&0x7f)<<21) | ((long )(id3v2head[7]&0x7f)<<14) | ((long )(id3v2head[8]&0x7f)<<7) | (long )(id3v2head[9]&0x7f));
+		lDataPtr += 10;
+	}
+	SetFilePointer(hFile,lDataPtr,NULL,FILE_BEGIN);
+	if(ReadFile(hFile,&id3v2head,sizeof(id3v2head),&dwRet,NULL) &&
+		(dwRet == sizeof(id3v2head)) &&
+		(memcmp(id3v2head,"ID3",3) == 0) )
+	{
+		lDataPtr += (((long )(id3v2head[6]&0x7f)<<21) | ((long )(id3v2head[7]&0x7f)<<14) | ((long )(id3v2head[8]&0x7f)<<7) | (long )(id3v2head[9]&0x7f));
+		lDataPtr += 10;
+	}
 
 	//Mp3ƒwƒbƒ_î•ñ‚Ì“Ç‚ÝŽæ‚è
 	DWORD dwFrameCount = 0;
