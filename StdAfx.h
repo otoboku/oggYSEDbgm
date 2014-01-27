@@ -61,6 +61,20 @@ typedef PUINT DWORD_PTR
 #include <mmdeviceapi.h>
 #include <endpointvolume.h>
 
+struct playlistdata0{
+	TCHAR name[1024];
+	TCHAR art[1024];
+	TCHAR alb[1024];
+	TCHAR fol[1024];
+	int sub;
+	TCHAR game[256];
+	int loop1;
+	int loop2;
+	int ret2;
+	int icon;
+	int time;
+};
+
 struct save{
 	TCHAR ysf[1024];
 	TCHAR ys6[1024];

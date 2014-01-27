@@ -168,6 +168,7 @@ BOOL CPlayList::OnInitDialog()
 	m_lc.InsertColumn ( 3, _T("アーティスト"), LVCFMT_LEFT, 200, 0 );
 	m_lc.InsertColumn ( 4, _T("アルバム/コメント"), LVCFMT_LEFT, 200, 0 );
 	m_lc.InsertColumn ( 5, _T("フォルダ"), LVCFMT_LEFT, 50, 0 );
+	m_lc.pc = pc;
 //	pc=NULL;
 //	pc = (playlistdata0*)malloc(sizeof(playlistdata0)*50000);
 //	if(pc==NULL)
@@ -1380,6 +1381,9 @@ void CPlayList::Load()
 		f.Close();
 	}
 	_tchdir(tmp);
+	if(GetAsyncKeyState(VK_LCONTROL)&0x8000){
+		x=-10000;
+	}
 	if(x!=-10000){
 		MoveWindow(x,y,cx,cy,TRUE);
 		RECT r;
@@ -1451,6 +1455,7 @@ void CPlayList::OnNMDblclkList1(NMHDR *pNMHDR, LRESULT *pResult)
 	}
 }
 extern CDouga *pMainFrame1;
+extern long height, width;
 void CPlayList::OnSize(UINT nType, int cx, int cy)
 {
 	CDialog::OnSize(nType, cx, cy);
@@ -1471,7 +1476,7 @@ void CPlayList::OnSize(UINT nType, int cx, int cy)
 		if(nType==SIZE_RESTORED){
 			if(m_saisyo.GetCheck())
 				og->ShowWindow(SW_RESTORE);
-			if(pMainFrame1){
+			if(pMainFrame1 && height!=0){
 				pMainFrame1->ShowWindow(SW_SHOWNORMAL);
 			}
 		}

@@ -659,7 +659,7 @@ BEGIN
             VALUE "FileDescription", "ogg/wav簡易プレイヤ+メディアプレイヤ Ver 0.6h Rel.8e No.14.9"
             VALUE "FileVersion", "0, 6, 8, 1409"
             VALUE "InternalName", "ogg"
-            VALUE "LegalCopyright", "Copyright (C) 2013.04.16 ちゃちゃ/大原隆誠"
+            VALUE "LegalCopyright", "Copyright (C) 2013.04.27 ちゃちゃ/大原隆誠"
             VALUE "LegalTrademarks", "Pre Prayer Power Soft"
             VALUE "OriginalFilename", "oggYSEDbgm.exe"
             VALUE "ProductName", "ファルコム簡易プレイヤ＋メディアプレイヤ"

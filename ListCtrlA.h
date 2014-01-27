@@ -17,6 +17,7 @@ class CListCtrlA : public CListCtrl
 public:
 	CListCtrlA(void);
 	~CListCtrlA(void);
+	playlistdata0 *pc;
 protected:
 	virtual BOOL OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult);
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);

@@ -30,25 +30,45 @@ BOOL CListCtrlA::OnToolTipText( UINT id, NMHDR * pNMHDR, LRESULT * pResult ){
 	TOOLTIPTEXTA* pTTTA = (TOOLTIPTEXTA*)pNMHDR;
 	TOOLTIPTEXTW* pTTTW = (TOOLTIPTEXTW*)pNMHDR;
 	CString strTipText;
+	CString i,j,k,l,m;
 	UINT nID = pNMHDR->idFrom;
-
+	AFX_MODULE_THREAD_STATE* pThreadState = AfxGetModuleThreadState();
+	CToolTipCtrl *pToolTip = pThreadState->m_pToolTip;
+	pToolTip->SetMaxTipWidth(500);
 	if( nID == 0 )	  	// Notification in NT from automatically
 		return FALSE;   	// created tooltip
 
 	int row = ((nID-1) >> 10) & 0x3fffff ;
 	int col = (nID-1) & 0x3ff;
-	strTipText = GetItemText( row, col );
+	i = GetItemText( row, 0 );
+	j = GetItemText( row, 3 );
+	k = GetItemText( row, 4 );
+	l = GetItemText( row, 2 );
+	m = GetItemText( row, 1 );
+	strTipText.Format(_T("名前：%s\nアーティスト：%s\nアルバム：%s\n時間：%s\n種類：%s"),i,j,k,l,m);
 
+//#ifndef _UNICODE
+//	if (pNMHDR->code == TTN_NEEDTEXTA)
+//		lstrcpyn(pTTTA->szText, strTipText, 579);
+//	else
+//		_mbstowcsz(pTTTW->szText, strTipText, 579);
+//#else
+//	if (pNMHDR->code == TTN_NEEDTEXTA)
+//		_wcstombsz(pTTTA->szText, strTipText, 579);
+//	else
+//		lstrcpyn(pTTTW->szText, strTipText, 579);
+//#endif
 #ifndef _UNICODE
+	strTipText=i;
 	if (pNMHDR->code == TTN_NEEDTEXTA)
 		lstrcpyn(pTTTA->szText, strTipText, 579);
 	else
 		_mbstowcsz(pTTTW->szText, strTipText, 579);
 #else
 	if (pNMHDR->code == TTN_NEEDTEXTA)
-		_wcstombsz(pTTTA->szText, strTipText, 579);
+		pTTTA->lpszText = (LPSTR)(LPWSTR)(LPCWSTR)strTipText;
 	else
-		lstrcpyn(pTTTW->szText, strTipText, 579);
+	    pTTTW->lpszText = (LPWSTR)(LPCWSTR)strTipText;
 #endif
 	*pResult = 0;
 
@@ -72,6 +92,7 @@ CListCtrlA::OnToolHitTest( CPoint point, TOOLINFO* pTI) const{
 	pTI->uId = (UINT)((row<<10)+(col&0x3ff)+1);
 	pTI->lpszText = LPSTR_TEXTCALLBACK;
 
+	cellrect.bottom += 200;
 	pTI->rect = cellrect;
 
 	return pTI->uId;

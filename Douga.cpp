@@ -368,8 +368,8 @@ extern int wavch,wavbit;
 CString s2;
 #if WIN64
 #else
-static const GUID MR_VIDEO_RENDER_SERVICE =     {0x1092a86c, 0xab1a, 0x459a, {0xa3, 0x36, 0x83, 0x1f, 0xbc, 0x4d, 0x11, 0xff} };
-static const IID IID_IMFVideoDisplayControl =   {0xa490b1e4, 0xab84, 0x4d31, {0xa1, 0xb2, 0x18, 0x1e, 0x03, 0xb1, 0x07, 0x7a} };
+//static const GUID MR_VIDEO_RENDER_SERVICE =     {0x1092a86c, 0xab1a, 0x459a, {0xa3, 0x36, 0x83, 0x1f, 0xbc, 0x4d, 0x11, 0xff} };
+//static const IID IID_IMFVideoDisplayControl =   {0xa490b1e4, 0xab84, 0x4d31, {0xa1, 0xb2, 0x18, 0x1e, 0x03, 0xb1, 0x07, 0x7a} };
 #endif
 void CDouga::plays(TCHAR* s)
 {
@@ -1684,10 +1684,12 @@ HRESULT CDouga::EnumFilters (IGraphBuilder *pGraph,int no)
     return S_OK;
 }
 
+long height=0, width=0;
+
 void CDouga::plays2()
 {
 	videocnt3=0;
-	long height=0, width=0;
+	height=0; width=0;
 //	if(pGraphBuilder)pGraphBuilder->RenderFile(douga,NULL);
 	if(pGraphBuilder)EnumFilters(pGraphBuilder,0);
 	if(pVideoWindow)pVideoWindow->put_Owner((OAHWND)m_hWnd);
@@ -1744,7 +1746,7 @@ void CDouga::plays2()
 //    MoveWindow(0,0,height,width,TRUE);
 //	MCIWndCanPlay(hMCIWnd);
 //	MCIWndPlay(hMCIWnd);
-	if(width==0){}else{
+	if(width==0){ShowWindow(SW_HIDE);}else{
 		if(pVideoWindow)pVideoWindow->put_Visible(OATRUE);
 		ShowWindow(SW_SHOWNORMAL);
 		UpdateWindow();

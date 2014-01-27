@@ -2,7 +2,6 @@
 #include "afxwin.h"
 #include "BtnST.h"
 #include "afxcmn.h"
-#include "ListCtrlA.h"
 // CPlayList ダイアログ
 
 struct playlistdata{
@@ -18,19 +17,7 @@ struct playlistdata{
 	int res2;
 };
 
-struct playlistdata0{
-	TCHAR name[1024];
-	TCHAR art[1024];
-	TCHAR alb[1024];
-	TCHAR fol[1024];
-	int sub;
-	TCHAR game[256];
-	int loop1;
-	int loop2;
-	int ret2;
-	int icon;
-	int time;
-};
+#include "ListCtrlA.h"
 
 class CPlayList : public CDialog
 {

@@ -6,14 +6,14 @@
 #include "kmp_pi.h"
 //#include "afxdll_.h"
 #include "Dwmapi.h"
-const GUID  IID_ITaskbarList3 = { 0xea1afb91,0x9e28,0x4b86,{0x90,0xe9,0x9e,0x9f,0x8a,0x5e,0xef,0xaf}} ;
-const GUID  IID_ICustomDestinationList = {0x6332debf,0x87b5,0x4670,{0x90,0xc0,0x5e,0x57,0xb4,0x08,0xa4,0x9e}};
-const CLSID CLSID_DestinationList ={ 0x77F10CF0, 0x3DB5, 0x4966, { 0xB5, 0x20, 0xB7, 0xC5, 0x4F, 0xD3, 0x5E, 0xD6 } };
-const CLSID CLSID_EnumerableObjectCollection = {0x2d3468c1,0x36a7,0x43b6,{0xac,0x24,0xd3,0xf0,0x2f,0xd9,0x60,0x7a}};
+//#include "Shobjidl.h"
+//#include <shlobj.h> 
+//const GUID  IID_ITaskbarList3 = { 0xea1afb91,0x9e28,0x4b86,{0x90,0xe9,0x9e,0x9f,0x8a,0x5e,0xef,0xaf}} ;
+//const GUID  IID_ICustomDestinationList = {0x6332debf,0x87b5,0x4670,{0x90,0xc0,0x5e,0x57,0xb4,0x08,0xa4,0x9e}};
+//const CLSID CLSID_DestinationList ={ 0x77F10CF0, 0x3DB5, 0x4966, { 0xB5, 0x20, 0xB7, 0xC5, 0x4F, 0xD3, 0x5E, 0xD6 } };
+//const CLSID CLSID_EnumerableObjectCollection = {0x2d3468c1,0x36a7,0x43b6,{0xac,0x24,0xd3,0xf0,0x2f,0xd9,0x60,0x7a}};
 //#undef NTDDI_VERSION
 //#define NTDDI_VERSION NTDDI_VERSION_FROM_WIN32_WINNT(NTDDI_WIN7)
-#include "Shobjidl.h"
-#include <shlobj.h> 
 #define INITGUID
 #undef NO_SHLWAPI_STRFCNS
 #define STRICT_TYPED_ITEMIDS 
@@ -3824,6 +3824,7 @@ extern IBaseFilter   *prend;
 extern double rate;
 extern int rateflg;
 extern RECT rcm;
+extern long height, width;
 DWORD videocnt=0,videocnt2=0,videocnt3;
 
 void COggDlg::timerp()
@@ -3989,7 +3990,7 @@ void COggDlg::timerp()
 		videocnt2++;
 		videocnt3++;
 
-		if((mode==-2||videoonly) && rate!=0.0){
+		if((mode==-2||videoonly) && rate!=0.0 && height != 0){
 			s.Format(_T("size:%d x %d"),rcm.right,rcm.bottom);
 			moji(s,1,48,0x7fffff);
 			s.Format(_T("rate:%3.3ffps"),rate);
@@ -6603,7 +6604,7 @@ void COggDlg::OnSize(UINT nType, int cx, int cy)
 			if(pl->m_saisyo.GetCheck())
 				pl->ShowWindow(SW_RESTORE);
 		}
-		if(pMainFrame1){
+		if(pMainFrame1 && height!=0){
 			pMainFrame1->ShowWindow(SW_SHOWNORMAL);
 		}
 	}
