@@ -247,6 +247,8 @@ BOOL CAboutDlg::OnInitDialog()
 					ss=_T("Windows 7"); break;}
 				if(in.dwMinorVersion==2){
 					ss=_T("Windows 8"); break;}
+				if(in.dwMinorVersion==3){
+					ss=_T("Windows 8.1"); break;}
 			}
 		}
 	}

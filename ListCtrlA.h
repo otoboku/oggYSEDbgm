@@ -4,6 +4,9 @@ class CListCtrlA : public CListCtrl
 {
 	public:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	CString strTipText;
+		CHAR ff1[1024];
+		WCHAR ff2[1024];
 	protected:
 	virtual void PreSubclassWindow();
 	int CellRectFromPoint(CPoint & point, RECT * cellrect, int * col) const;

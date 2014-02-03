@@ -29,7 +29,7 @@ int CListCtrlA::OnCreate(LPCREATESTRUCT lpCreateStruct)
 BOOL CListCtrlA::OnToolTipText( UINT id, NMHDR * pNMHDR, LRESULT * pResult ){
 	TOOLTIPTEXTA* pTTTA = (TOOLTIPTEXTA*)pNMHDR;
 	TOOLTIPTEXTW* pTTTW = (TOOLTIPTEXTW*)pNMHDR;
-	CString strTipText;
+
 	CString i,j,k,l,m;
 	UINT nID = pNMHDR->idFrom;
 	AFX_MODULE_THREAD_STATE* pThreadState = AfxGetModuleThreadState();
@@ -59,11 +59,16 @@ BOOL CListCtrlA::OnToolTipText( UINT id, NMHDR * pNMHDR, LRESULT * pResult ){
 //		lstrcpyn(pTTTW->szText, strTipText, 579);
 //#endif
 #ifndef _UNICODE
-	strTipText=i;
-	if (pNMHDR->code == TTN_NEEDTEXTA)
-		lstrcpyn(pTTTA->szText, strTipText, 579);
-	else
-		_mbstowcsz(pTTTW->szText, strTipText, 579);
+	if (pNMHDR->code == TTN_NEEDTEXTA){
+		lstrcpyn(ff1,strTipText,1024);
+		pTTTA->lpszText= ff1;
+		pTTTA->szText[0]=NULL;
+	}
+	else{
+		int rr=MultiByteToWideChar(CP_ACP,0,strTipText,-1,ff2,1024);
+		pTTTW->lpszText= ff2;
+		pTTTW->szText[0]=NULL;
+	}
 #else
 	if (pNMHDR->code == TTN_NEEDTEXTA)
 		pTTTA->lpszText = (LPSTR)(LPWSTR)(LPCWSTR)strTipText;
