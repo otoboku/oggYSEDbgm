@@ -3207,8 +3207,8 @@ int readmp3(char*bw,int cnt)
 		r=mp3_.Render2(bufkpi+poss,rr,kbps);//4608
 	else
 		r=mp3_.Render(bufkpi+poss,rr);//4608
+	memcpy(bw,bufkpi+poss,r);
 	poss+=r;
-	memcpy(bw,bufkpi,cnt);
 	if(cnt<=poss){
 		poss-=cnt;
 		if(poss!=0){ memcpy(bufkpi,bufkpi+cnt,poss); }
@@ -5886,7 +5886,7 @@ void COggDlg::Speana()
 	if(PlayCursor>OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM) PlayCursor=0;
 	memcpy(bufwav3+(OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM),bufwav3,OUTPUT_BUFFER_SIZE*2);
 	memcpy(buf4,bufwav3+PlayCursor,OUTPUT_BUFFER_SIZE*2);
-	for(i=0;i<BUFSZ/4-1;i++){
+	for(i=0;i<BUFSZ/4;i++){
 		bui= buf3[i*2];
 		bui+= buf3[i*2+1];
 		bui/=2;
