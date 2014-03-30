@@ -1895,7 +1895,8 @@ void CPlayList::OnFindUp()
 	// TODO: ここにコントロール通知ハンドラ コードを追加します。
 	CString s;
 	m_find.GetWindowText(s);
-	if(s=="") return;
+	s.MakeLower();
+	if(s==_T("")) return;
 	int pnt2;
 
 	if(pnt<0) pnt=-1;
@@ -1937,7 +1938,8 @@ void CPlayList::OnFindDown()
 	// TODO: ここにコントロール通知ハンドラ コードを追加します。
 	CString s;
 	m_find.GetWindowText(s);
-	if(s=="") return;
+	s.MakeLower();
+	if(s==_T("")) return;
 	int pnt2;
 
 	if(pnt<0) pnt=-1;

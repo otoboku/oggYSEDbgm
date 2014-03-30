@@ -102,7 +102,7 @@ END
 IDD_OGG_DIALOG DIALOGEX 0, 0, 415, 267
 STYLE DS_SETFONT | DS_3DLOOK | WS_MINIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_ACCEPTFILES | WS_EX_APPWINDOW
-CAPTION "ogg/wav簡易プレイヤ Ver 0.6h Rel 8e"
+CAPTION "ogg/wav簡易プレイヤ Ver 0.6h Rel 8e 14.9.2"
 FONT 9, "ＭＳ Ｐゴシック", 0, 0, 0x1
 BEGIN
     PUSHBUTTON      "Ys6 ナピシュテム",IDC_BUTTON8,7,94,64,14
@@ -638,7 +638,7 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,6,8,1409
+ FILEVERSION 0,6,8,14092
  PRODUCTVERSION 1,0,0,1
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -656,10 +656,10 @@ BEGIN
         BEGIN
             VALUE "Comments", "ファルコム簡易プレイヤ＋メディアプレイヤ+kpiプレイヤ"
             VALUE "CompanyName", "Pre Prayer Power Soft"
-            VALUE "FileDescription", "ogg/wav簡易プレイヤ+メディアプレイヤ Ver 0.6h Rel.8e No.14.9"
-            VALUE "FileVersion", "0, 6, 8, 1409"
+            VALUE "FileDescription", "ogg/wav簡易プレイヤ+メディアプレイヤ Ver 0.6h Rel.8e No.14.9.2"
+            VALUE "FileVersion", "0, 6, 8, 14092"
             VALUE "InternalName", "ogg"
-            VALUE "LegalCopyright", "Copyright (C) 2013.04.27 ちゃちゃ/大原隆誠"
+            VALUE "LegalCopyright", "Copyright (C) 2014.03.31 ちゃちゃ/大原隆誠"
             VALUE "LegalTrademarks", "Pre Prayer Power Soft"
             VALUE "OriginalFilename", "oggYSEDbgm.exe"
             VALUE "ProductName", "ファルコム簡易プレイヤ＋メディアプレイヤ"
