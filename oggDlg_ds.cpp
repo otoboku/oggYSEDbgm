@@ -175,7 +175,7 @@ UINT HandleNotifications(LPVOID)
 //		int ik;
 //		for(ik=0;ik<60;ik++){
 //		if(syukai)
-			::WaitForMultipleObjects(1, ev, FALSE, 100);
+			::WaitForMultipleObjects(1, ev, FALSE, 60);
 //		else
 			//Sleep(1);
 			if(sek==1){

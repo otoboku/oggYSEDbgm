@@ -3207,7 +3207,7 @@ int readmp3(char*bw,int cnt)
 		r=mp3_.Render2(bufkpi+poss,rr,kbps);//4608
 	else
 		r=mp3_.Render(bufkpi+poss,rr);//4608
-	memcpy(bw,bufkpi+poss,r);
+	memcpy(bw,bufkpi,cnt);
 	poss+=r;
 	if(cnt<=poss){
 		poss-=cnt;
