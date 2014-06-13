@@ -1833,7 +1833,7 @@ void COggDlg::play()
 		loop1=0;stitle="";
 //		loop2=(int)(((float)(((float)si1.dwLength)*44.1f))/(44100.0f/((float)((wavch==2)?wavbit:(wavbit/2)))));
 //		loop2=(int)((float)(mp3_.m_mp3info.total_samples)/(wavch==2?1.0f:2.0f));
-		loop2=(int)(((double)mp3__.GetMSec())/1000.0*(double)mp3_.m_mp3info.freq/(44100.0/((double)((wavch==2)?wavbit:(wavbit/2)))));
+		loop2=(int)(((double)mp3__.GetMSec())/1000.0*(double)mp3_.m_mp3info.freq);//*(44100.0/((double)((wavch==2)?(double)wavbit:((double)wavbit/2.0)))));
 //		if(loop2==0){
 //			loop2=(int)(((float)(((float)si1.dwLength)*44.1f))/(44100.0f/((float)((wavch==2)?wavbit:(wavbit/2)))));
 //		}

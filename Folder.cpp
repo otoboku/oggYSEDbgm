@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "ogg.h"
 #include "Folder.h"
+#include "PVI.h"
 #include <direct.h>
 
 #ifdef _DEBUG
@@ -91,6 +92,7 @@ BEGIN_MESSAGE_MAP(CFolder, CDialog)
 	ON_BN_CLICKED(IDC_BUTTON52, &CFolder::OnBnClickedButton52)
 	ON_BN_CLICKED(IDC_BUTTON55, &CFolder::OnBnClickedButton55)
 	ON_BN_CLICKED(IDC_BUTTON56, &CFolder::OnBnClickedButton56)
+	ON_BN_CLICKED(IDC_BUTTON25, &CFolder::OnBnClickedButton25)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -542,4 +544,11 @@ void CFolder::OnBnClickedButton56()
 		m_24s.SetWindowText(pcFolder);
 		_tcscpy(savedata.san2,pcFolder);
     }
+}
+
+void CFolder::OnBnClickedButton25()
+{
+	// TODO: ここにコントロール通知ハンドラ コードを追加します。
+	CPVI p;
+	p.DoModal();
 }

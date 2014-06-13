@@ -99,6 +99,7 @@ public:
 	afx_msg void OnBnClickedButton55();
 	CEdit m_24s;
 	afx_msg void OnBnClickedButton56();
+	afx_msg void OnBnClickedButton25();
 };
 
 //{{AFX_INSERT_LOCATION}}

@@ -195,7 +195,7 @@ STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "フォルダ設定"
 FONT 9, "ＭＳ Ｐゴシック", 0, 0, 0x0
 BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,174,222,50,14
+    DEFPUSHBUTTON   "OK",IDOK,167,222,50,14
     PUSHBUTTON      "ｷｬﾝｾﾙ",IDCANCEL,322,222,50,14,NOT WS_VISIBLE
     LTEXT           "YS6",IDC_STATIC,7,26,12,8
     EDITTEXT        IDC_EDIT1,27,23,134,12,ES_AUTOHSCROLL | ES_READONLY
@@ -270,6 +270,7 @@ BEGIN
     LTEXT           "三国志2",IDC_STATIC,182,149,25,8
     EDITTEXT        IDC_EDIT24,208,147,150,12,ES_AUTOHSCROLL | ES_READONLY
     PUSHBUTTON      "...",IDC_BUTTON56,359,147,13,14
+    PUSHBUTTON      "PVIパス設定",IDC_BUTTON25,7,222,50,14
 END
 
 IDD_SENTAKU1 DIALOGEX 0, 0, 183, 273
@@ -631,6 +632,18 @@ BEGIN
     LISTBOX         IDC_LIST1,17,81,96,82,LBS_SORT | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
 END
 
+IDD_PVI DIALOGEX 0, 0, 258, 86
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "fmpmd.kpi PVIパス設定"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "保存",IDOK,201,7,50,14
+    PUSHBUTTON      "キャンセル",IDCANCEL,201,24,50,14
+    EDITTEXT        IDC_EDIT1,7,32,192,47,ES_MULTILINE | ES_WANTRETURN | WS_VSCROLL
+    LTEXT           "PVIパス \\で必ず終わること　複数指定は ; で指定",IDC_STATIC,7,7,160,8
+    LTEXT           "c:\\xxx\\xxx\\ や c:\\xxx\\xxx\\;x:\\yyy\\yyy\\ のように記述",IDC_STATIC,7,18,192,8
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -638,7 +651,7 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,6,9,0
+ FILEVERSION 0,6,9,2
  PRODUCTVERSION 1,0,0,1
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -656,10 +669,10 @@ BEGIN
         BEGIN
             VALUE "Comments", "ファルコム簡易プレイヤ＋メディアプレイヤ+kpiプレイヤ"
             VALUE "CompanyName", "Pre Prayer Power Soft"
-            VALUE "FileDescription", "ogg/wav簡易プレイヤ+メディアプレイヤ Ver 0.6i"
-            VALUE "FileVersion", "0, 6, 9, 0"
+            VALUE "FileDescription", "ogg/wav簡易プレイヤ+メディアプレイヤ Ver 0.6i Rel.2"
+            VALUE "FileVersion", "0, 6, 9, 2"
             VALUE "InternalName", "ogg"
-            VALUE "LegalCopyright", "Copyright (C) 2014.03.31 ちゃちゃ/大原隆誠"
+            VALUE "LegalCopyright", "Copyright (C) 2014.06.12 ちゃちゃ/大原隆誠"
             VALUE "LegalTrademarks", "Pre Prayer Power Soft"
             VALUE "OriginalFilename", "oggYSEDbgm.exe"
             VALUE "ProductName", "ファルコム簡易プレイヤ＋メディアプレイヤ"
@@ -959,6 +972,14 @@ BEGIN
         RIGHTMARGIN, 122
         TOPMARGIN, 7
         BOTTOMMARGIN, 181
+    END
+
+    IDD_PVI, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 251
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 79
     END
 END
 #endif    // APSTUDIO_INVOKED

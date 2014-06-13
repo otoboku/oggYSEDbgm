@@ -15,6 +15,8 @@ Global
 		Release|x64 = Release|x64
 		sse2|Win32 = sse2|Win32
 		sse2|x64 = sse2|x64
+		uni_de|Win32 = uni_de|Win32
+		uni_de|x64 = uni_de|x64
 		uni|Win32 = uni|Win32
 		uni|x64 = uni|x64
 	EndGlobalSection
@@ -39,6 +41,10 @@ Global
 		{A09FBD07-606E-41CD-B055-88B68D6E8809}.sse2|Win32.Build.0 = sse2|Win32
 		{A09FBD07-606E-41CD-B055-88B68D6E8809}.sse2|x64.ActiveCfg = sse2|x64
 		{A09FBD07-606E-41CD-B055-88B68D6E8809}.sse2|x64.Build.0 = sse2|x64
+		{A09FBD07-606E-41CD-B055-88B68D6E8809}.uni_de|Win32.ActiveCfg = uni_de|Win32
+		{A09FBD07-606E-41CD-B055-88B68D6E8809}.uni_de|Win32.Build.0 = uni_de|Win32
+		{A09FBD07-606E-41CD-B055-88B68D6E8809}.uni_de|x64.ActiveCfg = uni_de|x64
+		{A09FBD07-606E-41CD-B055-88B68D6E8809}.uni_de|x64.Build.0 = uni_de|x64
 		{A09FBD07-606E-41CD-B055-88B68D6E8809}.uni|Win32.ActiveCfg = uni|Win32
 		{A09FBD07-606E-41CD-B055-88B68D6E8809}.uni|Win32.Build.0 = uni|Win32
 		{A09FBD07-606E-41CD-B055-88B68D6E8809}.uni|x64.ActiveCfg = uni|x64
