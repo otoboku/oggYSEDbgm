@@ -21,6 +21,7 @@
 extern int fade1;
 extern 	LPDIRECTSOUND m_ds;
 extern 	LPDIRECTSOUNDBUFFER m_dsb;
+extern 	LPDIRECTSOUND3DBUFFER m_dsb3d;
 extern	LPDIRECTSOUNDBUFFER m_p;
 extern LPDIRECTSOUND3DBUFFER m_lpDS3DBuffer;
 
@@ -47,6 +48,7 @@ extern void playwavds2(char*bw,int len);
 extern BOOL playwavadpcm(char* bw,int old,int l1,int l2);
 extern int mode;
 extern save savedata;
+LPDIRECTSOUND3DLISTENER m_listener=NULL;
 
 CString COggDlg::init(HWND hwnd,int sm)
 {
@@ -86,6 +88,9 @@ CString COggDlg::init(HWND hwnd,int sm)
 		p.wBitsPerSample=16;
 		m_p->SetFormat(&p);
 	}
+	//m_p->QueryInterface(IID_IDirectSound3DListener, (LPVOID*)&m_listener);
+	//m_listener->SetPosition(0.0f, 0.0f, 0.0f, DS3D_IMMEDIATE);
+
 	return _T("");
 }
 
@@ -113,6 +118,7 @@ void COggDlg::Closeds()
 //	fade1=1;
 	if(m_dsb){
 		m_dsb->Stop();
+		if(m_dsb3d != NULL){m_dsb3d->Release();m_dsb3d =NULL;}
 		if(m_dsb != NULL){m_dsb->Release();m_dsb =NULL;}
 	}
 }
@@ -121,6 +127,7 @@ BOOL COggDlg::ReleaseDXSound(void)
 {
 	if(m_ds){
 		Closeds();
+		if(m_dsb3d != NULL){m_dsb3d->Release();m_dsb3d =NULL;}
 		if(m_dsb != NULL) {m_dsb->Release();m_dsb=NULL;}
 		if(m_lpDS3DBuffer != NULL){m_lpDS3DBuffer->Release();}
 		m_dsb =NULL;

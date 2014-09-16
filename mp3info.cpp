@@ -296,16 +296,16 @@ BOOL CMp3Info::Load(const TCHAR *szFileName,BOOL bVbrScan)
 				CloseHandle(hFile);
 				return FALSE;//0œZ–h~
 			}
-//			_int64 i64Msec;
+			_int64 i64Msec;
 			pMpegHead->flmnum = pMpegHead->size/(pMpegHead->framesize+4);
-//			i64Msec = (_int64 )pMpegHead->flmnum * 576 * (pMpegHead->lsf?1:2) * 1000 / pMpegHead->sampling_frequency;
-//			pMpegHead->msec = (ULONG )i64Msec;
+			//i64Msec = (_int64 )pMpegHead->flmnum * 576 * (pMpegHead->lsf?1:2) * 1000 / pMpegHead->sampling_frequency;
+			//pMpegHead->msec = (ULONG )i64Msec;
 			if(pMpegHead->bps == 0)
 			{
 				CloseHandle(hFile);
 				return FALSE;// 2004-02-19 0œZ–h~
 			}
-			pMpegHead->msec = pMpegHead->size * 8 / pMpegHead->bps;
+			pMpegHead->msec = pMpegHead->size * 8 / (pMpegHead->bps*((pMpegHead->stereo==1)?2:1)) ;
 			if(pMpegHead->mpeg25) 
 			{
 				//mpeg2

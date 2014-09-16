@@ -139,6 +139,9 @@ static char THIS_FILE[] = __FILE__;
 int fade1,playf;
 LPDIRECTSOUND m_ds;
 LPDIRECTSOUNDBUFFER m_dsb=NULL;
+//LPDIRECTSOUNDBUFFER8 m_dsb=NULL;
+LPDIRECTSOUND3DBUFFER m_dsb3d=NULL;
+
 LPDIRECTSOUNDBUFFER m_p;
 LPDIRECTSOUND3DBUFFER m_lpDS3DBuffer;
 HANDLE hNotifyEvent[20];
@@ -1956,9 +1959,10 @@ void COggDlg::play()
 	DSBUFFERDESC dsbd;
 	ZeroMemory(&dsbd,sizeof(DSBUFFERDESC));
 	dsbd.dwSize = sizeof(DSBUFFERDESC);
-	dsbd.dwFlags = DSBCAPS_GLOBALFOCUS | DSBCAPS_GETCURRENTPOSITION2 | DSBCAPS_CTRLVOLUME;
+	dsbd.dwFlags = DSBCAPS_GLOBALFOCUS | DSBCAPS_GETCURRENTPOSITION2 | DSBCAPS_CTRLVOLUME;// | DSBCAPS_CTRL3D;
 	dsbd.dwBufferBytes = WAVDALen;
 	dsbd.lpwfxFormat = &wfx1;
+	//dsbd.guid3DAlgorithm = DS3DALG_HRTF_LIGHT;
 	for(i=0;i<10;i++){
 		HRESULT r=m_ds->CreateSoundBuffer(&dsbd,&m_dsb,NULL);
 		if(m_dsb == NULL){DoEvent();Sleep(100); continue;} else break;
@@ -1966,11 +1970,14 @@ void COggDlg::play()
 	if(m_dsb == NULL){
 		fnn="DirectSound‚ªŠJ‚¯‚Ü‚¹‚ñ‚Å‚µ‚½B";
 		tagfile=fnn;
-				m_saisai.EnableWindow(TRUE);
-		return;}
+		m_saisai.EnableWindow(TRUE);
+		return;
+	}
+
+	//m_dsb->QueryInterface(IID_IDirectSound3DBuffer, (LPVOID*)m_dsb3d);
+
 	DWORD le=WAVDAStartLen;
 	ttt = WAVDAStartLen;
-
 
 	stf=0;
 	plf=1;fade1=0;fade=1.0f;fadeadd=0.0f;
