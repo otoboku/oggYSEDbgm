@@ -1256,6 +1256,7 @@ void COggDlg::play()
 	//	m_rund.EnableWindow(FALSE);
 	m_saisai.EnableWindow(FALSE);
 	WAVDALen=OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM;WAVDAStartLen=OUTPUT_BUFFER_SIZE;
+	si1.dwSamplesPerSec=0;sikpi.dwSamplesPerSec=0;
 	//LOOPSTART=
 	//LOOPLENGTH=
 	CString s,b;
@@ -1873,7 +1874,7 @@ void COggDlg::play()
 		CString ss;
 		ss=filen.Left(filen.ReverseFind(':')-1);
 		ZeroMemory(&sikpi,sizeof(sikpi));
-		sikpi.dwSamplesPerSec=44100; sikpi.dwChannels=2; sikpi.dwSeekable=1; sikpi.dwLength=-1;
+		sikpi.dwSamplesPerSec=48000; sikpi.dwChannels=2; sikpi.dwSeekable=1; sikpi.dwLength=-1; sikpi.dwBitsPerSample=16;
 		if(mod){
 			if(ss==""){
 				if(mod->Init) mod->Init();
@@ -1900,7 +1901,7 @@ void COggDlg::play()
 				if(mod->SetPosition) mod->SetPosition(kmp,_tstoi(filen.Right(4))*1000);
 			}
 		}
-		wavbit=sikpi.dwSamplesPerSec;	wavch=sikpi.dwChannels;	loop1=0;loop2=(int)(sikpi.dwLength*44.1);
+		wavbit=sikpi.dwSamplesPerSec;	wavch=sikpi.dwChannels;	loop1=0;loop2=(int)((double)sikpi.dwLength*(double)sikpi.dwSamplesPerSec/1000.0);
 		if(sikpi.dwLength==(DWORD)-1) loop2=0;	data_size=oggsize=loop2*4;
 		m_time.SetRange(0,(data_size)/4,TRUE);
 		if(mod->SetPosition) mod->SetPosition(kmp,0);
@@ -1926,10 +1927,16 @@ void COggDlg::play()
     wfx1.nChannels = wavch;
     wfx1.nSamplesPerSec = wavbit;
     wfx1.wBitsPerSample = 16;
+	if(si1.dwBitsPerSample){
+		wfx1.wBitsPerSample = si1.dwBitsPerSample;
+	}
+	if(sikpi.dwBitsPerSample){
+		wfx1.wBitsPerSample = sikpi.dwBitsPerSample;
+	}
     wfx1.nBlockAlign = wfx1.nChannels * wfx1.wBitsPerSample / 8;
     wfx1.nAvgBytesPerSec = wfx1.nSamplesPerSec * wfx1.nBlockAlign;
     wfx1.cbSize = 0;
-	if(wavbit2!=wavbit){
+	if(wavbit2!=wavbit||si1.dwBitsPerSample||sikpi.dwBitsPerSample){
 		ReleaseDXSound();
 		init(m_hWnd,wavbit);
 	}
@@ -3133,15 +3140,19 @@ int readkpi(char*bw,int cnt)
 	}
 	short *b,c;
 	b=(short*)bw;
-	CString sss=og->kpi;
-	if(sss.Right(9)=="kbspc.kpi"||sss.Right(10)=="kb_nez.kpi"){
+//	CString sss=og->kpi;
+	CString sss;
+	sss=filen.Right(filen.GetLength()-filen.ReverseFind('.')-1);
+	sss.MakeLower();
+	if(sss="spc"){
+//	if(sss.Right(9)=="kbspc.kpi"||sss.Right(10)=="kb_nez.kpi"||sss.Right(13)=="kbsnesapu.kpi"){
 		if(savedata.spc!=1)
 			for(int i=0;i<cnt/2;i++){
 				int c=(int)b[i];
-				if(savedata.spc==2)	c=(int)((float)b[i]*1.5f);
-				else if(savedata.spc==4) c=(int)((float)b[i]*2.0f);
-				else if(savedata.spc==8) c=(int)((float)b[i]*2.5f);
-				else if(savedata.spc==16) c=(int)((float)b[i]*3.0f);
+				if(savedata.spc==2)	c=(int)((float)b[i]*2.0f);
+				else if(savedata.spc==4) c=(int)((float)b[i]*3.0f);
+				else if(savedata.spc==8) c=(int)((float)b[i]*4.0f);
+				else if(savedata.spc==16) c=(int)((float)b[i]*5.0f);
 				if(c>=32768)c=32767;
 				if(c<=-32767)c=-32766;
 				b[i]=(short)c;
@@ -3150,10 +3161,10 @@ int readkpi(char*bw,int cnt)
 	if(savedata.kpivol!=1){
 		for(int i=0;i<cnt/2;i++){
 			int c=(int)b[i];
-			if(savedata.kpivol==2)	c=(int)((float)b[i]*1.5f);
-			else if(savedata.kpivol==3) c=(int)((float)b[i]*2.0f);
-			else if(savedata.kpivol==4) c=(int)((float)b[i]*2.5f);
-			else if(savedata.kpivol==5) c=(int)((float)b[i]*3.0f);
+			if(savedata.kpivol==2)	c=(int)((float)b[i]*2.0f);
+			else if(savedata.kpivol==3) c=(int)((float)b[i]*3.0f);
+			else if(savedata.kpivol==4) c=(int)((float)b[i]*4.0f);
+			else if(savedata.kpivol==5) c=(int)((float)b[i]*5.0f);
 			if(c>=32768)c=32767;
 			if(c<=-32767)c=-32766;
 			b[i]=(short)c;
