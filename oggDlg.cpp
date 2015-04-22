@@ -1820,7 +1820,7 @@ void COggDlg::play()
 		s=filen.Left(filen.ReverseFind('\\')); ss=filen.Right(filen.GetLength()-filen.ReverseFind('\\')-1);
 		_tchdir(s);
 		CFile ff;
-		if(ff.Open(ss,CFile::modeRead,NULL)==FALSE){
+		if(ff.Open(ss,CFile::modeRead|CFile::shareDenyNone,NULL)==FALSE){
 			MessageBox(_T("ファイルが存在しません。\n削除されたかフォルダまたはファイル名が変更された可能性があります。"),_T("ファイルが存在しません。"));
 						m_saisai.EnableWindow(TRUE);return;
 		}ff.Close();
@@ -1924,18 +1924,15 @@ void COggDlg::play()
 
 	WAVEFORMATEX wfx1;
     wfx1.wFormatTag = WAVE_FORMAT_PCM;
+	if(!(wavch==1 || wavch==2)) wavch=2;
+	if(wavbit==0 || wavbit>48000) wavbit=44100;
     wfx1.nChannels = wavch;
     wfx1.nSamplesPerSec = wavbit;
     wfx1.wBitsPerSample = 16;
-	if(si1.dwBitsPerSample){
-		wfx1.wBitsPerSample = si1.dwBitsPerSample;
-	}
-	if(sikpi.dwBitsPerSample){
-		wfx1.wBitsPerSample = sikpi.dwBitsPerSample;
-	}
     wfx1.nBlockAlign = wfx1.nChannels * wfx1.wBitsPerSample / 8;
     wfx1.nAvgBytesPerSec = wfx1.nSamplesPerSec * wfx1.nBlockAlign;
     wfx1.cbSize = 0;
+
 	if(wavbit2!=wavbit||si1.dwBitsPerSample||sikpi.dwBitsPerSample){
 		ReleaseDXSound();
 		init(m_hWnd,wavbit);
@@ -1970,12 +1967,31 @@ void COggDlg::play()
 	dsbd.dwBufferBytes = WAVDALen;
 	dsbd.lpwfxFormat = &wfx1;
 	//dsbd.guid3DAlgorithm = DS3DALG_HRTF_LIGHT;
+	HRESULT r;
 	for(i=0;i<10;i++){
-		HRESULT r=m_ds->CreateSoundBuffer(&dsbd,&m_dsb,NULL);
+		r=m_ds->CreateSoundBuffer(&dsbd,&m_dsb,NULL);
 		if(m_dsb == NULL){DoEvent();Sleep(100); continue;} else break;
 	}
 	if(m_dsb == NULL){
-		fnn="DirectSoundが開けませんでした。";
+		AfxMessageBox(_T("DirectSoundが開けませんでした。"));
+		if(r == DSERR_ALLOCATED){
+			AfxMessageBox(_T("優先レベルなどのリソースが他の呼び出しによって既に使用中であるため、要求は失敗した。"));
+		}else if(r == DSERR_CONTROLUNAVAIL){
+			AfxMessageBox(_T("呼び出し元が要求するバッファ コントロール (ボリューム、パンなど) は利用できない。"));
+		}else if(r == DSERR_BADFORMAT){
+			AfxMessageBox(_T("指定したウェーブ フォーマットはサポートされていない。"));
+		}else if(r == DSERR_INVALIDPARAM){
+			AfxMessageBox(_T("無効なパラメータが関数に渡された。"));
+		}else if(r == DSERR_NOAGGREGATION){
+			AfxMessageBox(_T("このオブジェクトは COM 集合化をサポートしない。"));
+		}else if(r == DSERR_OUTOFMEMORY){
+			AfxMessageBox(_T("DirectSound サブシステムは、呼び出し元の要求を完了するための十分なメモリを割り当てられなかった。"));
+		}else if(r == DSERR_UNINITIALIZED){
+			AfxMessageBox(_T("他のメソッドを呼び出す前に IDirectSound::Initialize メソッドを呼び出さなかったか、呼び出しが成功しなかった。"));
+		}else if(r == DSERR_UNSUPPORTED){
+			AfxMessageBox(_T("呼び出した関数はこの時点ではサポートされていない。"));
+		}else{}
+
 		tagfile=fnn;
 		m_saisai.EnableWindow(TRUE);
 		return;
