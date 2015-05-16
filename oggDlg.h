@@ -12,6 +12,7 @@
 /////////////////////////////////////////////////////////////////////////////
 // COggDlg ダイアログ
 #include "LinkStatic.h"
+#include "afxwin.h"
 
 
 class COggDlg : public CDialog
@@ -38,7 +39,7 @@ public:
 	LRESULT dp2(WPARAM, LPARAM);
 	void SetAdd(CString fnn,int mode,int loop1,int loop2,CString filen,int ret2,REFTIME time);
 
-
+	CString mp3file;
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 
 	IMMDeviceEnumerator *deve;
@@ -221,6 +222,8 @@ public:
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	CButton m_playlist;
 	afx_msg void OnPlayList();
+	afx_msg void OnBnmp3jake();
+	CButton m_mp3jake;
 };
 
 //{{AFX_INSERT_LOCATION}}

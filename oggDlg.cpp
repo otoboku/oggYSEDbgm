@@ -59,6 +59,7 @@
 #include "Folder.h"
 #include "Render.h"
 #include "PlayList.h"
+#include "Mp3Image.h"
 
 #include "Id3tagv1.h"
 #include "Id3tagv2.h"
@@ -111,7 +112,8 @@ void Render(int san2);
 MMRESULT    mmRes;
 HWAVEOUT    hwo;
 CPlayList *pl=NULL;
-BOOL plw;
+CMp3Image *mi=NULL;
+BOOL plw,miw;
 extern TCHAR karento2[1024];
 char kare[256];
 extern COggDlg *og;
@@ -342,6 +344,7 @@ void COggDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BUTTON53, d_san1);
 	DDX_Control(pDX, IDC_BUTTON54, d_san2);
 	DDX_Control(pDX, IDC_BUTTON57, m_playlist);
+	DDX_Control(pDX, IDC_BUTTON58, m_mp3jake);
 }
 
 BEGIN_MESSAGE_MAP(COggDlg, CDialog)
@@ -401,6 +404,7 @@ BEGIN_MESSAGE_MAP(COggDlg, CDialog)
 	ON_WM_SIZE()
 	ON_WM_CTLCOLOR()
 	ON_BN_CLICKED(IDC_BUTTON57, &COggDlg::OnPlayList)
+	ON_BN_CLICKED(IDC_BUTTON58, &COggDlg::OnBnmp3jake)
 END_MESSAGE_MAP()
 
 REFTIME aa1,aa2=0;
@@ -1252,6 +1256,7 @@ extern 	int syukai;
 void COggDlg::play()
 {
 	CWaitCursor rrr;
+	m_mp3jake.EnableWindow(FALSE);
 	tagname=tagfile=tagalbum="";
 	//	m_rund.EnableWindow(FALSE);
 	m_saisai.EnableWindow(FALSE);
@@ -1268,7 +1273,13 @@ void COggDlg::play()
 	playy=0;
 	cnt3=0;
 	bufzero=0;
-
+	if(mi){
+		killw1=0;
+		mi->DestroyWindow(); 
+		for(;killw1==0;)
+			DoEvent();
+		mi=NULL;
+	}
 	//
 	//
 	videoonly=FALSE;
@@ -1801,7 +1812,7 @@ void COggDlg::play()
 	lo=loc=locs=0;
     //Stereo 16bit 44kHz
 	loc=0;
-
+	mp3file=_T("");
 //-------------------------------------------------------------------
 	if(m_dsb != NULL) m_dsb->Release();
 	m_dsb = NULL;
@@ -1823,6 +1834,21 @@ void COggDlg::play()
 		if(ff.Open(ss,CFile::modeRead|CFile::shareDenyNone,NULL)==FALSE){
 			MessageBox(_T("ファイルが存在しません。\n削除されたかフォルダまたはファイル名が変更された可能性があります。"),_T("ファイルが存在しません。"));
 						m_saisai.EnableWindow(TRUE);return;
+		}ff.Close();
+
+		BYTE buf[2005];
+		ZeroMemory(buf,2005);
+		if(ff.Open(ss,CFile::modeRead|CFile::shareDenyNone,NULL)==TRUE){
+			ff.Read(buf,2000);
+			int i;
+			for(i=0;i<2000;i++){
+				if(buf[i]==0x41 && buf[i+1]==0x50 && buf[i+2]==0x49 && buf[i+3]==0x43){
+					break;
+				}
+			}
+			if(i!=2000){
+				m_mp3jake.EnableWindow(TRUE);
+			}
 		}ff.Close();
 		mp3_.mp3init();
 		si1.dwSamplesPerSec=44100;
@@ -1860,6 +1886,7 @@ void COggDlg::play()
 		tagfile=ta2.GetTitle();if(b==-1) tagfile=ta1.GetTitle();
 		tagalbum=ta2.GetAlbum();if(b==-1) tagalbum=ta1.GetAlbum();
 		if(tagfile=="") tagfile=ss;
+		mp3file=ss;
 		wav_start();
 //		playwavmp3(bufwav3,0,dwDataLen*4,0);
 	}else if(mode==-3){
@@ -3742,6 +3769,13 @@ BOOL COggDlg::DestroyWindow()
 		pl=NULL;
 		savedata.pl=1;
 	}else savedata.pl=0;
+	if(mi){
+		killw1=0;
+		mi->DestroyWindow(); 
+		for(;killw1==0;)
+			DoEvent();
+		mi=NULL;
+	}
 	if(m_pDlgColor)delete m_pDlgColor;
 	if(ptl) ptl->Release();
 	if(pcdl) pcdl->Release();
@@ -6879,4 +6913,11 @@ void COggDlg::plugloop(CString ff)
 	cf1.Close();
 	for(int k=0;k<cdd;k++)
 		plugloop(dir[k]);
+}
+void COggDlg::OnBnmp3jake()
+{
+	// TODO: ここにコントロール通知ハンドラ コードを追加します。
+	mi = new CMp3Image;
+	mi->Create(og);
+	mi->Load(mp3file);
 }

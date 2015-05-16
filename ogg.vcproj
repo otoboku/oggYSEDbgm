@@ -284,7 +284,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="libvorbisfile_static_sse2.lib libogg_static_sse2.lib libvorbis_static_sse2.lib winmm.lib dxguid.lib dsound.lib strmiids.lib libmad_sse2.lib mfuuid.lib"
-				OutputFile="C:\FALCOM\ED_SORA2\BGM\oggYSEDbgmd.exe"
+				OutputFile="C:\FALCOM\ED_SORA2\BGM\oggYSEDbgmd0.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
 				GenerateDebugInformation="true"
@@ -1528,6 +1528,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Mp3Image.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Nishi.cpp"
 				>
 			</File>
@@ -1882,6 +1886,10 @@
 			</File>
 			<File
 				RelativePath=".\ListSyosai.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Mp3Image.h"
 				>
 			</File>
 			<File

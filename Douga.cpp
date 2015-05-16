@@ -2192,18 +2192,12 @@ void CDouga::OnSizing(UINT fwSide, LPRECT pRect)
 	double _x1,_y1;
     width=r.right-r.left;
     height=r.bottom-r.top;
-//	AdjustWindowRect(&r, WS_OVERLAPPEDWINDOW, FALSE);
 	x=r.bottom-r.top; y=r.right-r.left;xx=(double)y; yy=(double)x;//“®‰æ‚Ì‰æ‘œ‚Ì‘å‚«‚³‚ğŠl“¾
 	r.bottom=pRect->bottom;	r.top=pRect->top;
 	r.right=pRect->right;	r.left=pRect->left;
 	x1=r.bottom - r.top; y1_=r.right - r.left;xx1=(double)y1_; yy1_=(double)x1;//Œ»İ‚ÌƒTƒCƒYŠl“¾
-//	if(fwSide==2)	t= yy1_/yy;//c‚Ì‘å‚«‚³C³
-//	else			t= xx1/xx;//c‚Ì‘å‚«‚³C³
-//	xx1=t*xx;	yy1_=t*yy;
-//	yy1_+=(GetSystemMetrics(SM_CYSIZEFRAME)+::GetSystemMetrics(SM_CYCAPTION));
 	_x1=xx1/xx;
 	_y1=yy1_/yy;
-//	yy1_-=GetSystemMetrics(SM_CXSIZEFRAME)*2;
 	switch(fwSide){
 		case WMSZ_TOP:
 		case WMSZ_BOTTOM:
