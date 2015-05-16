@@ -3160,7 +3160,7 @@ int readkpi(char*bw,int cnt)
 	CString sss;
 	sss=filen.Right(filen.GetLength()-filen.ReverseFind('.')-1);
 	sss.MakeLower();
-	if(sss="spc"){
+	if(sss=="spc"){
 //	if(sss.Right(9)=="kbspc.kpi"||sss.Right(10)=="kb_nez.kpi"||sss.Right(13)=="kbsnesapu.kpi"){
 		if(savedata.spc!=1)
 			for(int i=0;i<cnt/2;i++){
