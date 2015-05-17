@@ -86,7 +86,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="libvorbisfile_static.lib libogg_static.lib libvorbis_static.lib winmm.lib dxguid.lib dsound.lib strmiids.lib libmad.lib mfuuid.lib"
 				ShowProgress="2"
-				OutputFile="C:\FALCOM\ED_SORA2\BGM\oggYSEDbgm.exe"
+				OutputFile="C:\PROJECTS\APPLICATION3\ogg_binary\oggYSEDbgm.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				GenerateManifest="true"
@@ -688,7 +688,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="libvorbisfile_static_nsse.lib libogg_static_nsse.lib libvorbis_static_nsse.lib winmm.lib dxguid.lib dsound.lib strmiids.lib libmad_nsse.lib mfuuid.lib"
-				OutputFile="C:\FALCOM\ED_SORA2\BGM\oggYSEDbgm_nsse.exe"
+				OutputFile="C:\PROJECTS\APPLICATION3\ogg_binary\oggYSEDbgm_nsse.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				ProgramDatabaseFile="sse/oggYSEDbgm.pdb"
@@ -990,7 +990,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="libvorbisfile_static64.lib libogg_static64.lib libvorbis_static64.lib winmm.lib dxguid.lib dsound.lib strmiids.lib libmad64.lib mfuuid.lib"
-				OutputFile="C:\FALCOM\ED_SORA2\BGM\oggYSEDbgm64.exe"
+				OutputFile="C:\PROJECTS\APPLICATION3\ogg_binary\oggYSEDbgm64.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				ProgramDatabaseFile="64/oggYSEDbgm.pdb"
@@ -1097,7 +1097,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="libvorbisfile_static.lib libogg_static.lib libvorbis_static.lib winmm.lib dxguid.lib dsound.lib strmiids.lib libmad_sse2.lib mfuuid.lib"
-				OutputFile="C:\FALCOM\ED_SORA2\BGM\oggYSEDbgm_uni.exe"
+				OutputFile="C:\PROJECTS\APPLICATION3\ogg_binary\oggYSEDbgm_uni.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				ProgramDatabaseFile="sse/oggYSEDbgm.pdb"

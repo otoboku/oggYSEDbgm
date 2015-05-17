@@ -69,11 +69,13 @@ BOOL CMp3Image::OnInitDialog()
 	// 例外 : OCX プロパティ ページは必ず FALSE を返します。
 }
 
-extern TCHAR karento2[1024];
+//extern TCHAR karento2[1024];
 void CMp3Image::Load(CString s)
 {
 	CString s1,s2;
-	s1=karento2;
+	TCHAR env[256];
+	GetEnvironmentVariable(_T("temp"),env,sizeof(env));
+	s1=env;s1+="\\";
 	s2=s1;
 
 
@@ -104,30 +106,40 @@ void CMp3Image::Load(CString s)
 	size |=(UINT)buf[i+6];
 	size <<= 8;
 	size |=(UINT)buf[i+7];
+	enc=buf[i+10];
 	i+=(4+4+3+6);
 	int flg=0;
 	if(buf[i]=='p'){ s1+=_T("111.png");} else {s1+=_T("111.jpg");}
 	s2+=_T("111.bmp");
 	for(;i<2000;i++){
-//		if(enc==1){
-			if(buf[i]==0 && buf[i+1]==0){
-				if(buf[i+1]==0 && buf[i+2]==0)
-					flg=1;
+			if(buf[i]==0)
 				break;
+	}
+	i+=2;
+
+	if((buf[i]==0xff || buf[i]==0xfe)){
+		for(;i<2000;i++){
+			if(enc==1){
+				if(buf[i]==0 && buf[i+1]==0){
+					if(buf[i+1]==0 && buf[i+2]==0)
+						flg=1;
+					break;
+				}
+			}else{
+				if(buf[i]==0)
+					flg=1;
+					break;
 			}
-//		}else{
-//			if(buf[i]==0)
-//				flg=1;
-//				break;
-//		}
+		}
+		if(i==2000){
+			DestroyWindow();
+			return;
+		}
+		i+=flg;
+		if(enc==1)
+			i+=2;
 	}
-	if(i==2000){
-		DestroyWindow();
-		return;
-	}
-	i+=flg;
-//	if(enc==1)
-		i+=2;
+
 	int ijk=i;
 	CFile fff;
 
@@ -150,7 +162,10 @@ void CMp3Image::Load(CString s)
 //	img.S
 	cdc0 = GetDC();
 	img.Load(s1);
-	img.Save(s2);
+	if(img.Save(s2)!=S_OK){MessageBox(_T("プログラムにバグがあるか未対応形式です。"));
+				DestroyWindow();
+			return;}
+	CFile::Remove(s1);
 	//bmpsub = CBitmap::FromHandle(img);
 	HBITMAP hbmp = (HBITMAP)::LoadImage(
     NULL, s2, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION );
@@ -160,6 +175,7 @@ void CMp3Image::Load(CString s)
 	ReleaseDC(cdc0);
 	y=img.GetHeight();
 	x=img.GetWidth();
+	CFile::Remove(s2);
 
 	CString str;
 	str.Format(_T("X: %4d"),x);

@@ -254,6 +254,8 @@ BOOL CAboutDlg::OnInitDialog()
 					ss=_T("Windows 8"); break;}
 				if(in.dwMinorVersion==3){
 					ss=_T("Windows 8.1"); break;}
+				if(in.dwMinorVersion==4){
+					ss=_T("Windows 10"); break;}
 			}
 		}
 	}
