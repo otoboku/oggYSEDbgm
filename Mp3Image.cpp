@@ -138,7 +138,7 @@ void CMp3Image::Load(CString s)
 		i+=flg;
 		if(enc==1)
 			i+=2;
-	}
+	}else i++;
 
 	int ijk=i;
 	CFile fff;

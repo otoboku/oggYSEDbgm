@@ -3,7 +3,7 @@
 // ‚ğ‹Lq‚µ‚Ü‚·B
 
 #pragma once
-
+#pragma warning(disable : 4995)
 //#pragma warning( disable : 4995 ) 
 #define _AFX_DISABLE_DEPRECATED
 #ifndef _SECURE_ATL
