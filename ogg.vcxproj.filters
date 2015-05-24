@@ -1,0 +1,389 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{197daa30-22bf-4932-97df-f7be21bb0e9f}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{e7766610-7f69-4894-b0d8-10c4c5716d47}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{7bf7f29f-b7c4-49c5-a5cb-67191b1dee15}</UniqueIdentifier>
+      <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
+    </Filter>
+    <Filter Include="ライブラリ">
+      <UniqueIdentifier>{40f49b2d-252c-4621-9acd-f90363dfca4c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="mp3infp">
+      <UniqueIdentifier>{e525c4f3-c88b-4a4b-a334-9d0d5832dc75}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Arc.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AudioSelect.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Br4.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Dino.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Douga.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ED3.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ED4.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ED5.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ED63rd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Filename.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Folder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Graph.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Gurumin.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="itiran.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="itiran_FC.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="itiran_YS6.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="itiran_YSF.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="itiran_YSO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Kpilist.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ListSyosai.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mp3Image.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Nishi.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ogg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="oggDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="oggDlg_ds.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayList.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PVI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ringbuf.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="San1.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="San2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StdAfx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TUKI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="XA.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="yaneCriticalSection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Ys12_1.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Ys12_2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="YsC1.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="YsC2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Zwei.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ZWEIII.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BtnST.cpp">
+      <Filter>ライブラリ</Filter>
+    </ClCompile>
+    <ClCompile Include="fftsg.c">
+      <Filter>ライブラリ</Filter>
+    </ClCompile>
+    <ClCompile Include="GlobalCommand.cpp">
+      <Filter>ライブラリ</Filter>
+    </ClCompile>
+    <ClCompile Include="Id3tagv1.cpp">
+      <Filter>ライブラリ</Filter>
+    </ClCompile>
+    <ClCompile Include="Id3tagv2.cpp">
+      <Filter>ライブラリ</Filter>
+    </ClCompile>
+    <ClCompile Include="LinkStatic.cpp">
+      <Filter>ライブラリ</Filter>
+    </ClCompile>
+    <ClCompile Include="ListCtrlA.cpp">
+      <Filter>ライブラリ</Filter>
+    </ClCompile>
+    <ClCompile Include="mp3info.cpp">
+      <Filter>ライブラリ</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ogg.rc">
+      <Filter>Source Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Arc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AudioSelect.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Br4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Dino.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Douga.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ED3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ED4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ED5.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ED63rd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Filename.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Folder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Graph.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Gurumin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="itiran.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="itiran_FC.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="itiran_YS6.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="itiran_YSF.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="itiran_YSO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Kpilist.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ListSyosai.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Mp3Image.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Nishi.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ogg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="oggDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayList.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PVI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ringbuf.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="San1.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="San2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Sor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StdAfx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TUKI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="XA.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="yaneCriticalSection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Ys12_1.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Ys12_2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="YsC1.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="YsC2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Zwei.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ZWEIII.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BtnST.h">
+      <Filter>ライブラリ</Filter>
+    </ClInclude>
+    <ClInclude Include="GlobalCommand.h">
+      <Filter>ライブラリ</Filter>
+    </ClInclude>
+    <ClInclude Include="Id3tagv1.h">
+      <Filter>ライブラリ</Filter>
+    </ClInclude>
+    <ClInclude Include="Id3tagv2.h">
+      <Filter>ライブラリ</Filter>
+    </ClInclude>
+    <ClInclude Include="kmp_pi.h">
+      <Filter>ライブラリ</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkStatic.h">
+      <Filter>ライブラリ</Filter>
+    </ClInclude>
+    <ClInclude Include="ListCtrlA.h">
+      <Filter>ライブラリ</Filter>
+    </ClInclude>
+    <ClInclude Include="mp3.h">
+      <Filter>ライブラリ</Filter>
+    </ClInclude>
+    <ClInclude Include="mp3info.h">
+      <Filter>ライブラリ</Filter>
+    </ClInclude>
+    <ClInclude Include="utils.h">
+      <Filter>ライブラリ</Filter>
+    </ClInclude>
+    <ClInclude Include="VbrTag.h">
+      <Filter>ライブラリ</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\ico00001.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\ico00002.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\ico00003.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\ico00004.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\icon1.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\icon2.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\icon3.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\icon4.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\icon5.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\idr_down.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\idr_main.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\idr_sdow.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\idr_up1.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\ogg.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\ogg.rc2">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="ReadMe.txt" />
+  </ItemGroup>
+</Project>
