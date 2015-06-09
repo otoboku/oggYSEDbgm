@@ -143,8 +143,8 @@ BOOL COggDlg::ReleaseDXSound(void)
 }
 
 extern void playwavds2(char* bw,int old,int l1,int l2);
-extern void playwavkpi(char* bw,int old,int l1,int l2);
-extern void playwavmp3(char* bw,int old,int l1,int l2);
+extern int playwavkpi(char* bw,int old,int l1,int l2);
+extern int playwavmp3(char* bw,int old,int l1,int l2);
 extern char bufwav3[OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM*60];
 extern int ps;
 extern COggDlg *og;
@@ -154,6 +154,7 @@ extern int endf;
 extern int lenl;
 extern int fade1;
 extern BOOL sek;
+extern int wavch,wavbit;
 //スレッド
 int syukai=0,syukai2=0;
 UINT HandleNotifications(LPVOID)
@@ -168,7 +169,7 @@ UINT HandleNotifications(LPVOID)
 //	char bufwav2[OUTPUT_BUFFER_SIZE];
 	HANDLE ev[] = {(HANDLE)og->timer};
 //	ULONG PlayCursor,WriteCursor=OUTPUT_BUFFER_SIZE*4,oldw=OUTPUT_BUFFER_SIZE*4;
-	ULONG PlayCursor,WriteCursor=0,oldw=OUTPUT_BUFFER_SIZE*4;
+	ULONG PlayCursor,WriteCursor=0,oldw=OUTPUT_BUFFER_SIZE*4,oldw2;
 	m_dsb->SetCurrentPosition(0);
 	if(mode==-10){
 		oldw=OUTPUT_BUFFER_SIZE*2;
@@ -213,20 +214,26 @@ UINT HandleNotifications(LPVOID)
 			len1=OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM-oldw; len2=WriteCursor;}
 		if(len2<0)
 			len2=0;
+		len4=len1+len2;
 		if((mode>=10 && mode<=20) || mode<-10)
 			playwavadpcm(bufwav3,oldw,len1,len2);//データ獲得
 		else if(mode==-10)
-			playwavmp3(bufwav3,oldw,len1,len2);//データ獲得
+			len4=playwavmp3(bufwav3,oldw,len1,len2);//データ獲得
 		else if(mode==-3)
-			playwavkpi(bufwav3,oldw,len1,len2);//データ獲得
+			len4=playwavkpi(bufwav3,oldw,len1,len2);//データ獲得
 		else
 			playwavds2(bufwav3,oldw,len1,len2);//データ獲得
+
 		if(m_dsb){
-			m_dsb->Lock(oldw,len1+len2,(LPVOID *)&pdsb1,(DWORD*)&len3,(LPVOID *)&pdsb2,(DWORD*)&len4,0);
+			m_dsb->Lock(oldw,len4,(LPVOID *)&pdsb1,(DWORD*)&len3,(LPVOID *)&pdsb2,(DWORD*)&len4,0);
+			thn=FALSE;
 			Sleep(50);
+			thn=FALSE;
 			memcpy(pdsb1,bufwav3+oldw,len3);
 			if(len4!=0)memcpy(pdsb2,bufwav3,len4);
 			if(m_dsb)m_dsb->Unlock(pdsb1,len3,pdsb2,len4);
+			oldw2=oldw+len3;
+			if(len4!=0)oldw2=len4;
 			oldw=WriteCursor;
 //			oldw+=(len3+len4);
 //			oldw%=OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM;
@@ -238,10 +245,28 @@ UINT HandleNotifications(LPVOID)
 //				if(len4!=0)ZeroMemory(pdsb2,len4);
 //				m_dsb->Unlock(pdsb1,len3,pdsb2,len4);
 //			}
-			Sleep(750);
+//			Sleep(750);
+			oldw=oldw2-(wavbit);
+			if(((int)oldw)<0)oldw=wavbit;
+			int flgn=0;
+			if(m_dsb && thn==FALSE){
+				m_dsb->GetCurrentPosition(&PlayCursor, &WriteCursor);
+				if(oldw<=PlayCursor) flgn=1;
+//				DWORD time=timeGetTime()+3000;
+				for(;;){
+//					if(time<timeGetTime()) break;
+					DoEvent();
+					if(m_dsb)m_dsb->GetCurrentPosition(&PlayCursor, &WriteCursor);
+					if(oldw>PlayCursor){flgn=0; continue;}
+					if(oldw<=PlayCursor && flgn==0) break;
+				}
+			}
+//			m_dsb->SetVolume(DSBVOLUME_MIN);
+//			m_dsb->Stop();
 			og->OnPause();
 			playf=0;
 			thn=TRUE;
+
 			AfxEndThread(0);
 //			for(int y=0;y<11;y++){
 //				CloseHandle(hNotifyEvent[y]);hNotifyEvent[y] = (HANDLE)NULL;

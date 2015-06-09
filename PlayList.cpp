@@ -152,7 +152,7 @@ BOOL CPlayList::OnInitDialog()
 	m_tooltip.AddTool(GetDlgItem(IDC_CHECK5), _T("途中で演奏を停止した位置を自動保存します。\nmp3系と動画(avi,mp4など)のみ対応。\n停止ボタンもしくは終了したときのみ保存します。\n再生中に違う曲を選んだ時は位置は保存しません。"));
 	m_tooltip.SetDelayTime( TTDT_AUTOPOP, 10000 );
 	m_tooltip.SendMessage(TTM_SETMAXTIPWIDTH, 0, 512);
-
+//	m_lc.SetMaxTipWidth(500)
 	DWORD dwExStyle = m_lc.GetExtendedStyle();
 	dwExStyle |= LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES;//|LVS_EX_INFOTIP;
 	m_lc.SetExtendedStyle(dwExStyle);

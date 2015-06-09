@@ -154,9 +154,9 @@ ULONG WAVDALen;
 UINT WAVDAStartLen;
 
 int randomno;
-void playwavkpi(char* bw,int old,int l1,int l2);
+int playwavkpi(char* bw,int old,int l1,int l2);
 int readkpi(char*bw,int cnt);
-void playwavmp3(char* bw,int old,int l1,int l2);
+int playwavmp3(char* bw,int old,int l1,int l2);
 int readmp3(char*bw,int cnt);
 void playwavds2(char* bw,int old,int l1,int l2);
 BOOL playwavadpcm(char* bw,int old,int l1,int l2);
@@ -2049,6 +2049,26 @@ void COggDlg::play()
 	m_dsb->Lock(0,WAVDALen,(LPVOID *)&pdsb,&dwDataLen1,NULL,0,0);
 	memcpy(pdsb,bufwav3,dwDataLen1);
 	m_dsb->Unlock(pdsb,dwDataLen1,NULL,0);
+	int len1,len2,len3;
+	ULONG PlayCursor,WriteCursor=0;
+	if(m_dsb)m_dsb->GetCurrentPosition(&PlayCursor, &WriteCursor);//再生位置取得
+	len1=(int)WriteCursor;//書き込み範囲取得
+	len2=0;
+	if(len1<0){
+		len1=OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM; len2=WriteCursor;}
+	if(len2<0)
+		len2=0;
+	if((mode>=10 && mode<=20) || mode<-10)
+		playwavadpcm(bufwav3,0,len1,len2);//データ獲得
+	else if(mode==-10)
+		playwavmp3(bufwav3,0,len1,len2);//データ獲得
+	else if(mode==-3)
+		playwavkpi(bufwav3,0,len1,len2);//データ獲得
+	else
+		playwavds2(bufwav3,0,len1,len2);//データ獲得
+	m_dsb->Lock(0,len1+len2,(LPVOID *)&pdsb,(DWORD*)&len3,NULL,0,0);
+	memcpy(pdsb,bufwav3,len3);
+	m_dsb->Unlock(pdsb,len3,NULL,0);
 	m_dsb->SetVolume((savedata.dsvol-1)*10);
 	CFile f123;
 	int flggg=0;
@@ -3118,9 +3138,9 @@ int readadpcmarc(CFile&adpcmf,char* bw,int len)
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-void playwavkpi(char* bw,int old,int l1,int l2)
+int playwavkpi(char* bw,int old,int l1,int l2)
 {
-	if(og->mod==NULL) return;
+	if(og->mod==NULL) return 0;  
 	playb+=(l1+l2)/4;
     //データ読み込み
 	int rrr=readkpi(bw+old,l1);
@@ -3147,6 +3167,7 @@ void playwavkpi(char* bw,int old,int l1,int l2)
 			}
 		}
 	}
+	return l1+l2;
 }
 
 BYTE bufkpi[OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM*60];
@@ -3233,11 +3254,12 @@ int readkpi(char*bw,int cnt)
 	return cnt;
 }
 
-void playwavmp3(char* bw,int old,int l1,int l2)
+int playwavmp3(char* bw,int old,int l1,int l2)
 {
 	playb+=(l1+l2);
     //データ読み込み
-	int rrr=readmp3(bw+old,l1);
+	int rrr=0,rrr2=0;
+	rrr=readmp3(bw+old,l1);
 	if(l1 != rrr){
 		if(endf==1){
 			l1=rrr; fade1=1;
@@ -3249,18 +3271,19 @@ void playwavmp3(char* bw,int old,int l1,int l2)
 		}
 	}
 	if(l2){
-		rrr=readmp3(bw,l2);
-		if(l2 != rrr){
+		rrr2=readmp3(bw,l2);
+		if(l2 != rrr2){
 			if(endf==1){
-				l2=rrr; fade1=1;
+				l2=rrr2; fade1=1;
 			}else{
 				loopcnt++;
 				playb=loop1;
 				mp3_.seek(0,wavch);
-				readmp3(bw+rrr,(int)l2-rrr);
+				readmp3(bw+rrr2,(int)l2-rrr2);
 			}
 		}
 	}
+	return l1+l2;
 }
 
 int readmp3(char*bw,int cnt)
@@ -3646,9 +3669,10 @@ void COggDlg::stop()
 		_ccl.Leave();
 		timer.SetEvent();
 		if(thn==FALSE){
-			for(;;){
+			for(int i=0;i<100;i++){
 				if(thn==TRUE) break;
 				DoEvent();
+				Sleep(10);
 			}
 		}
 		Closeds();
@@ -4182,6 +4206,7 @@ void COggDlg::timerp()
 	if(pl&&plw){
 		if(pl->m_renzoku.GetCheck()){
 			if(plf==1 && fade==0.0f && playy==1){
+				thn=FALSE;
 				fade1=1;
 			}
 		}else{
@@ -4802,7 +4827,7 @@ void timerog1(UINT nIDEvent)
 					og->KillTimer(1250);
 					pl->Get(plcnt);
 					pl->SIcon(plcnt);
-					fade1=0;lenl=0;
+					thn=FALSE;
 					og->stop();
 					fade1=0;lenl=0;
 					og->OnRestart();
@@ -5826,10 +5851,10 @@ void COggDlg::OnRestart()
 {
 	// TODO: この位置にコントロール通知ハンドラ用のコードを追加してください
 	CString ti;
+	stop();
 	if(filen!=""){
 		ti=filen.Right(filen.GetLength()-filen.ReverseFind('\\')-1);
 		int sub_=mode;
-		stop();
 		if((filen.Right(4)==".ogg" || filen.Right(4)==".OGG") && mode<1){
 			modesub=-1;
 			play();

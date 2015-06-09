@@ -34,6 +34,7 @@ BOOL CListCtrlA::OnToolTipText( UINT id, NMHDR * pNMHDR, LRESULT * pResult ){
 	UINT nID = pNMHDR->idFrom;
 	AFX_MODULE_THREAD_STATE* pThreadState = AfxGetModuleThreadState();
 	CToolTipCtrl *pToolTip = pThreadState->m_pToolTip;
+	if(pToolTip==NULL) return FALSE;
 	pToolTip->SetMaxTipWidth(500);
 	if( nID == 0 )	  	// Notification in NT from automatically
 		return FALSE;   	// created tooltip

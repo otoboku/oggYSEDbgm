@@ -13,13 +13,11 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// 日本語 resources
+// 日本語 (日本) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_JPN)
-#ifdef _WIN32
 LANGUAGE LANG_JAPANESE, SUBLANG_DEFAULT
 #pragma code_page(932)
-#endif //_WIN32
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -369,7 +367,7 @@ BEGIN
     CONTROL         "動画再生時複数音声の時音声選択画面を出す",IDC_CHECK48,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,8,92,150,10
 END
 
-IDD_SENTAKU7 DIALOG  0, 0, 210, 325
+IDD_SENTAKU7 DIALOG 0, 0, 210, 325
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Ys I&II Chronicles Ys 1"
 FONT 9, "ＭＳ Ｐゴシック"
@@ -378,7 +376,7 @@ BEGIN
     LISTBOX         IDC_LIST1,7,7,196,293,LBS_USETABSTOPS | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
 END
 
-IDD_SENTAKU8 DIALOG  0, 0, 203, 321
+IDD_SENTAKU8 DIALOG 0, 0, 203, 321
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Ys I&II Chronicles Ys 2"
 FONT 9, "ＭＳ Ｐゴシック"
@@ -663,7 +661,7 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,6,9,5
+ FILEVERSION 0,6,9,6
  PRODUCTVERSION 1,0,0,1
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -681,13 +679,13 @@ BEGIN
         BEGIN
             VALUE "Comments", "ファルコム簡易プレイヤ＋メディアプレイヤ+kpiプレイヤ"
             VALUE "CompanyName", "Pre Prayer Power Soft"
-            VALUE "FileDescription", "ogg/wav簡易プレイヤ+メディアプレイヤ Ver 0.6i Rel.5"
-            VALUE "FileVersion", "0, 6, 9, 5"
+            VALUE "FileDescription", "ogg/wav簡易プレイヤ+メディアプレイヤ Ver 0.6i Rel.6"
+            VALUE "FileVersion", "0.6.9.6"
             VALUE "InternalName", "ogg"
-            VALUE "LegalCopyright", "Copyright (C) 2015.05.20 ちゃちゃ/大原隆誠"
+            VALUE "LegalCopyright", "Copyright (C) 2015.06.03 ちゃちゃ/大原隆誠"
             VALUE "LegalTrademarks", "Pre Prayer Power Soft"
             VALUE "OriginalFilename", "oggYSEDbgm.exe"
-            VALUE "ProductName", "ファルコム簡易プレイヤ＋メディアプレイヤ"
+            VALUE "ProductName", "ファルコム簡易プレイヤ＋メディアプレイヤ+kpiプレイヤ"
             VALUE "ProductVersion", "1, 0, 0, 1"
         END
     END
@@ -704,7 +702,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO 
+GUIDELINES DESIGNINFO
 BEGIN
     IDD_ABOUTBOX, DIALOG
     BEGIN
@@ -1010,7 +1008,7 @@ END
 // Menu
 //
 
-CG_IDR_POPUP_DOUGA MENU 
+CG_IDR_POPUP_DOUGA MENU
 BEGIN
     POPUP "_ﾎﾟｯﾌﾟｱｯﾌﾟ_"
     BEGIN
@@ -1039,7 +1037,7 @@ BEGIN
     END
 END
 
-CG_IDR_POPUP_LIST MENU 
+CG_IDR_POPUP_LIST MENU
 BEGIN
     POPUP "pop"
     BEGIN
@@ -1056,12 +1054,12 @@ END
 // String Table
 //
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_ABOUTBOX            "ogg/wav簡易プレイヤ＋メディアプレイヤ のﾊﾞｰｼﾞｮﾝ情報(&A)..."
 END
 
-#endif    // 日本語 resources
+#endif    // 日本語 (日本) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
