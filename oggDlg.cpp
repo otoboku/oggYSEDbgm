@@ -616,6 +616,7 @@ BOOL COggDlg::OnInitDialog()
 		m_tooltip.AddTool(GetDlgItem(IDC_CHECK24), _T("‰p—Y“`àIII ”’‚«–‚—"));
 		m_tooltip.AddTool(GetDlgItem(IDC_CHECK25), _T("‰p—Y“`àIV ég‚¢´"));
 		m_tooltip.AddTool(GetDlgItem(IDC_CHECK26), _T("‰p—Y“`àV ŠC‚ÌŸB‰Ì"));
+		m_tooltip.AddTool(GetDlgItem(IDC_BUTTON58), _T("mp3/m4a/ogg‚É–„‚ß‚Ü‚ê‚Ä‚¢‚éƒWƒƒƒPƒbƒg‚ğ•\¦‚µ‚Ü‚·B"));
 
 		m_tooltip.AddTool(GetDlgItem(IDC_EDIT1), _T("Ÿ‚Ì‹È‚Ö‚¢‚­‚½‚ß‚Ìƒ‹[ƒv‰ñ”‚ğİ’è‚µ‚Ü‚·"));
 	}
