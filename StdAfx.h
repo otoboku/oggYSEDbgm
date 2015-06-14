@@ -169,5 +169,10 @@ struct save{
 	int savecheck;
 };
 
+
+char *b64_decode(char *s, int size,int &len);
+
+int b64_ctoi(char c);
+
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ は前行の直前に追加の宣言を挿入します。

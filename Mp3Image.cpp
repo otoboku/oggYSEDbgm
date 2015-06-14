@@ -4,10 +4,14 @@
 #include "stdafx.h"
 #include "ogg.h"
 #include "Mp3Image.h"
+#include <vorbis/codec.h>
+#include <vorbis/vorbisfile.h>
 
 extern BOOL miw;
 extern CMp3Image *mi;
 extern int killw1;
+extern OggVorbis_File vf;
+
 void CMp3Image::OnNcDestroy()
 {
 	CDialog::OnNcDestroy();
@@ -50,7 +54,7 @@ BEGIN_MESSAGE_MAP(CMp3Image, CDialog)
 	ON_WM_SIZING()
 END_MESSAGE_MAP()
 
-
+BYTE bufimage[0x30000f];
 // CMp3Image メッセージ ハンドラ
 
 BOOL CMp3Image::OnInitDialog()
@@ -85,81 +89,153 @@ void CMp3Image::Load(CString s)
 		DestroyWindow();
 		return;
 	}
-	BYTE buf[2005];
-	ZeroMemory(buf,2005);
-	ff.Read(buf,2000);
-	int i,enc;
-	if(buf[0x14]==0 || buf[0x14]==3) enc=0; else enc=1;
-	for(i=0;i<2000;i++){
-		if(buf[i]==0x41 && buf[i+1]==0x50 && buf[i+2]==0x49 && buf[i+3]==0x43){
-			break;
-		}
-	}
-	if(i==2000){
-		DestroyWindow();
-		return;
-	}
-	UINT size = (UINT)buf[i+4];
-	size <<= 8;
-	size |=(UINT)buf[i+5];
-	size <<= 8;
-	size |=(UINT)buf[i+6];
-	size <<= 8;
-	size |=(UINT)buf[i+7];
-	enc=buf[i+10];
-	i+=(4+4+3+6);
-	int flg=0;
-	if(buf[i]=='p'){ s1+=_T("111.png");} else {s1+=_T("111.jpg");}
-	s2+=_T("111.bmp");
-	for(;i<2000;i++){
-			if(buf[i]==0)
+	UINT size;
+	int i, enc;
+	s.MakeLower();
+	if (s.Right(3) == "mp3"){
+		ZeroMemory(bufimage, 2005);
+		ff.Read(bufimage, 2005);
+		if (bufimage[0x14] == 0 || bufimage[0x14] == 3) enc = 0; else enc = 1;
+		for (i = 0; i < 2000; i++){
+			if (bufimage[i] == 0x41 && bufimage[i + 1] == 0x50 && bufimage[i + 2] == 0x49 && bufimage[i + 3] == 0x43){
 				break;
-	}
-	i+=2;
-
-	if((buf[i]==0xff || buf[i]==0xfe)){
-		for(;i<2000;i++){
-			if(enc==1){
-				if(buf[i]==0 && buf[i+1]==0){
-					if(buf[i+1]==0 && buf[i+2]==0)
-						flg=1;
-					break;
-				}
-			}else{
-				if(buf[i]==0)
-					flg=1;
-					break;
 			}
 		}
-		if(i==2000){
+		if (i == 2000){
 			DestroyWindow();
 			return;
 		}
-		i+=flg;
-		if(enc==1)
-			i+=2;
-	}else i++;
+		size = (UINT)bufimage[i + 4];
+		size <<= 8;
+		size |= (UINT)bufimage[i + 5];
+		size <<= 8;
+		size |= (UINT)bufimage[i + 6];
+		size <<= 8;
+		size |= (UINT)bufimage[i + 7];
+		enc = bufimage[i + 10];
+		i += (4 + 4 + 3 + 6);
+		int flg = 0;
+		if (bufimage[i] == 'p'){ s1 += _T("111.png"); }
+		else { s1 += _T("111.jpg"); }
+		s2 += _T("111.bmp");
+		for (; i<2000; i++){
+			if (bufimage[i] == 0)
+				break;
+		}
+		i += 2;
 
-	int ijk=i;
-	CFile fff;
+		if ((bufimage[i] == 0xff || bufimage[i] == 0xfe)){
+			for (; i<2000; i++){
+				if (enc == 1){
+					if (bufimage[i] == 0 && bufimage[i + 1] == 0){
+						if (bufimage[i + 1] == 0 && bufimage[i + 2] == 0)
+							flg = 1;
+						break;
+					}
+				}
+				else{
+					if (bufimage[i] == 0)
+						flg = 1;
+					break;
+				}
+			}
+			if (i == 2000){
+				DestroyWindow();
+				return;
+			}
+			i += flg;
+			if (enc == 1)
+				i += 2;
+		}
+		else i++;
+	}
+	else if (s.Right(3) == "m4a"){
+		ZeroMemory(bufimage, sizeof(bufimage));
+		ff.Read(bufimage, sizeof(bufimage));
+		if (bufimage[0x14] == 0 || bufimage[0x14] == 3) enc = 0; else enc = 1;
+		for (i = 0; i < 0x300000; i++){// 00 06 5D 6A 64 61 74 61
+			if (bufimage[i] == 0x63 && bufimage[i + 1] == 0x6f && bufimage[i + 2] == 0x76 && bufimage[i + 3] == 0x72 && bufimage[i + 8] == 0x64 && bufimage[i + 9] == 0x61 && bufimage[i + 10] == 0x74 && bufimage[i + 11] == 0x61){
+				break;
+			}
+		}
+		if (i == 0x300000){
+			DestroyWindow();
+			return;
+		}
+		i += 4;
+		size = (UINT)bufimage[i];
+		size <<= 8;
+		size |= (UINT)bufimage[i + 1];
+		size <<= 8;
+		size |= (UINT)bufimage[i + 2];
+		size <<= 8;
+		size |= (UINT)bufimage[i + 3];
+		size -= 16;
 
-
-
-	if(fff.Open(s1,CFile::modeCreate|CFile::modeWrite,NULL)==FALSE){
-		int a=0;
+		i += 16;
+		if (bufimage[i + 1] == 0x50 && bufimage[i + 2] == 0x4e && bufimage[i + 3] == 0x47){
+			s1 += _T("111.png");
+		}else{
+			s1 += _T("111.jpg");
+		}
+		s2 += _T("111.bmp");
+	}
+	else if (s.Right(3) == "ogg"){
+		CString cc;
+		int vfiii = FALSE;
+		for (int iii = 0; iii < vf.vc->comments; iii++){
+#if _UNICODE
+			WCHAR *f; f = new WCHAR[0x300000];
+			MultiByteToWideChar(CP_UTF8, 0, vf.vc->user_comments[iii], -1, f, 0x300000);
+			cc = f;
+			delete [] f;
+#else
+			cc = vf.vc->user_comments[iii];
+#endif
+			if (cc.Left(23) == "METADATA_BLOCK_PICTURE="){
+				vfiii = TRUE;
+				char *buf = vf.vc->user_comments[iii];
+				buf += 23;//Base64
+				int len;
+				char *decode = b64_decode(buf, strlen(buf),len);
+				if (decode[1 + 16 + 16 + 10] == 0x50 && decode[2 + 16 + 16 + 10] == 0x4e && decode[3 + 16 + 16 + 10] == 0x47){
+					s1 += _T("111.png");
+				}
+				else{
+					s1 += _T("111.jpg");
+				}
+				s2 += _T("111.bmp");
+				CFile fff;
+				if (fff.Open(s1, CFile::modeCreate | CFile::modeWrite, NULL) == TRUE){
+					fff.Write(decode+16+16+10, len-16-16-10);
+					fff.Close();
+				}
+				free(decode);
+			}
+		}
+		if (vfiii == FALSE){
+			DestroyWindow();
+			return;
+		}
 	}
 
-	i = ijk;
-	ff.SeekToBegin();
-	ff.Seek(i,CFile::begin);
-	char *b = new char[size];
-	ff.Read(b,size);
-	fff.Write(b,size);
-	delete [] b;
-	ff.Close();
-	fff.Close();
+	if (s.Right(3) != "ogg"){
+		int ijk = i;
+		CFile fff;
+		if (fff.Open(s1, CFile::modeCreate | CFile::modeWrite, NULL) == FALSE){
+			int a = 0;
+		}
+		i = ijk;
+		ff.SeekToBegin();
+		ff.Seek(i, CFile::begin);
+		char *b = new char[size];
+		ff.Read(b, size);
+		fff.Write(b, size);
+		delete[] b;
+		ff.Close();
+		fff.Close();
+	}
 
-//	img.S
 	cdc0 = GetDC();
 	img.Load(s1);
 	if(img.Save(s2)!=S_OK){MessageBox(_T("プログラムにバグがあるか未対応形式です。"));

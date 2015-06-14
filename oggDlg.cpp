@@ -83,7 +83,6 @@ void CWread::wavread1(WPARAM a,LPARAM b){
 	wavread();thend=1;wavwait=1;AfxEndThread(0);return;
 }
 
-
 #define ID_HOTKEY0 8000
 #define ID_HOTKEY1 8001
 #define ID_HOTKEY2 8002
@@ -162,6 +161,7 @@ void playwavds2(char* bw,int old,int l1,int l2);
 BOOL playwavadpcm(char* bw,int old,int l1,int l2);
 //スレッド
 UINT wavread(LPVOID);
+extern BYTE bufimage[0x30000f];
 
 CString extn;
 /////////////////////////////////////////////////////////////////////////////
@@ -452,7 +452,6 @@ STARTUPINFO si;
 PROCESS_INFORMATION pi;
 int spc;
 int killw1=0,ttt_;
-
 CString ext[10000][100];
 CString kpif[10000];
 int kpicnt;
@@ -1259,6 +1258,8 @@ void COggDlg::play()
 {
 	CWaitCursor rrr;
 	m_mp3jake.EnableWindow(FALSE);
+	mp3file = filen;
+
 	tagname=tagfile=tagalbum="";
 	//	m_rund.EnableWindow(FALSE);
 	m_saisai.EnableWindow(FALSE);
@@ -1736,7 +1737,7 @@ void COggDlg::play()
 	wl=0;
 
 	fade1=0;fade=1.0f;fadeadd=0.0f;
-
+	m_mp3jake.EnableWindow(FALSE);
 	if(m_dou.GetCheck()==1)
 		dougaplay(ret2);
 
@@ -1778,9 +1779,10 @@ void COggDlg::play()
 			CString cc;
 			for(int iii=0;iii<vf.vc->comments;iii++){
 #if _UNICODE
-				WCHAR f[1024];
-				MultiByteToWideChar(CP_UTF8,0,vf.vc->user_comments[iii],-1,f,1024);
+				WCHAR *f; f = new WCHAR[0x300000];
+				MultiByteToWideChar(CP_UTF8, 0, vf.vc->user_comments[iii], -1, f, 0x300000);
 				cc=f;
+				delete [] f;
 #else
 				cc=vf.vc->user_comments[iii];
 #endif
@@ -1801,6 +1803,10 @@ void COggDlg::play()
 				{
 					loop2=_tstoi(cc.Mid(11));
 				}
+				if (cc.Left(23) == "METADATA_BLOCK_PICTURE=")
+				{
+					m_mp3jake.EnableWindow(TRUE);
+				}
 			}
 		}
 	}
@@ -1814,7 +1820,6 @@ void COggDlg::play()
 	lo=loc=locs=0;
     //Stereo 16bit 44kHz
 	loc=0;
-	mp3file=_T("");
 //-------------------------------------------------------------------
 	if(m_dsb != NULL) m_dsb->Release();
 	m_dsb = NULL;
@@ -1936,6 +1941,25 @@ void COggDlg::play()
 		if(mod->SetPosition) mod->SetPosition(kmp,0);
 		wav_start();
 //		playwavkpi(bufwav3,0,dwDataLen*4,0);
+	}else if (mode == -2){
+		CFile ff;
+		CString ss11 = ss; ss11.MakeLower();
+		if (ss11.Right(3) == "m4a"){
+			if (ff.Open(ss, CFile::modeRead | CFile::shareDenyNone, NULL) == TRUE){
+				mp3file = ss;
+				ZeroMemory(bufimage, sizeof(bufimage));
+				int i;
+				ff.Read(bufimage, sizeof(bufimage));
+				for (i = 0; i < 0x300000; i++){// 00 06 5D 6A 64 61 74 61
+					if (bufimage[i] == 0x63 && bufimage[i + 1] == 0x6f && bufimage[i + 2] == 0x76 && bufimage[i + 3] == 0x72 && bufimage[i + 8] == 0x64 && bufimage[i + 9] == 0x61 && bufimage[i + 10] == 0x74 && bufimage[i + 11] == 0x61){
+						break;
+					}
+				}
+				if (i != 0x300000){
+					m_mp3jake.EnableWindow(TRUE);
+				}
+			}ff.Close();
+		}
 	}
 //	else
 //		playwavds2(bufwav3,0,dwDataLen*4,0);
@@ -3453,6 +3477,25 @@ void COggDlg::dp(CString a)
 		mode=-10;modesub=-10;
 		play();
 	}else{//DirectShow
+		CFile ff;
+		CString ss11 = filen; ss11.MakeLower();
+		if (ss11.Right(3) == "m4a"){
+			if (ff.Open(filen, CFile::modeRead | CFile::shareDenyNone, NULL) == TRUE){
+				mp3file = filen;
+				ZeroMemory(bufimage, sizeof(bufimage));
+				int i;
+				ff.Read(bufimage, sizeof(bufimage));
+				for (i = 0; i < 0x300000; i++){// 00 06 5D 6A 64 61 74 61 // 63 6F 76 72 xx xx xx xx 64 61 74 61
+					if (bufimage[i] == 0x63 && bufimage[i + 1] == 0x6f && bufimage[i + 2] == 0x76 && bufimage[i + 3] == 0x72 && bufimage[i + 8] == 0x64 && bufimage[i + 9] == 0x61 && bufimage[i + 10] == 0x74 && bufimage[i + 11] == 0x61){
+						break;
+					}
+				}
+				m_mp3jake.EnableWindow(FALSE);
+				if (i != 0x300000){
+					m_mp3jake.EnableWindow(TRUE);
+				}
+			}ff.Close();
+		}
 		playlistdata p;
 		if(pl&&plw){
 			p.sub=0;
@@ -3476,66 +3519,66 @@ void COggDlg::dp(CString a)
 		pMainFrame1->Create(GetSafeHwnd());
 		pMainFrame1->ShowWindow(SW_HIDE);
 		pMainFrame1->play(0);
-	CFile f123;
-	int flggg=0;
-	if(f123.Open(filen+_T(".save"),CFile::modeRead,NULL)==TRUE){
-		f123.Close();
-		if(IDYES==MessageBox(_T("途中再生データが存在します。\n前回中断した部分から再生しますか？\nはい = 途中から再生\nいいえ = はじめから再生"),_T("再生確認"),MB_YESNO)){
-			flggg=1;
-		}else{
-			CFile::Remove(filen+_T(".save"));
-		}
-	}
-	if(f123.Open(filen+_T(".save"),CFile::modeRead,NULL)==TRUE&&flggg==1){
-		f123.Close();
-		if(pGraphBuilder)pMainFrame1->plays2();
-		if(pMediaControl){for(int y=0;y<45;y++){Sleep(10);DoEvent();}pMediaControl->Run();}
-		if(mode==-10){
-			if(f123.Open(filen+_T(".save"),CFile::modeRead,NULL)==TRUE){
-				f123.Read(&playb,sizeof(__int64));
-				if(savedata.mp3orig){
-					mp3_.seek2(playb/(wavch==2?4:1),wavch);
-				}else{
-					mp3_.seek(playb/(wavch==2?4:1),wavch);
-				}
-				f123.Close();
-			}
-		}
-		if(mode==-2){
-			if(f123.Open(filen+_T(".save"),CFile::modeRead,NULL)==TRUE){
-				f123.Read(&aa1_,sizeof(double));
-				pMainFrame1->seek((LONGLONG)(((float)((float)aa1_*100.0f*100000.0f))));
-				f123.Close();
-			}
-		}
-	}else{
-		if(pGraphBuilder)pMainFrame1->plays2();
-		if(pMediaControl){for(int y=0;y<45;y++){Sleep(10);DoEvent();}pMediaControl->Run();}
-		if(pMainFrame1){pMainFrame1->seek(0);}
-	}
-//		if(pGraphBuilder)pMainFrame1->plays2();
-//		if(pMediaControl)pMediaControl->Run();
-		int a=0;aa2=0;
-		REFTIME aa=0;
-		aa2=0;
-		ps=0;m_ps.SetWindowText(_T("一時停止"));
-		if(pMediaPosition)pMediaPosition->get_StopTime(&aa);
-		aa1=oggsize2=aa;
-		m_time.SetRange(0,(int)((REFTIME)aa*100.0),TRUE);
-		m_time.SetSelection(0,(int)((REFTIME)aa*100.0)-1);
-		m_time.Invalidate();
-		if(pl&&plw){
-			int plc;
-			plc=pl->Add(fnn,mode,0,0,_T(""),_T(""),filen,0,(int)aa,1);
-			if(plc==-1){
-				int i=pl->m_lc.GetItemCount()-1;
-				plcnt=i;
-				pl->SIcon(i);
+		CFile f123;
+		int flggg=0;
+		if(f123.Open(filen+_T(".save"),CFile::modeRead,NULL)==TRUE){
+			f123.Close();
+			if(IDYES==MessageBox(_T("途中再生データが存在します。\n前回中断した部分から再生しますか？\nはい = 途中から再生\nいいえ = はじめから再生"),_T("再生確認"),MB_YESNO)){
+				flggg=1;
 			}else{
-				plcnt=plc;
-				pl->SIcon(plc);
+				CFile::Remove(filen+_T(".save"));
 			}
 		}
+		if(f123.Open(filen+_T(".save"),CFile::modeRead,NULL)==TRUE&&flggg==1){
+			f123.Close();
+			if(pGraphBuilder)pMainFrame1->plays2();
+			if(pMediaControl){for(int y=0;y<45;y++){Sleep(10);DoEvent();}pMediaControl->Run();}
+			if(mode==-10){
+				if(f123.Open(filen+_T(".save"),CFile::modeRead,NULL)==TRUE){
+					f123.Read(&playb,sizeof(__int64));
+					if(savedata.mp3orig){
+						mp3_.seek2(playb/(wavch==2?4:1),wavch);
+					}else{
+						mp3_.seek(playb/(wavch==2?4:1),wavch);
+					}
+					f123.Close();
+				}
+			}
+			if(mode==-2){
+				if(f123.Open(filen+_T(".save"),CFile::modeRead,NULL)==TRUE){
+					f123.Read(&aa1_,sizeof(double));
+					pMainFrame1->seek((LONGLONG)(((float)((float)aa1_*100.0f*100000.0f))));
+					f123.Close();
+				}
+			}
+		}else{
+			if(pGraphBuilder)pMainFrame1->plays2();
+			if(pMediaControl){for(int y=0;y<45;y++){Sleep(10);DoEvent();}pMediaControl->Run();}
+			if(pMainFrame1){pMainFrame1->seek(0);}
+		}
+	//		if(pGraphBuilder)pMainFrame1->plays2();
+	//		if(pMediaControl)pMediaControl->Run();
+			int a=0;aa2=0;
+			REFTIME aa=0;
+			aa2=0;
+			ps=0;m_ps.SetWindowText(_T("一時停止"));
+			if(pMediaPosition)pMediaPosition->get_StopTime(&aa);
+			aa1=oggsize2=aa;
+			m_time.SetRange(0,(int)((REFTIME)aa*100.0),TRUE);
+			m_time.SetSelection(0,(int)((REFTIME)aa*100.0)-1);
+			m_time.Invalidate();
+			if(pl&&plw){
+				int plc;
+				plc=pl->Add(fnn,mode,0,0,_T(""),_T(""),filen,0,(int)aa,1);
+				if(plc==-1){
+					int i=pl->m_lc.GetItemCount()-1;
+					plcnt=i;
+					pl->SIcon(i);
+				}else{
+					plcnt=plc;
+					pl->SIcon(plc);
+				}
+			}
 
 		plf=1;
 	}
@@ -5862,97 +5905,122 @@ void COggDlg::OnRestart()
 			filen.Right(4)==".mp1" || filen.Right(4)==".MP1" || filen.Right(4)==".rmp" || filen.Right(4)==".RMP")){
 			modesub=-10;
 			play();
-		}else if(mode==-2||mode==-3) {
+		}
+		else if (mode == -2 || mode == -3) {
 			playlistdata p;
-			kpi[0]=0;
-			if(pl&&plw){
-				p.sub=0;
-				CString ss,s;
-				s=filen;
-				ss=s.Left(s.ReverseFind(':')-1);
-				if(ss!="") s=ss;
-				pl->plugs(s,&p,kpi);
-				if(p.sub==-3){//kb medua player
-					s=kpi;
-					ss=s.Left(s.ReverseFind('\\'));
+			kpi[0] = 0;
+			if (pl&&plw){
+				p.sub = 0;
+				CString ss, s;
+				s = filen;
+				ss = s.Left(s.ReverseFind(':') - 1);
+				if (ss != "") s = ss;
+				pl->plugs(s, &p, kpi);
+				if (p.sub == -3){//kb medua player
+					s = kpi;
+					ss = s.Left(s.ReverseFind('\\'));
 					_tchdir(ss);
-						hDLLk=LoadLibrary(kpi);
-						pFunck=(pfnGetKMPModule)::GetProcAddress(hDLLk,"kmp_GetTestModule");
-						modesub=-3;
-						play();
+					hDLLk = LoadLibrary(kpi);
+					pFunck = (pfnGetKMPModule)::GetProcAddress(hDLLk, "kmp_GetTestModule");
+					modesub = -3;
+					play();
 					return;
 				}
 			}
-			fnn=ti;
-			modesub=-2;mode=-2;
+			fnn = ti;
+			modesub = -2; mode = -2;
 			pMainFrame1 = new CDouga;
 			pMainFrame1->Create(GetSafeHwnd());
 			pMainFrame1->ShowWindow(SW_HIDE);
 			pMainFrame1->play(0);
-	CFile f123;
-	int flggg=0;
-	if(f123.Open(filen+_T(".save"),CFile::modeRead,NULL)==TRUE){
-		f123.Close();
-		if(IDYES==MessageBox(_T("途中再生データが存在します。\n前回中断した部分から再生しますか？\nはい = 途中から再生\nいいえ = はじめから再生"),_T("再生確認"),MB_YESNO)){
-			flggg=1;
-		}else{
-			CFile::Remove(filen+_T(".save"));
-		}
-	}
-	if(f123.Open(filen+_T(".save"),CFile::modeRead,NULL)==TRUE&&flggg==1){
-		f123.Close();
-		if(pGraphBuilder)pMainFrame1->plays2();
-		if(pMediaControl){for(int y=0;y<45;y++){Sleep(10);DoEvent();}pMediaControl->Run();}
-		if(mode==-10){
-			if(f123.Open(filen+_T(".save"),CFile::modeRead,NULL)==TRUE){
-				f123.Read(&playb,sizeof(__int64));
-				if(savedata.mp3orig){
-					mp3_.seek2(playb/(wavch==2?4:1),wavch);
-				}else{
-					mp3_.seek(playb/(wavch==2?4:1),wavch);
+			CFile f123;
+			int flggg = 0;
+			if (f123.Open(filen + _T(".save"), CFile::modeRead, NULL) == TRUE){
+				f123.Close();
+				if (IDYES == MessageBox(_T("途中再生データが存在します。\n前回中断した部分から再生しますか？\nはい = 途中から再生\nいいえ = はじめから再生"), _T("再生確認"), MB_YESNO)){
+					flggg = 1;
 				}
-				f123.Close();
+				else{
+					CFile::Remove(filen + _T(".save"));
+				}
 			}
-		}
-		if(mode==-2){
-			if(f123.Open(filen+_T(".save"),CFile::modeRead,NULL)==TRUE){
-				f123.Read(&aa1_,sizeof(double));
-				pMainFrame1->seek((LONGLONG)(((float)((float)aa1_*100.0f*100000.0f))));
+			if (f123.Open(filen + _T(".save"), CFile::modeRead, NULL) == TRUE&&flggg == 1){
 				f123.Close();
+				if (pGraphBuilder)pMainFrame1->plays2();
+				if (pMediaControl){ for (int y = 0; y < 45; y++){ Sleep(10); DoEvent(); }pMediaControl->Run(); }
+				if (mode == -10){
+					if (f123.Open(filen + _T(".save"), CFile::modeRead, NULL) == TRUE){
+						f123.Read(&playb, sizeof(__int64));
+						if (savedata.mp3orig){
+							mp3_.seek2(playb / (wavch == 2 ? 4 : 1), wavch);
+						}
+						else{
+							mp3_.seek(playb / (wavch == 2 ? 4 : 1), wavch);
+						}
+						f123.Close();
+					}
+				}
+				if (mode == -2){
+					if (f123.Open(filen + _T(".save"), CFile::modeRead, NULL) == TRUE){
+						f123.Read(&aa1_, sizeof(double));
+						pMainFrame1->seek((LONGLONG)(((float)((float)aa1_*100.0f*100000.0f))));
+						f123.Close();
+					}
+				}
 			}
-		}
-	}else{
-		if(pGraphBuilder)pMainFrame1->plays2();
-		if(pMediaControl){for(int y=0;y<45;y++){Sleep(10);DoEvent();}pMediaControl->Run();}
-		if(pMainFrame1){pMainFrame1->seek(0);}
-	}
-//			if(pGraphBuilder)pMainFrame1->plays2();
-//			if(pMediaControl)pMediaControl->Run();
-//			if(pMediaPosition)pMediaPosition->put_CurrentPosition(0);
-			int a=0;aa2=0;
-			REFTIME aa=0;
-			aa2=0;
-			ps=0;m_ps.SetWindowText(_T("一時停止"));
-			if(pMediaPosition)pMediaPosition->get_StopTime(&aa);
-			aa1=oggsize2=aa;
-			m_time.SetRange(0,(int)((REFTIME)aa*100.0),TRUE);
-			m_time.SetSelection(0,(int)((REFTIME)aa*100.0)-1);
+			else{
+				if (pGraphBuilder)pMainFrame1->plays2();
+				if (pMediaControl){ for (int y = 0; y < 45; y++){ Sleep(10); DoEvent(); }pMediaControl->Run(); }
+				if (pMainFrame1){ pMainFrame1->seek(0); }
+			}
+			//			if(pGraphBuilder)pMainFrame1->plays2();
+			//			if(pMediaControl)pMediaControl->Run();
+			//			if(pMediaPosition)pMediaPosition->put_CurrentPosition(0);
+			int a = 0; aa2 = 0;
+			REFTIME aa = 0;
+			aa2 = 0;
+			ps = 0; m_ps.SetWindowText(_T("一時停止"));
+			if (pMediaPosition)pMediaPosition->get_StopTime(&aa);
+			aa1 = oggsize2 = aa;
+			m_time.SetRange(0, (int)((REFTIME)aa*100.0), TRUE);
+			m_time.SetSelection(0, (int)((REFTIME)aa*100.0) - 1);
 			m_time.Invalidate();
-			if(pl&&plw){
+			if (pl&&plw){
 				int plc;
-				plc=pl->Add(fnn,mode,0,0,_T(""),_T(""),filen,0,(int)aa,1);
-				if(plc==-1){
-					int i=pl->m_lc.GetItemCount()-1;
-					plcnt=i;
+				plc = pl->Add(fnn, mode, 0, 0, _T(""), _T(""), filen, 0, (int)aa, 1);
+				if (plc == -1){
+					int i = pl->m_lc.GetItemCount() - 1;
+					plcnt = i;
 					pl->SIcon(i);
-				}else{
-					plcnt=plc;
+				}
+				else{
+					plcnt = plc;
 					pl->SIcon(plc);
 				}
 			}
-			SetTimer(1250,100,NULL);
-			plf=1;
-		}else{
+			SetTimer(1250, 100, NULL);
+			plf = 1;
+			CFile ff;
+			CString ss11 = filen; ss11.MakeLower();
+			if (ss11.Right(3) == "m4a"){
+				if (ff.Open(filen, CFile::modeRead | CFile::shareDenyNone, NULL) == TRUE){
+					mp3file = filen;
+					ZeroMemory(bufimage, sizeof(bufimage));
+					int i;
+					ff.Read(bufimage, sizeof(bufimage));
+					for (i = 0; i < 0x300000; i++){// 00 06 5D 6A 64 61 74 61
+						if (bufimage[i] == 0x63 && bufimage[i + 1] == 0x6f && bufimage[i + 2] == 0x76 && bufimage[i + 3] == 0x72 && bufimage[i + 8] == 0x64 && bufimage[i + 9] == 0x61 && bufimage[i + 10] == 0x74 && bufimage[i + 11] == 0x61){
+							break;
+						}
+					}
+					m_mp3jake.EnableWindow(FALSE);
+					if (i != 0x300000){
+						m_mp3jake.EnableWindow(TRUE);
+					}
+				}ff.Close();
+			}
+		}
+			else{
 			if(mode==19)filen=filen.Left(5);
 			play();	
 		}
