@@ -10,6 +10,8 @@
 #define _SECURE_ATL 1
 #endif
 
+//#define _USING_V110_SDK71_
+
 #ifndef VC_EXTRALEAN
 #define VC_EXTRALEAN		// Windows ヘッダーから使用されていない部分を除外します。
 #endif
