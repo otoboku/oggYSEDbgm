@@ -1164,7 +1164,7 @@ BOOL COggDlg::OnInitDialog()
 				in.wServicePackMinor,
 				&edition)){
 				if (in.dwMinorVersion == 0){
-					ss = _T("Windows 10"); break;
+					ss = _T("Windows 10");
 					switch (edition)
 					{
 					case PRODUCT_ENTERPRISE:
