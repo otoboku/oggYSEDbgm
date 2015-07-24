@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ generated include file.
-// Used by ogg.rc
+// Microsoft Visual C++ で生成されたインクルード ファイル。
+// ogg.rc で使用
 //
 #define IDOK2                           2
 #define IDCANCEL2                       3
@@ -206,6 +206,7 @@
 #define IDC_FONT2                       1073
 #define IDC_BUTTON58                    1073
 #define IDC_STATIC1                     1074
+#define IDC_STATIC_OS                   1075
 #define ID_MENUITEM32771                32771
 #define ID_MENUITEM32772                32772
 #define ID_MENUITEM32773                32773
@@ -245,7 +246,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        180
 #define _APS_NEXT_COMMAND_VALUE         32804
-#define _APS_NEXT_CONTROL_VALUE         1075
+#define _APS_NEXT_CONTROL_VALUE         1076
 #define _APS_NEXT_SYMED_VALUE           104
 #endif
 #endif

@@ -347,6 +347,7 @@ void COggDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BUTTON54, d_san2);
 	DDX_Control(pDX, IDC_BUTTON57, m_playlist);
 	DDX_Control(pDX, IDC_BUTTON58, m_mp3jake);
+	DDX_Control(pDX, IDC_STATIC_OS, m_OS);
 }
 
 BEGIN_MESSAGE_MAP(COggDlg, CDialog)
@@ -423,7 +424,7 @@ extern "C" {
 }
 #endif // defined(__cplusplus)
 
-#define BUFSZ			(8192*2)
+//#define BUFSZ			(8192*4)
 #define HIGHDIV			4
 #define BUFSZH			(BUFSZ/HIGHDIV)
 #define SQRT_BUFSZ2		64
@@ -465,29 +466,64 @@ IObjectCollection *poc;
  
 int plcnt=0;
 int wavch=2;
+int wavsam = 16;
 
+typedef BOOL(WINAPI *LPFN_ISWOW64PROCESS) (HANDLE, PBOOL);
+LPFN_ISWOW64PROCESS fnIsWow64Process;
+
+// pdwReturnedProductType定義値
+#if 0
+#define PRODUCT_BUSINESS 0x00000006
+#define PRODUCT_ENTERPRISE 0x00000004
+#define PRODUCT_HOME_BASIC 0x00000002
+#define PRODUCT_HOME_PREMIUM 0x00000003
+#define PRODUCT_ULTIMATE 0x00000001
+#define PRODUCT_UNDEFINED 0x00000000
+
+#define PRODUCT_ENTERPRISE1 0x00000048
+#define PRODUCT_PROFFESIONAL 0x00000008
+#define PRODUCT_HOME 0x00000000
+#endif
+BOOL IsWow64();
+BOOL IsWow64()
+{
+	BOOL bIsWow64 = FALSE;
+
+
+	fnIsWow64Process = (LPFN_ISWOW64PROCESS)GetProcAddress(
+		GetModuleHandle(TEXT("kernel32")), "IsWow64Process");
+
+	if (NULL != fnIsWow64Process)
+	{
+		if (!fnIsWow64Process(GetCurrentProcess(), &bIsWow64))
+		{
+			//handle error
+		}
+	}
+	return bIsWow64;
+}
 
 BOOL COggDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
-	plw=0;
-	pi.dwProcessId=-1;
-	randomf=0;hsc=0;spc=0;
-	wavbit=44100;wavbit2=44100;wavch=2;
-	fade1=0;
-	thend1=TRUE;
-	videoonly=FALSE;
-	kpicnt=0;
-	kpi[0]=0;
-	mod=NULL;kmp=NULL;
-	extn="";
-	mod=NULL;
-	kmp=NULL;
-	aa1_=0.0;
-	hDLLk=NULL;
+	plw = 0;
+	pi.dwProcessId = -1;
+	randomf = 0; hsc = 0; spc = 0;
+	wavbit = 44100; wavbit2 = 44100; wavch = 2;
+	fade1 = 0;
+	thend1 = TRUE;
+	videoonly = FALSE;
+	kpicnt = 0;
+	kpi[0] = 0;
+	mod = NULL; kmp = NULL;
+	extn = "";
+	mod = NULL;
+	kmp = NULL;
+	aa1_ = 0.0;
+	hDLLk = NULL;
 	mp3_.mp3init();
 	// "バージョン情報..." メニュー項目をシステム メニューへ追加します。
-	fnn="";
+	fnn = "";
 	// IDM_ABOUTBOX はコマンド メニューの範囲でなければなりません。
 	ASSERT((IDM_ABOUTBOX & 0xFFF0) == IDM_ABOUTBOX);
 	ASSERT(IDM_ABOUTBOX < 0xF000);
@@ -508,35 +544,35 @@ BOOL COggDlg::OnInitDialog()
 	// ウィンドウがダイアログでない時は自動的に設定しません。
 	SetIcon(m_hIcon, TRUE);			// 大きいアイコンを設定
 	SetIcon(m_hIcon, FALSE);		// 小さいアイコンを設定
-	
+
 	// TODO: 特別な初期化を行う時はこの場所に追加してください。
 	//フォント設定
-    LOGFONT LogFont; 
+	LOGFONT LogFont;
 	CClientDC dc1(this);
 	dc1.GetCurrentFont()->GetLogFont(&LogFont);
-	_tcscpy(LogFont.lfFaceName,_T("ＭＳ ゴシック"));
+	_tcscpy(LogFont.lfFaceName, _T("ＭＳ ゴシック"));
 	LogFont.lfHeight--;
-	LogFont.lfWeight=100;
-	hFont= CreateFontIndirect(&LogFont);
-/*	hFont = CreateFont(16,8,0,0,500,FALSE,FALSE,FALSE,
-		               SHIFTJIS_CHARSET,OUT_TT_PRECIS,CLIP_DEFAULT_PRECIS,
-					   DRAFT_QUALITY,FIXED_PITCH | FF_MODERN,
-					   _T("Arphic Gothic JIS"));
-	if(hFont==NULL)
-		hFont = CreateFont(16,8,0,0,500,FALSE,FALSE,FALSE,
-		               SHIFTJIS_CHARSET,OUT_TT_PRECIS,CLIP_DEFAULT_PRECIS,
-					   DRAFT_QUALITY,FIXED_PITCH  | FF_MODERN,
-					   _T("ＭＳ ゴシック"));
-*/	
-	
-	ogg=NULL;wav=NULL;adbuf2=NULL;
-	plf=0;
-    timeBeginPeriod(1);
-	SetTimer(5656,2000,NULL);
-	SetTimer(5657,50,NULL);
-	SetTimer(1233,17,NULL);
-	timingf=timerf1=0;
-	stf=1;
+	LogFont.lfWeight = 100;
+	hFont = CreateFontIndirect(&LogFont);
+	/*	hFont = CreateFont(16,8,0,0,500,FALSE,FALSE,FALSE,
+						   SHIFTJIS_CHARSET,OUT_TT_PRECIS,CLIP_DEFAULT_PRECIS,
+						   DRAFT_QUALITY,FIXED_PITCH | FF_MODERN,
+						   _T("Arphic Gothic JIS"));
+						   if(hFont==NULL)
+						   hFont = CreateFont(16,8,0,0,500,FALSE,FALSE,FALSE,
+						   SHIFTJIS_CHARSET,OUT_TT_PRECIS,CLIP_DEFAULT_PRECIS,
+						   DRAFT_QUALITY,FIXED_PITCH  | FF_MODERN,
+						   _T("ＭＳ ゴシック"));
+						   */
+
+	ogg = NULL; wav = NULL; adbuf2 = NULL;
+	plf = 0;
+	timeBeginPeriod(1);
+	SetTimer(5656, 2000, NULL);
+	SetTimer(5657, 50, NULL);
+	SetTimer(1233, 17, NULL);
+	timingf = timerf1 = 0;
+	stf = 1;
 	m_dou.SetCheck(1);
 	// CG: 以下のブロックはツールヒント コンポーネントによって追加されました
 	{
@@ -587,8 +623,8 @@ BOOL COggDlg::OnInitDialog()
 
 		m_tooltip.AddTool(GetDlgItem(IDC_BUTTON12), _T("拡張パネルを開く/閉じる"));
 
-		OSVERSIONINFO in;ZeroMemory(&in,sizeof(in));in.dwOSVersionInfoSize=sizeof(OSVERSIONINFO);GetVersionEx(&in);
-		if(in.dwMajorVersion>=6)
+		OSVERSIONINFO in; ZeroMemory(&in, sizeof(in)); in.dwOSVersionInfoSize = sizeof(OSVERSIONINFO); GetVersionEx(&in);
+		if (in.dwMajorVersion >= 6)
 			m_tooltip.AddTool(GetDlgItem(IDC_BUTTON21), _T("レンダリングを変更します。\nVMR7:DirectX7を使ったレンダリング\nVMR9:DirectX9を使ったレンダリング\n普段はデフォルトで使ってください。\nWindowsVista以降の場合、EVRを有効にチェックをいれてデフォルトが最適環境です。"));
 		else
 			m_tooltip.AddTool(GetDlgItem(IDC_BUTTON21), _T("レンダリングを変更します。\nVMR7:DirectX7を使ったレンダリング\nVMR9:DirectX9を使ったレンダリング\nVMR9あたりを使うと最適環境が得られると思います。\nWindows98ではデフォルトを設定します。"));
@@ -620,36 +656,37 @@ BOOL COggDlg::OnInitDialog()
 
 		m_tooltip.AddTool(GetDlgItem(IDC_EDIT1), _T("次の曲へいくためのループ回数を設定します"));
 	}
-	m_tooltip.SetDelayTime( TTDT_AUTOPOP, 10000 );
+	m_tooltip.SetDelayTime(TTDT_AUTOPOP, 10000);
 	m_tooltip.SendMessage(TTM_SETMAXTIPWIDTH, 0, 512);
 	// FFT三角関数テーブルの初期化
 	ipTab2[0] = 0;
 	int i;
 	// 窓関数テーブルの初期化
-	for(i=0; i<BUFSZ/2; i++) {
-//		fnWFilter[i] = (1-cos(2*M_PI*i/BUFSZ))/2; // Hanning窓
-		fnWFilter[i] = sin(M_PI*i/BUFSZ); // sin窓
+	for (i = 0; i < BUFSZ / 2; i++) {
+		//		fnWFilter[i] = (1-cos(2*M_PI*i/BUFSZ))/2; // Hanning窓
+		fnWFilter[i] = sin(M_PI*i / BUFSZ); // sin窓
 	}
 
-	for(i=0;i<300;i++){spelv[i]=0;spetm[i]=0;}
-	fade=1.0;
-	fadeadd=0.0;
+	for (i = 0; i < 300; i++){ spelv[i] = 0; spetm[i] = 0; }
+	fade = 1.0;
+	fadeadd = 0.0;
 
 	CString s;
-	s.Format(_T("%d"),savedata.kaisuu);
+	s.Format(_T("%d"), savedata.kaisuu);
 	m_kaisuu.SetWindowText(s);
 
 	//画面位置
-	if(savedata.xx!=-10000){
-		MoveWindow(savedata.xx,savedata.yy,1,1);
+	if (savedata.xx != -10000){
+		MoveWindow(savedata.xx, savedata.yy, 1, 1);
 	}
 
 	Resize();
 
-	if(savedata.random){
+	if (savedata.random){
 		m_junji.SetCheck(1);
 		m_random.SetCheck(0);
-	}else{
+	}
+	else{
 		m_junji.SetCheck(0);
 		m_random.SetCheck(1);
 	}
@@ -675,32 +712,32 @@ BOOL COggDlg::OnInitDialog()
 	m_ed5.SetCheck(savedata.gameflg17);
 
 	m_dsval.ShowWindow(SW_HIDE);
-	m_dsval.SetRange(-498,1);
+	m_dsval.SetRange(-498, 1);
 	m_dsval.SetPos(-200);
-//	m_dsval.SetPos(savedata.dsvol);
-	voldsf=1;
+	//	m_dsval.SetPos(savedata.dsvol);
+	voldsf = 1;
 
 	cdc0 = GetDC(); //new CClientDC(this);
 	dc.CreateCompatibleDC(NULL);
 	dcsub.CreateCompatibleDC(NULL);
-	bmp.CreateCompatibleBitmap(cdc0,740,400);
-	bmpsub.CreateCompatibleBitmap(cdc0,3000,20);
+	bmp.CreateCompatibleBitmap(cdc0, 740, 400);
+	bmpsub.CreateCompatibleBitmap(cdc0, 3000, 20);
 	dc.SelectObject(&bmp);
-	dc.FillSolidRect(0,0,739,399,RGB(0,0,0));
+	dc.FillSolidRect(0, 0, 739, 399, RGB(0, 0, 0));
 	dcsub.SelectObject(&bmpsub);
-	dcsub.FillSolidRect(0,0,739,399,RGB(0,0,0));
+	dcsub.FillSolidRect(0, 0, 739, 399, RGB(0, 0, 0));
 	ReleaseDC(cdc0);
-	mode=modesub=0;
+	mode = modesub = 0;
 	m_supe.SetCheck(savedata.supe);
 	m_st.SetCheck(savedata.supe2);
-	mcnt=mcnt1=mcnt2=mcnt3=mcnt4=mcnt5=mcnt6=0;
-	m_time.SetRange(0,1);
-	m_time.SetSelection(0,1);
+	mcnt = mcnt1 = mcnt2 = mcnt3 = mcnt4 = mcnt5 = mcnt6 = 0;
+	m_time.SetRange(0, 1);
+	m_time.SetSelection(0, 1);
 
-	m_lpDS3DBuffer=NULL;
-	CString sr=init(GetSafeHwnd());
-	
-	SetTimer(9998,400,NULL);
+	m_lpDS3DBuffer = NULL;
+	CString sr = init(GetSafeHwnd());
+
+	SetTimer(9998, 400, NULL);
 
 
 	RegisterHotKey(GetSafeHwnd(), ID_HOTKEY0, 0, VK_UP);
@@ -708,103 +745,469 @@ BOOL COggDlg::OnInitDialog()
 	RegisterHotKey(GetSafeHwnd(), ID_HOTKEY2, 0, VK_RIGHT);
 	RegisterHotKey(GetSafeHwnd(), ID_HOTKEY3, 0, VK_LEFT);
 
-	ptl=NULL;
+	ptl = NULL;
 	CoInitialize(NULL);
-	CoCreateInstance(CLSID_TaskbarList, NULL, CLSCTX_INPROC_SERVER,IID_ITaskbarList3, (void**)&ptl);
-	if(ptl){
+	CoCreateInstance(CLSID_TaskbarList, NULL, CLSCTX_INPROC_SERVER, IID_ITaskbarList3, (void**)&ptl);
+	if (ptl){
 		ptl->HrInit();
 		ptl->SetProgressState(m_hWnd, TBPF_NOPROGRESS);
-		SetTimer(5219,200,NULL);
+		SetTimer(5219, 200, NULL);
 	}
-	pcdl=NULL;
-	CoCreateInstance(CLSID_DestinationList, NULL, CLSCTX_INPROC_SERVER,IID_ICustomDestinationList, (void**)&pcdl);
-	if(pcdl){
-		UINT cMinSlots; 
-		IObjectArray *poaRemoved; 
-		pcdl->BeginList(&cMinSlots, IID_PPV_ARGS(&poaRemoved)); 
-		CoCreateInstance(CLSID_EnumerableObjectCollection, NULL, CLSCTX_INPROC, IID_PPV_ARGS(&poc)); 
- 		IShellLink * psl=NULL;
+	pcdl = NULL;
+	CoCreateInstance(CLSID_DestinationList, NULL, CLSCTX_INPROC_SERVER, IID_ICustomDestinationList, (void**)&pcdl);
+	if (pcdl){
+		UINT cMinSlots;
+		IObjectArray *poaRemoved;
+		pcdl->BeginList(&cMinSlots, IID_PPV_ARGS(&poaRemoved));
+		CoCreateInstance(CLSID_EnumerableObjectCollection, NULL, CLSCTX_INPROC, IID_PPV_ARGS(&poc));
+		IShellLink * psl = NULL;
 		_CreateShellLink(_T("*1"), _T("再演奏"), &psl, 0, true);
-		poc->AddObject(psl);	psl->Release(); 
+		poc->AddObject(psl);	psl->Release();
 		_CreateShellLink(_T("*2"), _T("一時停止"), &psl, 0, true);
-		poc->AddObject(psl);	psl->Release(); 
+		poc->AddObject(psl);	psl->Release();
 		_CreateShellLink(_T("*3"), _T("停止"), &psl, 0, true);
-		poc->AddObject(psl);	psl->Release(); 
-		_CreateShellLink(_T(""), _T(""), &psl, 0, true,FALSE);
-		poc->AddObject(psl);	psl->Release(); 
+		poc->AddObject(psl);	psl->Release();
+		_CreateShellLink(_T(""), _T(""), &psl, 0, true, FALSE);
+		poc->AddObject(psl);	psl->Release();
 		_CreateShellLink(_T("*4"), _T("プレイリスト開閉"), &psl, 0, true);
-		poc->AddObject(psl);	psl->Release(); 
-		_CreateShellLink(_T(""), _T(""), &psl, 0, true,FALSE);
-		poc->AddObject(psl);	psl->Release(); 
+		poc->AddObject(psl);	psl->Release();
+		_CreateShellLink(_T(""), _T(""), &psl, 0, true, FALSE);
+		poc->AddObject(psl);	psl->Release();
 		_CreateShellLink(_T("*5"), _T("レンダリング設定"), &psl, 0, true);
-		poc->AddObject(psl);	psl->Release(); 
+		poc->AddObject(psl);	psl->Release();
 		_CreateShellLink(_T("*6"), _T("フォルダ設定"), &psl, 0, true);
-		poc->AddObject(psl);	psl->Release(); 
-		IObjectArray * poa; poc->QueryInterface(IID_PPV_ARGS(&poa)); 
- 		pcdl->AddUserTasks(poa); poa->Release(); 
+		poc->AddObject(psl);	psl->Release();
+		IObjectArray * poa; poc->QueryInterface(IID_PPV_ARGS(&poa));
+		pcdl->AddUserTasks(poa); poa->Release();
 		pcdl->CommitList(); poaRemoved->Release();
-		poc->Release(); 
- 	}
+		poc->Release();
+	}
 
 	m_pDlgColor = NULL;
 
-	if(savedata.aero){
+	if (savedata.aero){
 		HMODULE hDLL;
-		typedef DWORD (WINAPI *PFUNC)(HWND,MARGINS*);
+		typedef DWORD(WINAPI *PFUNC)(HWND, MARGINS*);
 		PFUNC pFunc;
-		hDLL=::LoadLibrary(_T("Dwmapi"));
-		pFunc=(PFUNC)::GetProcAddress(hDLL,"DwmExtendFrameIntoClientArea");
+		hDLL = ::LoadLibrary(_T("Dwmapi"));
+		pFunc = (PFUNC)::GetProcAddress(hDLL, "DwmExtendFrameIntoClientArea");
 		MARGINS margin = { -1, -1, -1, -1 };
-		if(pFunc){
-			pFunc(m_hWnd,&margin);
+		if (pFunc){
+			pFunc(m_hWnd, &margin);
 		}
 		::FreeLibrary(hDLL);
-		m_pDlgColor = new CBrush( RGB(0,0,0));
+		m_pDlgColor = new CBrush(RGB(0, 0, 0));
 	}
 
 	//Windows7 / Vista用 ボリュームチェンジ
-	deve=NULL;dev=NULL;audio=NULL;
-	if(SUCCEEDED(CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL,CLSCTX_ALL,__uuidof(IMMDeviceEnumerator),(void**)&deve))){
-		deve->GetDefaultAudioEndpoint(eRender, eConsole,&dev);
-		dev->Activate(__uuidof(IAudioEndpointVolume), CLSCTX_ALL,NULL, (void**)&audio);
+	deve = NULL; dev = NULL; audio = NULL;
+	if (SUCCEEDED(CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL, CLSCTX_ALL, __uuidof(IMMDeviceEnumerator), (void**)&deve))){
+		deve->GetDefaultAudioEndpoint(eRender, eConsole, &dev);
+		dev->Activate(__uuidof(IAudioEndpointVolume), CLSCTX_ALL, NULL, (void**)&audio);
 		float lv;
 		audio->GetMasterVolumeLevelScalar(&lv);
-		m_sl.SetRange(0,     100000);
+		m_sl.SetRange(0, 100000);
 		m_sl.SetPos((int)((float)lv*100000.0f));
-	}else{
-		deve=NULL;
-		m_sl.SetRange(0,1000);
+	}
+	else{
+		deve = NULL;
+		m_sl.SetRange(0, 1000);
 		m_sl.SetPos(600);
-		DWORD vol=GetVol();
+		DWORD vol = GetVol();
 		union a{
 			DWORD vol2;
 			WORD b[2];
 		} volu;
 		volu.vol2 = vol;
-		DWORD c=(DWORD)volu.b[0];
-		float d=(float)c; d=d/65535.0f;
-		d=1000.0f*d+1.0f;
+		DWORD c = (DWORD)volu.b[0];
+		float d = (float)c; d = d / 65535.0f;
+		d = 1000.0f*d + 1.0f;
 		m_sl.SetPos((int)d);
 	}
 
-	SetTimer(5211,20,NULL);
+	SetTimer(5211, 20, NULL);
 
-	ttt_=5;
-//	uTimerId = timeSetEvent(1, 0, TimeCallback, NULL, TIME_PERIODIC);
+	ttt_ = 5;
+	//	uTimerId = timeSetEvent(1, 0, TimeCallback, NULL, TIME_PERIODIC);
 #if WIN64
 #else
-	plug(karento2,mod);
+	plug(karento2, mod);
 #endif	
 	WAVEFORMATEX wfx1;
-    wfx1.wFormatTag = WAVE_FORMAT_PCM;
-    wfx1.nChannels = 2;
-    wfx1.nSamplesPerSec = 44100;
-    wfx1.wBitsPerSample = 16;
-    wfx1.nBlockAlign = wfx1.nChannels * wfx1.wBitsPerSample / 8;
-    wfx1.nAvgBytesPerSec = wfx1.nSamplesPerSec * wfx1.nBlockAlign;
-    wfx1.cbSize = 0;
+	wfx1.wFormatTag = WAVE_FORMAT_PCM;
+	wfx1.nChannels = 2;
+	wfx1.nSamplesPerSec = 48000;
+	wfx1.wBitsPerSample = 24;
+	wfx1.nBlockAlign = wfx1.nChannels * wfx1.wBitsPerSample / 8;
+	wfx1.nAvgBytesPerSec = wfx1.nSamplesPerSec * wfx1.nBlockAlign;
+	wfx1.cbSize = 0;
 
-    waveOutOpen(&hwo,WAVE_MAPPER,&wfx1,NULL,NULL,CALLBACK_NULL);
+	waveOutOpen(&hwo, WAVE_MAPPER, &wfx1, NULL, NULL, CALLBACK_NULL);
+
+	/////////////////////////////////
+
+	DWORD edition = PRODUCT_UNDEFINED;
+	OSVERSIONINFOEX in; ZeroMemory(&in, sizeof(in)); in.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX); GetVersionExW((OSVERSIONINFO*)&in);
+	CString ss;
+	HMODULE	hModule;
+
+	BOOL(CALLBACK* pfnGetProductInfo)(DWORD dwOSMajorVersion, DWORD dwOSMinorVersion, DWORD dwSpMajorVersion, DWORD dwSpMinorVersion, PDWORD pdwReturnedProductType);
+	hModule = ::LoadLibrary(_T("kernel32.dll"));
+	(*(FARPROC*)&pfnGetProductInfo) = ::GetProcAddress(hModule, "GetProductInfo");
+	switch (in.dwPlatformId){
+	case 1:
+		switch (in.dwMinorVersion){
+		case 0:
+			ss = _T("Windows 95"); break;
+		case 10:
+			ss = _T("Windows 98"); break;
+		case 90:
+			ss = _T("Windows Me"); break;
+		}break;
+	case 2:
+		switch (in.dwMajorVersion){
+		case 3:
+			ss = _T("Windows NT 3.51"); break;
+		case 4:
+			ss = _T("Windows NT 4.0"); break;
+		case 5:
+			if (in.dwMinorVersion == 0){
+				ss = _T("Windows 2000"); break;
+			}
+			if (in.dwMinorVersion == 1){
+				ss = _T("Windows XP");
+				if ((in.wSuiteMask & VER_SUITE_PERSONAL) == VER_SUITE_PERSONAL){
+					ss += " Home Edition";
+				}
+				else{
+					ss += " Professional Edition";
+				}
+				break;
+			}
+			if (in.dwMinorVersion == 2){
+				ss = _T("Windows Server 2003");
+				if ((in.wSuiteMask & VER_SUITE_DATACENTER)
+					== VER_SUITE_DATACENTER)
+				{
+					ss += " Datacenter Edition";
+				}
+				else if ((in.wSuiteMask & VER_SUITE_ENTERPRISE)
+					== VER_SUITE_ENTERPRISE)
+				{
+					ss += " Enterprise Edition";
+				}
+				else if (in.wSuiteMask == VER_SUITE_BLADE)
+				{
+					ss += " Web Edition";
+				}
+				else
+				{
+					ss += " Standard Edition";
+				}
+				break;
+			}
+		case 6:
+			if (pfnGetProductInfo(
+				in.dwMajorVersion,
+				in.dwMinorVersion,
+				in.wServicePackMajor,
+				in.wServicePackMinor,
+				&edition)){
+				if (in.dwMinorVersion == 0){
+					if (in.wProductType == VER_NT_WORKSTATION)
+					{
+						ss = _T("Windows Vista");
+						switch (edition)
+						{
+						case PRODUCT_ENTERPRISE:
+						case PRODUCT_ENTERPRISE_N:
+						case PRODUCT_ENTERPRISE_E:
+						case PRODUCT_ENTERPRISE_SERVER_CORE:
+						case PRODUCT_ENTERPRISE_SERVER_IA64:
+							ss += " Enterprise Edition";
+							break;
+						case PRODUCT_ULTIMATE:
+						case PRODUCT_ULTIMATE_N:
+						case PRODUCT_ULTIMATE_E:
+							ss += " Ultimate Edition";
+							break;
+						case PRODUCT_BUSINESS:
+							ss += " Business Edition";
+							break;
+						case PRODUCT_HOME_PREMIUM:
+						case PRODUCT_HOME_PREMIUM_N:
+							ss += " Home Premium Edition";
+							break;
+						case 0x30:
+						case 49:
+							ss += " Professional Edition";
+							break;
+						case PRODUCT_HOME_BASIC:
+							ss += " Home Basic Edition";
+							break;
+						case PRODUCT_STARTER:
+							ss += " Starter Edition";
+							break;
+						default:
+							ss += " Unknown Edition";
+							break;
+						}
+					}
+					else{
+						ss = _T("Windows Server 2008");
+						if ((in.wSuiteMask & VER_SUITE_DATACENTER)
+							== VER_SUITE_DATACENTER)
+						{
+							ss += " Datacenter Edition";
+						}
+						else if ((in.wSuiteMask & VER_SUITE_ENTERPRISE)
+							== VER_SUITE_ENTERPRISE)
+						{
+							ss += " Enterprise Edition";
+						}
+						else if (in.wSuiteMask == VER_SUITE_BLADE)
+						{
+							ss += " Web Edition";
+						}
+						else
+						{
+							ss += " Standard Edition";
+						}
+						break;
+					}
+
+					break;
+				}
+				else{
+					if (in.dwMinorVersion == 1){
+						if (in.wProductType == VER_NT_WORKSTATION){
+							ss = _T("Windows 7");
+							switch (edition)
+							{
+							case PRODUCT_ENTERPRISE:
+							case PRODUCT_ENTERPRISE_N:
+							case PRODUCT_ENTERPRISE_E:
+							case PRODUCT_ENTERPRISE_SERVER_CORE:
+							case PRODUCT_ENTERPRISE_SERVER_IA64:
+								ss += " Enterprise Edition";
+								break;
+							case PRODUCT_ULTIMATE:
+							case PRODUCT_ULTIMATE_N:
+							case PRODUCT_ULTIMATE_E:
+								ss += " Ultimate Edition";
+								break;
+							case PRODUCT_BUSINESS:
+								ss += " Business Edition";
+								break;
+							case PRODUCT_HOME_PREMIUM:
+							case PRODUCT_HOME_PREMIUM_N:
+								ss += " Home Premium Edition";
+								break;
+							case 0x30:
+							case 49:
+								ss += " Professional Edition";
+								break;
+							case PRODUCT_HOME_BASIC:
+								ss += " Home Basic Edition";
+								break;
+							case PRODUCT_STARTER:
+								ss += " Starter Edition";
+								break;
+							default:
+								ss += " Unknown Edition";
+								break;
+							}
+						}
+						else{
+							ss = _T("Windows Server 2008 R2");
+							if ((in.wSuiteMask & VER_SUITE_DATACENTER)
+								== VER_SUITE_DATACENTER)
+							{
+								ss += " Datacenter Edition";
+							}
+							else if ((in.wSuiteMask & VER_SUITE_ENTERPRISE)
+								== VER_SUITE_ENTERPRISE)
+							{
+								ss += " Enterprise Edition";
+							}
+							else if (in.wSuiteMask == VER_SUITE_BLADE)
+							{
+								ss += " Web Edition";
+							}
+							else
+							{
+								ss += " Standard Edition";
+							}
+							break;
+						}
+						break;
+					}
+					if (in.dwMinorVersion == 2){
+						if (in.wProductType == VER_NT_WORKSTATION){
+							ss = _T("Windows 8");
+							if (edition == 0x48 || edition == 4 || edition == 0x54)
+								ss += " Enterprise Edition";
+							if (edition == 0x30 || edition == 0x31)
+								ss += " Professional Edition";
+							if (edition == 0x67)
+								ss += " Pro with MC Edition";
+							if (edition == 0x36 || edition == 0x65 || edition == 0x62)
+								ss += " Home Edition";
+							break;
+						}
+						else{
+							ss = _T("Windows Server 2012");
+							if ((in.wSuiteMask & VER_SUITE_DATACENTER)
+								== VER_SUITE_DATACENTER)
+							{
+								ss += " Datacenter Edition";
+							}
+							else if ((in.wSuiteMask & VER_SUITE_ENTERPRISE)
+								== VER_SUITE_ENTERPRISE)
+							{
+								ss += " Enterprise Edition";
+							}
+							else if (in.wSuiteMask == VER_SUITE_BLADE)
+							{
+								ss += " Web Edition";
+							}
+							else
+							{
+								ss += " Standard Edition";
+							}
+							break;
+						}
+						break;
+					}
+					if (in.dwMinorVersion == 3){
+						if (in.wProductType == VER_NT_WORKSTATION){
+							ss = _T("Windows 8.1");
+							if (edition == 0x48 || edition == 4 || edition == 0x54)
+								ss += " Enterprise Edition";
+							if (edition == 0x30 || edition == 0x31)
+								ss += " Professional Edition";
+							if (edition == 0x67)
+								ss += " Pro with MC Edition";
+							if (edition == 0x36 || edition == 0x65 || edition == 0x62)
+								ss += " Home Edition";
+							break;
+						}
+						else{
+							ss = _T("Windows Server 2012 R2");
+							if ((in.wSuiteMask & VER_SUITE_DATACENTER)
+								== VER_SUITE_DATACENTER)
+							{
+								ss += " Datacenter Edition";
+							}
+							else if ((in.wSuiteMask & VER_SUITE_ENTERPRISE)
+								== VER_SUITE_ENTERPRISE)
+							{
+								ss += " Enterprise Edition";
+							}
+							else if (in.wSuiteMask == VER_SUITE_BLADE)
+							{
+								ss += " Web Edition";
+							}
+							else
+							{
+								ss += " Standard Edition";
+							}
+							break;
+						}
+						break;
+					}
+					if (in.dwMinorVersion == 4){
+						ss = _T("Windows 10 Preview"); break;
+						switch (edition)
+						{
+						case PRODUCT_ENTERPRISE:
+						case PRODUCT_ENTERPRISE_N:
+						case PRODUCT_ENTERPRISE_E:
+						case PRODUCT_ENTERPRISE_SERVER_CORE:
+						case PRODUCT_ENTERPRISE_SERVER_IA64:
+							ss += " Enterprise Edition";
+							break;
+						case PRODUCT_ULTIMATE:
+						case PRODUCT_ULTIMATE_N:
+						case PRODUCT_ULTIMATE_E:
+							ss += " Ultimate Edition";
+							break;
+						case PRODUCT_BUSINESS:
+							ss += " Business Edition";
+							break;
+						case PRODUCT_HOME_PREMIUM:
+						case PRODUCT_HOME_PREMIUM_N:
+							ss += " Home Premium Edition";
+							break;
+						case 0x30:
+						case 49:
+							ss += " Professional Edition";
+							break;
+						case PRODUCT_HOME_BASIC:
+							ss += " Home Basic Edition";
+							break;
+						case PRODUCT_STARTER:
+							ss += " Starter Edition";
+							break;
+						default:
+							ss += " Unknown Edition";
+							break;
+						}
+					}
+				}
+			}
+		case 10:
+			if (pfnGetProductInfo(
+				in.dwMajorVersion,
+				in.dwMinorVersion,
+				in.wServicePackMajor,
+				in.wServicePackMinor,
+				&edition)){
+				if (in.dwMinorVersion == 0){
+					ss = _T("Windows 10"); break;
+					switch (edition)
+					{
+					case PRODUCT_ENTERPRISE:
+					case PRODUCT_ENTERPRISE_N:
+					case PRODUCT_ENTERPRISE_E:
+					case PRODUCT_ENTERPRISE_SERVER_CORE:
+					case PRODUCT_ENTERPRISE_SERVER_IA64:
+						ss += " Enterprise Edition";
+						break;
+					case PRODUCT_ULTIMATE:
+					case PRODUCT_ULTIMATE_N:
+					case PRODUCT_ULTIMATE_E:
+						ss += " Ultimate Edition";
+						break;
+					case PRODUCT_BUSINESS:
+						ss += " Business Edition";
+						break;
+					case PRODUCT_HOME_PREMIUM:
+					case PRODUCT_HOME_PREMIUM_N:
+						ss += " Home Premium Edition";
+						break;
+					case 0x30:
+					case 49:
+						ss += " Professional Edition";
+						break;
+					case PRODUCT_HOME_BASIC:
+						ss += " Home Basic Edition";
+						break;
+					case PRODUCT_STARTER:
+						ss += " Starter Edition";
+						break;
+					default:
+						ss += " Unknown Edition";
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	::FreeLibrary(hModule);
+	s.Format(_T("%d.%d(%x) %s %s %s"), in.dwMajorVersion, in.dwMinorVersion, edition, ss, in.szCSDVersion, IsWow64() ? _T("64bit") : _T("32bit"));
+	m_OS.SetWindowText(s);
 
 	return TRUE;  // TRUE を返すとコントロールに設定したフォーカスは失われません。
 }
@@ -963,7 +1366,7 @@ int current_section;
 long whsize;
 int ret2;
 
-#define OUTPUT_BUFFER_NUM   10
+//#define OUTPUT_BUFFER_NUM   10
 #define OUTPUT_BUFFER_SIZE  BUFSZ
 char bufwav[OUTPUT_BUFFER_SIZE*60];
 char buf[OUTPUT_BUFFER_NUM][OUTPUT_BUFFER_SIZE];
@@ -1117,8 +1520,8 @@ DWORD COggDlg::GetVol()
 	WAVEFORMATEX wfx1;
     wfx1.wFormatTag = WAVE_FORMAT_PCM;
     wfx1.nChannels = 2;
-    wfx1.nSamplesPerSec = 44100;
-    wfx1.wBitsPerSample = 16;
+    wfx1.nSamplesPerSec = 48000;
+    wfx1.wBitsPerSample = 24;
     wfx1.nBlockAlign = wfx1.nChannels * wfx1.wBitsPerSample / 8;
     wfx1.nAvgBytesPerSec = wfx1.nSamplesPerSec * wfx1.nBlockAlign;
     wfx1.cbSize = 0;
@@ -1750,6 +2153,7 @@ void COggDlg::play()
 //		return;
 //	f.Close();
 	wavch=2;
+	wavsam = 16;
 	ZeroMemory(bufwav3,sizeof(bufwav3));
 	if(((mode>=10 && mode<=20) || mode<=-10) && mode!=-10){
 		thend1=FALSE;
@@ -1937,6 +2341,7 @@ void COggDlg::play()
 			}
 		}
 		wavbit=sikpi.dwSamplesPerSec;	wavch=sikpi.dwChannels;	loop1=0;loop2=(int)((double)sikpi.dwLength*(double)sikpi.dwSamplesPerSec/1000.0);
+		wavsam = sikpi.dwBitsPerSample;
 		if(sikpi.dwLength==(DWORD)-1) loop2=0;	data_size=oggsize=loop2*4;
 		m_time.SetRange(0,(data_size)/4,TRUE);
 		if(mod->SetPosition) mod->SetPosition(kmp,0);
@@ -1982,7 +2387,7 @@ void COggDlg::play()
 	if(wavbit==0 || wavbit>48000) wavbit=44100;
     wfx1.nChannels = wavch;
     wfx1.nSamplesPerSec = wavbit;
-    wfx1.wBitsPerSample = 16;
+	wfx1.wBitsPerSample = wavsam;
     wfx1.nBlockAlign = wfx1.nChannels * wfx1.wBitsPerSample / 8;
     wfx1.nAvgBytesPerSec = wfx1.nSamplesPerSec * wfx1.nBlockAlign;
     wfx1.cbSize = 0;
@@ -3195,7 +3600,7 @@ int playwavkpi(char* bw,int old,int l1,int l2)
 	return l1+l2;
 }
 
-BYTE bufkpi[OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM*60];
+BYTE bufkpi[OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM*100];
 int readkpi(char*bw,int cnt)
 {
 	_set_se_translator( trans_func );
@@ -4872,6 +5277,13 @@ void timerog1(UINT nIDEvent)
 					pl->Get(plcnt);
 					pl->SIcon(plcnt);
 					thn=FALSE;
+					for (int j = 0; j < 200; j++){
+						DoEvent();
+						Sleep(10);
+						if (thn == TRUE){
+							break;
+						}
+					}
 					og->stop();
 					fade1=0;lenl=0;
 					og->OnRestart();

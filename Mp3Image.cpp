@@ -238,6 +238,8 @@ void CMp3Image::Load(CString s)
 
 	cdc0 = GetDC();
 	img.Load(s1);
+	y=img.GetHeight();
+	x=img.GetWidth();
 	if(img.Save(s2)!=S_OK){MessageBox(_T("プログラムにバグがあるか未対応形式です。"));
 				DestroyWindow();
 			return;}
@@ -249,14 +251,13 @@ void CMp3Image::Load(CString s)
 	bmpsub = CBitmap::FromHandle( hbmp );
 	dc.SelectObject(bmpsub);
 	ReleaseDC(cdc0);
-	y=img.GetHeight();
-	x=img.GetWidth();
+
 	CFile::Remove(s2);
 
 	CString str;
 	str.Format(_T("X: %4d"),x);
 	m_x.SetWindowText(str);
-	str.Format(_T("Y: %4d"),x);
+	str.Format(_T("Y: %4d"),y);
 	m_y.SetWindowText(str);
 
 	Invalidate(FALSE);

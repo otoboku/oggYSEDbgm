@@ -85,7 +85,7 @@ CString COggDlg::init(HWND hwnd,int sm)
 		p.nSamplesPerSec=sm;
 		p.nBlockAlign=4;
 		p.nAvgBytesPerSec=p.nSamplesPerSec*p.nBlockAlign;
-		p.wBitsPerSample=16;
+		p.wBitsPerSample=24;
 		m_p->SetFormat(&p);
 	}
 	//m_p->QueryInterface(IID_IDirectSound3DListener, (LPVOID*)&m_listener);
@@ -183,7 +183,7 @@ UINT HandleNotifications(LPVOID)
 //		int ik;
 //		for(ik=0;ik<60;ik++){
 //		if(syukai)
-			::WaitForMultipleObjects(1, ev, FALSE, 60);
+			::WaitForMultipleObjects(1, ev, FALSE, 40);
 //		else
 			//Sleep(1);
 			if(sek==1){
@@ -247,8 +247,10 @@ UINT HandleNotifications(LPVOID)
 //			}
 //			Sleep(750);
 			oldw=oldw2-(wavbit);
-			if(((int)oldw)<0)oldw=wavbit;
+			if(((int)oldw)<=0)oldw=wavbit;
 			int flgn=0;
+			playf = 1;
+			thn = FALSE;
 			if(m_dsb && thn==FALSE){
 				m_dsb->GetCurrentPosition(&PlayCursor, &WriteCursor);
 				if(oldw<=PlayCursor) flgn=1;
@@ -275,89 +277,4 @@ UINT HandleNotifications(LPVOID)
 		}
 	}
 
-
-//----以下無効	
-/*	for(;;){
-		DWORD  dwDataLen = WAVDALen/10;
-		Sleep(1);
-		if(m_dsb==NULL) return 0;
-		if(m_dsb)m_dsb->GetCurrentPosition(&PlayCursor, &WriteCursor);
-		if(ttt<WriteCursor){//書き込み
-			playwavds(bufwav2);
-			m_dsb->Lock(ttt,dwDataLen,(LPVOID *)&pdsb,&dwDataLen,NULL,0,0);
-			memcpy(pdsb,bufwav2,dwDataLen);
-			m_dsb->Unlock(pdsb,dwDataLen,NULL,0);
-			ttt = ttt + (int)dwDataLen;
-			if( ttt > WAVDALen-(int)dwDataLen) ttt = 0;
-		Sleep(66);//待機時間 リングバッファの空きをここで待つ
-		}
-		if(fade1){
-			playf=0;
-			m_dsb->Stop();
-			ReleaseOggVorbis(&ogg);
-			ogg=NULL;
-
-			for(int y=0;y<11;y++){
-				CloseHandle(hNotifyEvent[y]);hNotifyEvent[y] = (HANDLE)NULL;
-			}
-			return 0;
-		}
-	}
-
-	while((hRet = WaitForMultipleObjects(11, hNotifyEvent, FALSE, INFINITE))!= WAIT_FAILED)
-	{
-		// Deal with the event that got signalled.
-		switch(hRet-WAIT_OBJECT_0)
-		{
-		case 0:
-		case 1:
-		case 2:
-		case 3:
-		case 4:
-		case 5:
-		case 6:
-		case 7:
-		case 8:
-		case 9:
-			{	// A play notification has been received.
-				DWORD  dwDataLen = WAVDALen/10;
-
-//				ttt = ttt + (int)dwDataLen;
-//				if( ttt > WAVDALen-(int)dwDataLen) ttt = 0;
-				int tttt=(hRet-WAIT_OBJECT_0);tttt+=8;
-				if(tttt>9)tttt-=10;
-				ttt=tttt*dwDataLen;
-				playwavds(bufwav2);
-				m_dsb->Lock(ttt,dwDataLen,(LPVOID *)&pdsb,&dwDataLen,NULL,0,0);
-				memcpy(pdsb,bufwav2,dwDataLen);
-				m_dsb->Unlock(pdsb,dwDataLen,NULL,0);
-				if(fade1){
-					m_dsb->Stop();
-					ReleaseOggVorbis(&ogg);
-					ogg=NULL;
-
-					for(int y=0;y<11;y++){
-						CloseHandle(hNotifyEvent[y]);hNotifyEvent[y] = (HANDLE)NULL;
-					}
-					return 0;
-				}
-				break;
-			}
-		case 10:
-			{
-
-				m_dsb->Stop();
-					for(int y=0;y<11;y++){
-						CloseHandle(hNotifyEvent[y]);hNotifyEvent[y] = (HANDLE)NULL;
-					}
-				break;
-			}
-		default:
-			ASSERT(FALSE);	// we should never fall in here.
-			break;
-		}// end switch
-	} // while
-	//UpdateProgressBar();
-	return 0;
-	*/
 } //handlenotifications()

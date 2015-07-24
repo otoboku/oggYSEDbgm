@@ -224,6 +224,7 @@ public:
 	afx_msg void OnPlayList();
 	afx_msg void OnBnmp3jake();
 	CButton m_mp3jake;
+	CStatic m_OS;
 };
 
 //{{AFX_INSERT_LOCATION}}

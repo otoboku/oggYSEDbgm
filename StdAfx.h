@@ -19,15 +19,15 @@
 // 下で指定された定義の前に対象プラットフォームを指定しなければならない場合、以下の定義を変更してください。
 // 異なるプラットフォームに対応する値に関する最新情報については、MSDN を参照してください。
 #ifndef WINVER				// Windows XP 以降のバージョンに固有の機能の使用を許可します。
-#define WINVER 0x0600		// これを Windows の他のバージョン向けに適切な値に変更してください。
+#define WINVER 0x501		// これを Windows の他のバージョン向けに適切な値に変更してください。
 #endif
 
 #ifndef _WIN32_WINNT		// Windows XP 以降のバージョンに固有の機能の使用を許可します。                   
-#define _WIN32_WINNT 0x600	// これを Windows の他のバージョン向けに適切な値に変更してください。
+#define _WIN32_WINNT 0x501	// これを Windows の他のバージョン向けに適切な値に変更してください。
 #endif						
-
+#define NTDDI_VERSION 0x05010000
 #ifndef _WIN32_WINDOWS		// Windows 98 以降のバージョンに固有の機能の使用を許可します。
-#define _WIN32_WINDOWS 0x0600 // これを Windows Me またはそれ以降のバージョン向けに適切な値に変更してください。
+#define _WIN32_WINDOWS 0x0501 // これを Windows Me またはそれ以降のバージョン向けに適切な値に変更してください。
 #endif
 
 #define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS	// 一部の CString コンストラクタは明示的です。
@@ -36,7 +36,7 @@
 #define _AFX_ALL_WARNINGS
 
 #include <afxwin.h>         // MFC のコアおよび標準コンポーネント
-//#include <afxext.h>         // MFC の拡張部分
+#include <afxext.h>         // MFC の拡張部分
 
 
 #include <afxdisp.h>        // MFC オートメーション クラス
