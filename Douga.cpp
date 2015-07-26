@@ -2,6 +2,8 @@
 //
 
 #include "stdafx.h"
+#include "d3d.h"
+#include "d3dtypes.h"
 #include "ogg.h"
 #include "oggDlg.h"
 #include "Douga.h"

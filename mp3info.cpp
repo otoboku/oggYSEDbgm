@@ -103,7 +103,8 @@ BOOL CMp3Info::Load(const TCHAR *szFileName,BOOL bVbrScan)
 //			mmckOutinfoParent.fccType = mmioFOURCC('R','M','P','3');
 			char buf[256];
 			f.SeekToBegin(); f.Read(buf,256);
-			for(int i=0;i<250;i++){ if(buf[i]=='R' || buf[i+1]=='M' || buf[i+2]=='P' || buf[i+3]=='3') break; }
+			int i;
+			for(i=0;i<250;i++){ if(buf[i]=='R' || buf[i+1]=='M' || buf[i+2]=='P' || buf[i+3]=='3') break; }
 			if(i!=250)
 //			if(mmioDescend(hmmio,&mmckOutinfoParent,NULL,MMIO_FINDRIFF) == MMSYSERR_NOERROR)
 			{
@@ -111,7 +112,7 @@ BOOL CMp3Info::Load(const TCHAR *szFileName,BOOL bVbrScan)
 //				MMCKINFO	mmckOutinfoSubchunk;
 //				memset(&mmckOutinfoSubchunk,0,sizeof(mmckOutinfoSubchunk));
 //				mmckOutinfoSubchunk.fccType = mmioFOURCC('d','a','t','a');
-				for(int i=0;i<250;i++){ if(buf[i]=='d' || buf[i+1]=='a' || buf[i+2]=='t' || buf[i+3]=='a') break; }
+				for(i=0;i<250;i++){ if(buf[i]=='d' || buf[i+1]=='a' || buf[i+2]=='t' || buf[i+3]=='a') break; }
 				if(i!=250)
 //				if(mmioDescend(hmmio,&mmckOutinfoSubchunk,&mmckOutinfoParent,MMIO_FINDCHUNK) == MMSYSERR_NOERROR)
 				{

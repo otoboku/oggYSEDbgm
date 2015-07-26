@@ -539,21 +539,24 @@ CAPTION "プレイリスト"
 FONT 9, "メイリオ", 400, 0, 0x80
 BEGIN
     PUSHBUTTON      "閉じる",IDOK,434,7,9,14,NOT WS_VISIBLE
-    PUSHBUTTON      "",IDC_BUTTON1,123,7,18,13,BS_ICON | BS_FLAT
-    PUSHBUTTON      "",IDC_BUTTON5,141,7,17,13,BS_ICON | BS_FLAT
-    PUSHBUTTON      "",IDC_BUTTON10,162,7,17,13,BS_ICON | BS_FLAT
-    PUSHBUTTON      "",IDC_BUTTON11,180,7,17,13,BS_ICON | BS_FLAT
-    CONTROL         "",IDC_LIST1,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | LVS_OWNERDATA | WS_BORDER | WS_TABSTOP,7,23,436,103
+    PUSHBUTTON      "",IDC_BUTTON1,123,9,18,13,BS_ICON | BS_FLAT
+    PUSHBUTTON      "",IDC_BUTTON5,141,9,17,13,BS_ICON | BS_FLAT
+    PUSHBUTTON      "",IDC_BUTTON10,162,9,17,13,BS_ICON | BS_FLAT
+    PUSHBUTTON      "",IDC_BUTTON11,180,9,17,13,BS_ICON | BS_FLAT
+    CONTROL         "",IDC_LIST1,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | LVS_OWNERDATA | WS_BORDER | WS_TABSTOP,7,25,436,101
     EDITTEXT        IDC_EDIT1,437,7,6,14,ES_AUTOHSCROLL | NOT WS_VISIBLE
     CONTROL         "連続再生",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,4,48,8
     CONTROL         "ループ再生",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,12,47,10
     CONTROL         "ツールチップ表示",IDC_CHECK28,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,55,3,67,10
     CONTROL         "最小化、復帰",IDC_CHECK29,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,55,12,61,10
-    LTEXT           "検索",IDC_STATIC,202,10,16,8
-    EDITTEXT        IDC_EDIT2,219,8,84,12,ES_AUTOHSCROLL
-    PUSHBUTTON      "",IDC_BUTTON16,304,7,17,13,BS_ICON | BS_FLAT
-    PUSHBUTTON      "",IDC_BUTTON20,322,7,17,13,BS_ICON | BS_FLAT
-    CONTROL         "再生位置を保存",IDC_CHECK5,"Button",BS_AUTOCHECKBOX | BS_PUSHLIKE | WS_TABSTOP,341,7,64,13
+    EDITTEXT        IDC_EDIT2,204,9,67,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "",IDC_BUTTON16,289,9,17,13,BS_ICON | BS_FLAT
+    PUSHBUTTON      "",IDC_BUTTON20,272,9,17,13,BS_ICON | BS_FLAT
+    CONTROL         "再生位置\nを保存",IDC_CHECK5,"Button",BS_AUTOCHECKBOX | BS_PUSHLIKE | BS_MULTILINE | WS_TABSTOP,309,2,39,20
+    GROUPBOX        "ファイル移動",IDC_STATICido,121,0,80,23,BS_CENTER | BS_FLAT
+    GROUPBOX        "あいまい検索",IDC_STATICken,202,0,106,23,BS_CENTER
+    CONTROL         "mp3",IDC_CHECK6,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,351,2,31,10
+    CONTROL         "DShow",IDC_CHECK7,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,351,11,39,10
 END
 
 IDD_GRAPH DIALOGEX 0, 0, 253, 135
@@ -680,10 +683,10 @@ BEGIN
         BEGIN
             VALUE "Comments", "ファルコム簡易プレイヤ＋メディアプレイヤ+kpiプレイヤ"
             VALUE "CompanyName", "Pre Prayer Power Soft"
-            VALUE "FileDescription", "ogg/wav簡易プレイヤ+メディアプレイヤ Ver 0.6i Rel.7"
+            VALUE "FileDescription", "ogg/wav簡易プレイヤ+メディアプレイヤ Ver 0.6i Rel.8"
             VALUE "FileVersion", "0.6.9.7"
             VALUE "InternalName", "ogg"
-            VALUE "LegalCopyright", "Copyright (C) 2015.06.14 ちゃちゃ/大原隆誠"
+            VALUE "LegalCopyright", "Copyright (C) 2015.07.25 ちゃちゃ/大原隆誠"
             VALUE "LegalTrademarks", "Pre Prayer Power Soft"
             VALUE "OriginalFilename", "oggYSEDbgm.exe"
             VALUE "ProductName", "ファルコム簡易プレイヤ＋メディアプレイヤ+kpiプレイヤ"

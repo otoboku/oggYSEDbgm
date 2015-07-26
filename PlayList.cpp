@@ -54,6 +54,8 @@ void CPlayList::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BUTTON16, m_findup);
 	DDX_Control(pDX, IDC_BUTTON20, m_finddown);
 	DDX_Control(pDX, IDC_CHECK5, m_savecheck);
+	DDX_Control(pDX, IDC_CHECK6, m_save_mp3);
+	DDX_Control(pDX, IDC_CHECK7, m_save_kpi);
 }
 
 
@@ -85,6 +87,8 @@ BEGIN_MESSAGE_MAP(CPlayList, CDialog)
 	ON_COMMAND(ID_POP_32787, &CPlayList::OnPop32787)
 	ON_BN_CLICKED(IDC_BUTTON16, &CPlayList::OnFindUp)
 	ON_BN_CLICKED(IDC_BUTTON20, &CPlayList::OnFindDown)
+	ON_BN_CLICKED(IDC_CHECK6, &CPlayList::OnBnClickedCheck6mp3)
+	ON_BN_CLICKED(IDC_CHECK7, &CPlayList::OnBnClickedCheck7dshow)
 END_MESSAGE_MAP()
 
 #include <eh.h>
@@ -145,12 +149,16 @@ BOOL CPlayList::OnInitDialog()
 	m_tooltip.AddTool(GetDlgItem(IDC_BUTTON5), _T("選択項目を上に持って行きます。"));
 	m_tooltip.AddTool(GetDlgItem(IDC_BUTTON10), _T("選択項目を一番下に持って行きます。"));
 	m_tooltip.AddTool(GetDlgItem(IDC_BUTTON11), _T("選択項目を下に持って行きます。"));
+	m_tooltip.AddTool(GetDlgItem(IDC_BUTTON16), _T("現在の位置から下に検索します。"));
+	m_tooltip.AddTool(GetDlgItem(IDC_BUTTON20), _T("現在の位置から上に検索します。"));
 	m_tooltip.AddTool(GetDlgItem(IDC_CHECK1), _T("プレイリストの順番に再生を行います。\n再生中にファイルドロップして追加しても演奏中の曲はそのまま鳴り続けます。"));
 	m_tooltip.AddTool(GetDlgItem(IDC_CHECK4), _T("選択した曲をループさせます。\n再生する前にチェックを入れる必要があります。\nそうでないとループはかかりません。\nループポイントが0のもの(mp3やループしない曲)が対象です。"));
 	m_tooltip.AddTool(GetDlgItem(IDC_CHECK28), _T("ツールチップを表示します。"));
 	m_tooltip.AddTool(GetDlgItem(IDC_CHECK29), _T("最小化、最小化からの復帰時、メイン画面とプレイリスト画面も同時に最小化、最小化からの復帰を行います。"));
 	m_tooltip.AddTool(GetDlgItem(IDC_CHECK5), _T("途中で演奏を停止した位置を自動保存します。\nmp3系と動画(avi,mp4など)のみ対応。\n停止ボタンもしくは終了したときのみ保存します。\n再生中に違う曲を選んだ時は位置は保存しません。"));
-	m_tooltip.SetDelayTime( TTDT_AUTOPOP, 10000 );
+	m_tooltip.AddTool(GetDlgItem(IDC_CHECK6), _T("mp3再生時に途中保存を有効にします。"));
+	m_tooltip.AddTool(GetDlgItem(IDC_CHECK7), _T("動画などのDirectShow使用時に途中保存を有効にします。"));
+	m_tooltip.SetDelayTime(TTDT_AUTOPOP, 10000);
 	m_tooltip.SendMessage(TTM_SETMAXTIPWIDTH, 0, 512);
 //	m_lc.SetMaxTipWidth(500)
 	DWORD dwExStyle = m_lc.GetExtendedStyle();
@@ -179,6 +187,8 @@ BOOL CPlayList::OnInitDialog()
 	pc=NULL;
 
 	m_savecheck.SetCheck(savedata.savecheck);
+	m_save_mp3.SetCheck(savedata.savecheck_mp3);
+	m_save_kpi.SetCheck(savedata.savecheck_dshow);
 
 	Load();
 	if(pc==NULL){
@@ -786,8 +796,9 @@ void CPlayList::Fol(CString fname)
 					else
 						f.SeekToBegin();
 					f.Read(buf,512);
+					int i = 0;
 					f.Close();
-					for(int i=0;i<500;i++){
+					for(;i<500;i++){
 						if(buf[i]=='F'&&buf[i+1]=='M'&&buf[i+2]=='C') break;
 					}
 					if(i!=500){
@@ -815,13 +826,15 @@ void CPlayList::Fol(CString fname)
 					ff.Read(buf,512);
 					int jj=ff.GetLength();if(jj>510) jj=510;
 					jj-=3;
-					for(int i=jj;i>0;i--){
+					int i;
+					for(i=jj;i>0;i--){
 						if(buf[i]==0&&(buf[i+1]==0||(BYTE)buf[i+1]==255)&&buf[i+2]==0)break;
 					}
 					ff.Close();
 					if(i!=0){
 						buf2=buf+i+3;
-						for(int j=0;;j++)if(buf2[j]==0)break;
+						int j = 0;
+						for(;;j++)if(buf2[j]==0)break;
 #if UNICODE
 						TCHAR ss1[512];
 						MultiByteToWideChar(CP_ACP,0,(LPCSTR)buf2,-1,ss1,2000);
@@ -861,7 +874,8 @@ void CPlayList::Fol(CString fname)
 					else
 						ff.SeekToBegin();
 					ff.Read(buf,0x80);
-					for(int i=0;i<0x80;i++){
+					int i = 0;
+					for(;i<0x80;i++){
 						if(buf[i+0]=='T'&&buf[i+1]=='A'&&buf[i+2]=='G')break;
 					}
 					ff.Close();
@@ -1109,7 +1123,8 @@ void CPlayList::Fol(CString fname)
 								ff.SeekToBegin();
 							ff.Read(buf,512);
 							ff.Close();
-							for(int i=0;i<500;i++){
+							int i = 0;
+							for(;i<500;i++){
 								if(buf[i]=='F'&&buf[i+1]=='M'&&buf[i+2]=='C') break;
 							}
 							if(i!=500){
@@ -1137,13 +1152,15 @@ void CPlayList::Fol(CString fname)
 							ff.Read(buf,512);
 							int jj=ff.GetLength();if(jj>510) jj=510;
 							jj-=3;
-							for(int i=jj;i>0;i--){
+							int i;
+							for(i=jj;i>0;i--){
 								if(buf[i]==0&&buf[i+1]==0&&buf[i+2]==0)break;
 							}
 							ff.Close();
 							if(i!=0){
 								buf2=buf+i+3;
-								for(int j=0;;j++)if(buf2[j]==0)break;
+								int j = 0;
+								for(;;j++)if(buf2[j]==0)break;
 #if UNICODE
 								TCHAR ss1[512];
 								MultiByteToWideChar(CP_ACP,0,(LPCSTR)buf2,-1,ss1,2000);
@@ -1183,7 +1200,8 @@ void CPlayList::Fol(CString fname)
 							else
 								ff.SeekToBegin();
 							ff.Read(buf,0x80);
-							for(int i=0;i<0x80;i++){
+							int i = 0;
+							for(;i<0x80;i++){
 								if(buf[i+0]=='T'&&buf[i+1]=='A'&&buf[i+2]=='G')break;
 							}
 							ff.Close();
@@ -1573,7 +1591,9 @@ void CPlayList::OnTimer(UINT nIDEvent)
 #endif
 {
 	savedata.savecheck=m_savecheck.GetCheck();
-	CPlayList* pl=(CPlayList*)this;
+	savedata.savecheck_mp3 = m_save_mp3.GetCheck();
+	savedata.savecheck_dshow = m_save_kpi.GetCheck();
+	CPlayList* pl = (CPlayList*)this;
 	timerpl(nIDEvent,pl);
 	CDialog::OnTimer(nIDEvent);
 }
@@ -1695,7 +1715,8 @@ void CPlayList::OnLButtonUp(UINT nFlags, CPoint point)
 		int hItem = m_lc.HitTest(point,NULL);
 		if( hItem != -1){
 			playlistdata *p;int cnt=0,j,cnt2=0,*cn;
-			for(int Lindex=-1;;){
+			int Lindex = -1;
+			for(;;){
 				Lindex=m_lc.GetNextItem(Lindex,LVNI_ALL |LVNI_SELECTED);
 				if(Lindex==-1) break;
 				cnt++;
@@ -1708,7 +1729,8 @@ void CPlayList::OnLButtonUp(UINT nFlags, CPoint point)
 			}
 			//転送するインテックス番号を獲得する
 			cn =(int*)malloc(sizeof(int)*cnt2);
-			for(int cn1=0,Lindexx=-1;;cn1++){
+			int cn1, Lindexx;
+			for(cn1=0,Lindexx=-1;;cn1++){
 				Lindexx=m_lc.GetNextItem(Lindexx,LVNI_ALL |LVNI_SELECTED);
 				if(Lindexx==-1) break;
 				cn[cn1]=Lindexx;
@@ -1730,7 +1752,8 @@ void CPlayList::OnLButtonUp(UINT nFlags, CPoint point)
 				_tcscpy(pp.fol,pc[hItem].fol);
 				pp.sub=pc[hItem].sub;
 				pp.ret2=pc[hItem].ret2;
-				for(int cnt1=0;cnt1<cnt;cnt1++){
+				int cnt1 = 0;
+				for(;cnt1<cnt;cnt1++){
 					if(_tcscmp(p[cnt1].name,pp.name)==0 && _tcscmp(p[cnt1].fol,pp.fol)==0 && p[cnt1].sub==pp.sub && p[cnt1].ret2==pp.ret2){
 						break;
 					}
@@ -1744,12 +1767,14 @@ void CPlayList::OnLButtonUp(UINT nFlags, CPoint point)
 					}
 					m_lc.SetItemState(hItem  ,m_lc.GetItemState(hItem,LVIS_SELECTED)|LVIS_SELECTED,LVIS_SELECTED);
 				}else{//選択項目が上　ドロップ位置が下
-					for(Lindexx=-1;;){
+					int Lindexx = -1;
+					for(;;){
 						Lindexx=m_lc.GetNextItem(Lindexx,LVNI_ALL |LVNI_SELECTED);
 						if(Lindexx==-1) break;
 						m_lc.SetItemState(Lindexx,m_lc.GetItemState(Lindexx,LVIS_SELECTED)&~LVIS_SELECTED,LVIS_SELECTED);
 					}
-					for(int i=0;i<cn1;i++){
+					int i;
+					for(i=0;i<cn1;i++){
 						int k=hItem-cn[i];
 						for(int kk=0;kk<k;kk++){
 								OnXCHG(cn[i]+kk+1,cn[i]+kk);
@@ -1907,7 +1932,8 @@ void CPlayList::OnFindUp()
 
 
 	int flg=0;
-	for(int i=pnt2;i<playcnt;i++){
+	int i;
+	for(i=pnt2;i<playcnt;i++){
 		CString ss,ssl;
 		ss=pc[i].name;
 		ssl=ss;ssl.MakeLower();
@@ -1950,7 +1976,8 @@ void CPlayList::OnFindDown()
 
 
 	int flg=0;
-	for(int i=pnt2;i>=0;i--){
+	int i;
+	for(i=pnt2;i>=0;i--){
 		CString ss,ssl;
 		ss=pc[i].name;
 		ssl=ss;ssl.MakeLower();
@@ -1973,4 +2000,16 @@ void CPlayList::OnFindDown()
 		m_lc.EnsureVisible(i,FALSE);
 	}
 	m_lc.SetFocus();
+}
+
+
+void CPlayList::OnBnClickedCheck6mp3()
+{
+	// TODO: ここにコントロール通知ハンドラー コードを追加します。
+}
+
+
+void CPlayList::OnBnClickedCheck7dshow()
+{
+	// TODO: ここにコントロール通知ハンドラー コードを追加します。
 }

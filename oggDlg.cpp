@@ -1206,7 +1206,7 @@ BOOL COggDlg::OnInitDialog()
 	}
 
 	::FreeLibrary(hModule);
-	s.Format(_T("%d.%d(%x) %s %s %s"), in.dwMajorVersion, in.dwMinorVersion, edition, ss, in.szCSDVersion, IsWow64() ? _T("64bit") : _T("32bit"));
+	s.Format(_T("%s %s %s %d.%d(%x)"), ss, in.szCSDVersion, IsWow64() ? _T("64bit") : _T("32bit"), in.dwMajorVersion, in.dwMinorVersion, edition);
 	m_OS.SetWindowText(s);
 
 	return TRUE;  // TRUE を返すとコントロールに設定したフォーカスは失われません。
@@ -4073,13 +4073,15 @@ void COggDlg::stop()
 				}
 			}
 			if(flg==0){
-				CFile f;
-				if(f.Open(filen+_T(".save"),CFile::modeCreate|CFile::modeWrite,NULL)==TRUE){
-					if(mode==-10)
-						f.Write(&playb,sizeof(__int64));
-					if(mode==-2)
-						f.Write(&aa1_,sizeof(double));
-					f.Close();
+				if ((savedata.savecheck_mp3 == 1 && mode == -10) || (savedata.savecheck_dshow == 1 && mode == -2)){
+					CFile f;
+					if (f.Open(filen + _T(".save"), CFile::modeCreate | CFile::modeWrite, NULL) == TRUE){
+						if (mode == -10)
+							f.Write(&playb, sizeof(__int64));
+						if (mode == -2)
+							f.Write(&aa1_, sizeof(double));
+						f.Close();
+					}
 				}
 			}else{
 			}

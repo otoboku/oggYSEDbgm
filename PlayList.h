@@ -113,4 +113,8 @@ public:
 	CButtonST m_findup;
 	CButtonST m_finddown;
 	CButton m_savecheck;
+	CButton m_save_mp3;
+	CButton m_save_kpi;
+	afx_msg void OnBnClickedCheck6mp3();
+	afx_msg void OnBnClickedCheck7dshow();
 };

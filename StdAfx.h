@@ -9,6 +9,7 @@
 #ifndef _SECURE_ATL
 #define _SECURE_ATL 1
 #endif
+#define DIRECT3D_VERSION 0x700
 
 //#define _USING_V110_SDK71_
 
@@ -169,6 +170,8 @@ struct save{
 	int audiost;
 
 	int savecheck;
+	int savecheck_mp3;
+	int savecheck_dshow;
 };
 
 
