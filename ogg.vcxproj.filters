@@ -171,6 +171,9 @@
     <ClCompile Include="mp3info.cpp">
       <Filter>ライブラリ</Filter>
     </ClCompile>
+    <ClCompile Include="OSVersion.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ogg.rc">
@@ -336,6 +339,9 @@
     </ClInclude>
     <ClInclude Include="VbrTag.h">
       <Filter>ライブラリ</Filter>
+    </ClInclude>
+    <ClInclude Include="OSVersion.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

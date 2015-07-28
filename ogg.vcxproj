@@ -1077,6 +1077,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='uni|Win32'">Use</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="oggDlg_ds.cpp" />
+    <ClCompile Include="OSVersion.cpp" />
     <ClCompile Include="PlayList.cpp" />
     <ClCompile Include="PVI.cpp" />
     <ClCompile Include="Render.cpp" />
@@ -1194,6 +1195,7 @@
     <ClInclude Include="Nishi.h" />
     <ClInclude Include="ogg.h" />
     <ClInclude Include="oggDlg.h" />
+    <ClInclude Include="OSVersion.h" />
     <ClInclude Include="PlayList.h" />
     <ClInclude Include="PVI.h" />
     <ClInclude Include="Render.h" />
