@@ -1,6 +1,21 @@
 #include "stdafx.h"
 #include "OSVersion.h"
-
+#define PRODUCT_CORE_ARM                            0x00000061
+#define PRODUCT_CORE_N                              0x00000062
+#define PRODUCT_CORE_COUNTRYSPECIFIC                0x00000063
+#define PRODUCT_CORE_SINGLELANGUAGE                 0x00000064
+#define PRODUCT_CORE                                0x00000065
+#define PRODUCT_PROFESSIONAL_WMC                    0x00000067
+#define PRODUCT_MOBILE_CORE                         0x00000068
+#define PRODUCT_EMBEDDED_INDUSTRY_EVAL              0x00000069
+#define PRODUCT_EMBEDDED_INDUSTRY_E_EVAL            0x0000006A
+#define PRODUCT_EMBEDDED_EVAL                       0x0000006B
+#define PRODUCT_EMBEDDED_E_EVAL                     0x0000006C
+#define PRODUCT_CORE_SERVER                         0x0000006D
+#define PRODUCT_CLOUD_STORAGE_SERVER                0x0000006E
+#define PRODUCT_EDUCATION							0x00000079
+#define PRODUCT_EDUCATION_N							0x0000007A
+#define PRODUCT_MOBILE_ENTERPRISE					0x00000085
 
 
 BOOL COSVersion::IsWow64()
@@ -232,6 +247,8 @@ CString COSVersion::GetVersionString()
 								ss += " Pro with MC Edition";
 							if (edition == 0x36 || edition == 0x65 || edition == 0x62)
 								ss += " Home Edition";
+							if (edition == PRODUCT_MOBILE_CORE)
+								ss += " Mobile Edition";
 							break;
 						}
 						else {
@@ -269,6 +286,8 @@ CString COSVersion::GetVersionString()
 								ss += " Pro with MC Edition";
 							if (edition == 0x36 || edition == 0x65 || edition == 0x62)
 								ss += " Home Edition";
+							if (edition == PRODUCT_MOBILE_CORE)
+								ss += " Mobile Edition";
 							break;
 						}
 						else {
@@ -306,27 +325,30 @@ CString COSVersion::GetVersionString()
 						case PRODUCT_ENTERPRISE_SERVER_IA64:
 							ss += " Enterprise Edition";
 							break;
-						case PRODUCT_ULTIMATE:
-						case PRODUCT_ULTIMATE_N:
-						case PRODUCT_ULTIMATE_E:
-							ss += " Ultimate Edition";
-							break;
-						case PRODUCT_BUSINESS:
-							ss += " Business Edition";
-							break;
-						case PRODUCT_HOME_PREMIUM:
-						case PRODUCT_HOME_PREMIUM_N:
-							ss += " Home Premium Edition";
-							break;
 						case 0x30:
 						case 49:
+						case PRODUCT_PROFESSIONAL_WMC:
 							ss += " Professional Edition";
 							break;
-						case PRODUCT_HOME_BASIC:
-							ss += " Home Basic Edition";
+						case PRODUCT_CORE:
+						case PRODUCT_CORE_N:
+							ss += " Home Edition";
 							break;
-						case PRODUCT_STARTER:
-							ss += " Starter Edition";
+						case PRODUCT_CORE_COUNTRYSPECIFIC:
+							ss += " Home China Edition";
+							break;
+						case PRODUCT_CORE_SINGLELANGUAGE:
+							ss += " Home Single Language Edition";
+							break;
+						case PRODUCT_EDUCATION:
+						case PRODUCT_EDUCATION_N:
+							ss += " Education Edition";
+							break;
+						case PRODUCT_MOBILE_CORE:
+							ss += " Mobile Edition";
+							break;
+						case PRODUCT_MOBILE_ENTERPRISE:
+							ss += " Mobile Enterprise Edition";
 							break;
 						default:
 							ss += " Unknown Edition";
@@ -353,27 +375,29 @@ CString COSVersion::GetVersionString()
 					case PRODUCT_ENTERPRISE_SERVER_IA64:
 						ss += " Enterprise Edition";
 						break;
-					case PRODUCT_ULTIMATE:
-					case PRODUCT_ULTIMATE_N:
-					case PRODUCT_ULTIMATE_E:
-						ss += " Ultimate Edition";
-						break;
-					case PRODUCT_BUSINESS:
-						ss += " Business Edition";
-						break;
-					case PRODUCT_HOME_PREMIUM:
-					case PRODUCT_HOME_PREMIUM_N:
-						ss += " Home Premium Edition";
-						break;
 					case 0x30:
 					case 49:
 						ss += " Professional Edition";
 						break;
-					case PRODUCT_HOME_BASIC:
-						ss += " Home Basic Edition";
+					case PRODUCT_CORE:
+					case PRODUCT_CORE_N:
+						ss += " Home Edition";
 						break;
-					case PRODUCT_STARTER:
-						ss += " Starter Edition";
+					case PRODUCT_CORE_COUNTRYSPECIFIC:
+						ss += " Home China Edition";
+						break;
+					case PRODUCT_CORE_SINGLELANGUAGE:
+						ss += " Home Single Language Edition";
+						break;
+					case PRODUCT_EDUCATION:
+					case PRODUCT_EDUCATION_N:
+						ss += " Education Edition";
+						break;
+					case PRODUCT_MOBILE_CORE:
+						ss += " Mobile Edition";
+						break;
+					case PRODUCT_MOBILE_ENTERPRISE:
+						ss += " Mobile Enterprise Edition";
 						break;
 					default:
 						ss += " Unknown Edition";
