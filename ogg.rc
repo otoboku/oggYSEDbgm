@@ -178,7 +178,7 @@ BEGIN
     PUSHBUTTON      "三国志2",IDC_BUTTON54,170,178,33,14
     PUSHBUTTON      "プレイリスト",IDC_BUTTON57,7,210,42,14
     PUSHBUTTON      "mp3ジャケ",IDC_BUTTON58,88,210,43,14,WS_DISABLED
-    LTEXT           "スタティック",IDC_STATIC_OS,7,239,188,8
+    LTEXT           "スタティック",IDC_STATIC_OS,7,239,188,8,SS_NOTIFY
 END
 
 IDD_SENTAKU DIALOGEX 0, 0, 183, 273
@@ -1050,6 +1050,17 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "削除",                          ID_POP_32777
     END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_OGG_DIALOG AFX_DIALOG_LAYOUT
+BEGIN
+    0
 END
 
 

@@ -506,6 +506,11 @@ BOOL COggDlg::OnInitDialog()
 	stf = 1;
 	m_dou.SetCheck(1);
 	// CG: 以下のブロックはツールヒント コンポーネントによって追加されました
+	COSVersion os;
+	DWORD edition;
+	OSVERSIONINFOEX in;
+	BOOL dumy;
+	os.GetVersionInfo(in, edition, dumy);
 	{
 		// ツールヒント コントロールを作成します
 		m_tooltip.Create(this);
@@ -554,7 +559,6 @@ BOOL COggDlg::OnInitDialog()
 
 		m_tooltip.AddTool(GetDlgItem(IDC_BUTTON12), _T("拡張パネルを開く/閉じる"));
 
-		OSVERSIONINFO in; ZeroMemory(&in, sizeof(in)); in.dwOSVersionInfoSize = sizeof(OSVERSIONINFO); GetVersionEx(&in);
 		if (in.dwMajorVersion >= 6)
 			m_tooltip.AddTool(GetDlgItem(IDC_BUTTON21), _T("レンダリングを変更します。\nVMR7:DirectX7を使ったレンダリング\nVMR9:DirectX9を使ったレンダリング\n普段はデフォルトで使ってください。\nWindowsVista以降の場合、EVRを有効にチェックをいれてデフォルトが最適環境です。"));
 		else
@@ -586,6 +590,10 @@ BOOL COggDlg::OnInitDialog()
 		m_tooltip.AddTool(GetDlgItem(IDC_BUTTON58), _T("mp3/m4a/oggに埋め込まれているジャケットを表示します。"));
 
 		m_tooltip.AddTool(GetDlgItem(IDC_EDIT1), _T("次の曲へいくためのループ回数を設定します"));
+		
+		CString s;
+		s.Format(_T("%s\n↑の情報が間違っている時は↓の内容を作者へ\n詳細：Ver %d.%d(%d) Build %d"), os.GetVersionString(), in.dwMajorVersion, in.dwMinorVersion, edition, in.dwBuildNumber);
+		m_tooltip.AddTool(GetDlgItem(IDC_STATIC_OS), s);
 	}
 	m_tooltip.SetDelayTime(TTDT_AUTOPOP, 10000);
 	m_tooltip.SendMessage(TTM_SETMAXTIPWIDTH, 0, 512);
@@ -776,12 +784,7 @@ BOOL COggDlg::OnInitDialog()
 	waveOutOpen(&hwo, WAVE_MAPPER, &wfx1, NULL, NULL, CALLBACK_NULL);
 
 	/////////////////////////////////
-	COSVersion os;
-	DWORD edition;
-	OSVERSIONINFOEX in;
-	BOOL dumy;
-	os.GetVersionInfo(in, edition, dumy);
-	s.Format(_T("%s %d.%d(%d)"), os.GetVersionString(), in.dwMajorVersion, in.dwMinorVersion, edition);
+	s.Format(_T("%s"), os.GetVersionString());
 	m_OS.SetWindowText(s);
 
 	return TRUE;  // TRUE を返すとコントロールに設定したフォーカスは失われません。
