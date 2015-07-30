@@ -689,7 +689,7 @@ BOOL COggDlg::OnInitDialog()
 	CoCreateInstance(CLSID_TaskbarList, NULL, CLSCTX_INPROC_SERVER, IID_ITaskbarList3, (void**)&ptl);
 	if (ptl){
 		ptl->HrInit();
-		ptl->SetProgressState(m_hWnd, TBPF_NOPROGRESS);
+		ptl->SetProgressState(m_hWnd, TBPF_NOPROGRESS|TBPF_NORMAL);
 		SetTimer(5219, 200, NULL);
 	}
 	pcdl = NULL;
