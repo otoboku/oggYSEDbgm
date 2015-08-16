@@ -11,6 +11,7 @@
 #include "ListSyosai.h"
 #include "Filename.h"
 #include "Douga.h"
+#include "mp3image.h"
 // CPlayList ダイアログ
 
 IMPLEMENT_DYNAMIC(CPlayList, CDialog)
@@ -600,641 +601,843 @@ void CPlayList::OnDropFiles(HDROP hDropInfo)
 #include <vorbis/codec.h>
 #include <vorbis/vorbisfile.h>
 OggVorbis_File vf1;
-
+extern BYTE bufimage[0x30000f];
 void CPlayList::Fol(CString fname)
 {
-	CString ft;ft="*.*";
-	CString s,ss;
-	playlistdata p;ZeroMemory(&p,sizeof(p));
-	if(_tchdir(fname)==-1){
-		CString ff=fname.Left(fname.ReverseFind('\\')-1);
+	CString ft; ft = "*.*";
+	CString s, ss;
+	playlistdata p; ZeroMemory(&p, sizeof(p));
+	if (_tchdir(fname) == -1) {
+		CString ff = fname.Left(fname.ReverseFind('\\') - 1);
 		_tchdir(ff);
-		ft=fname.Right(fname.GetLength()-fname.ReverseFind('\\')-1);
-		if(ft.Right(4)==".ogg" || ft.Right(4)==".OGG"){
-			p.sub=-1;
+		ft = fname.Right(fname.GetLength() - fname.ReverseFind('\\') - 1);
+		if (ft.Right(4) == ".ogg" || ft.Right(4) == ".OGG") {
+			p.sub = -1;
 			FILE *fp;
 			fp = _tfopen(fname, _T("rb"));
-			if(fp == NULL){
+			if (fp == NULL) {
 				return;
 			}
-			if(ov_open(fp, &vf1, NULL, 0) < 0) {
+			if (ov_open(fp, &vf1, NULL, 0) < 0) {
 				fclose(fp);
 				return;
 			}
 			CString cc;
-			_tcscpy(p.name,ft);
-			p.alb[0]=p.art[0]=NULL;
-			for(int iii=0;iii<vf1.vc->comments;iii++){
+			_tcscpy(p.name, ft);
+			p.alb[0] = p.art[0] = NULL;
+			for (int iii = 0; iii < vf1.vc->comments; iii++) {
 #if _UNICODE
 				WCHAR f[1024];
-				MultiByteToWideChar(CP_UTF8,0,vf1.vc->user_comments[iii],-1,f,1024);
-				cc=f;
+				MultiByteToWideChar(CP_UTF8, 0, vf1.vc->user_comments[iii], -1, f, 1024);
+				cc = f;
 #else
-				cc=vf1.vc->user_comments[iii];
+				cc = vf1.vc->user_comments[iii];
 #endif
-				if(cc.Left(6)=="TITLE=")
+				if (cc.Left(6) == "TITLE=")
 				{
 #if _UNICODE
-					ss=UTF8toUNI(cc.Mid(6));
+					ss = UTF8toUNI(cc.Mid(6));
 #else
-					ss=UTF8toSJIS(cc.Mid(6));
+					ss = UTF8toSJIS(cc.Mid(6));
 #endif
-					_tcscpy(p.name,ss);
+					_tcscpy(p.name, ss);
 				}
-				if(cc.Left(7)=="ARTIST=")
+				if (cc.Left(7) == "ARTIST=")
 				{
 #if _UNICODE
-					ss=UTF8toUNI(cc.Mid(7));
+					ss = UTF8toUNI(cc.Mid(7));
 #else
-					ss=UTF8toSJIS(cc.Mid(7));
+					ss = UTF8toSJIS(cc.Mid(7));
 #endif
-					_tcscpy(p.art,ss);
+					_tcscpy(p.art, ss);
 				}
-				if(cc.Left(6)=="ALBUM=")
+				if (cc.Left(6) == "ALBUM=")
 				{
 #if _UNICODE
-					ss=UTF8toUNI(cc.Mid(6));
+					ss = UTF8toUNI(cc.Mid(6));
 #else
-					ss=UTF8toSJIS(cc.Mid(6));
+					ss = UTF8toSJIS(cc.Mid(6));
 #endif
-					_tcscpy(p.alb,ss);
+					_tcscpy(p.alb, ss);
 				}
 			}
 			ov_clear(&vf1);
 			fclose(fp);
-			_tcscpy(p.fol,fname);
-			p.loop1=p.loop2=0;
-		}else if(ft.Right(4)==".mp3" || ft.Right(4)==".MP3" || ft.Right(4)==".mp2" || ft.Right(4)==".MP2" ||
-			ft.Right(4)==".mp1" || ft.Right(4)==".MP1" || ft.Right(4)==".rmp" || ft.Right(4)==".RMP"){
-			p.sub=-10;p.loop1=p.loop2=0;
-			_tcscpy(p.fol,fname);
+			_tcscpy(p.fol, fname);
+			p.loop1 = p.loop2 = 0;
+		}
+		else if (ft.Right(4) == ".mp3" || ft.Right(4) == ".MP3" || ft.Right(4) == ".mp2" || ft.Right(4) == ".MP2" ||
+			ft.Right(4) == ".mp1" || ft.Right(4) == ".MP1" || ft.Right(4) == ".rmp" || ft.Right(4) == ".RMP") {
+			p.sub = -10; p.loop1 = p.loop2 = 0;
+			_tcscpy(p.fol, fname);
 			CId3tagv1 ta1p;
 			CId3tagv2 ta2p;
-			int b=ta2p.Load(fname);
-			ss=ta2p.GetArtist();if(b==-1){ta1p.Load(fname); ss=ta1p.GetArtist();} _tcscpy(p.art,ss);
-			ss=ta2p.GetTitle(); if(b==-1) ss=ta1p.GetTitle();if(ss=="")ss=ft; _tcscpy(p.name,ss);
-			ss=ta2p.GetAlbum(); if(b==-1) ss=ta1p.GetAlbum(); _tcscpy(p.alb,ss);
-		}else {
-			p.sub=-2;
-			_tcscpy(p.name,ft);
-			_tcscpy(p.fol,fname);
-			p.alb[0]=p.art[0]=NULL;p.loop1=p.loop2=0;
-			TCHAR kpi[512];kpi[0]=0;
-			plugs(fname,&p,kpi);
-			if(kpi[0]){
-				ft=fname.Left(fname.ReverseFind('.'));ft+=".m3u";
-				ss=fname.Right(4);ss.MakeLower();
-				if(ss==".kss"){
-					CStdioFile f; if(f.Open(ft,CFile::modeRead|CFile::typeText,NULL)){
-						TCHAR buf[256];int st,ed,tmp;
-						for(;;){
-							if(f.ReadString(buf,256)==FALSE) break;
-							if(buf[0]==_T('#') || buf[0]==_T('\r') || buf[0]==_T('\n')) continue;
-							ss=buf;
-							st=ss.Find(',',0);ed=ss.Find(',',st+1); s=ss.Mid(st+1,(ed-1)-st);
-							if(s.Left(1)==_T("$")){
-								int num=0;
-								CString s3=s.Mid(1,1);
-								if(_T("0")<=s3 && _T("9")>=s3) num=s3.GetAt(0)-_T('0');
-								if(_T("a")<=s3 && _T("f")>=s3) num=s3.GetAt(0)-_T('a')+10;
-								if(_T("A")<=s3 && _T("F")>=s3) num=s3.GetAt(0)-_T('A')+10;
-								s3=s.Mid(2,1);num*=10;
-								if(_T("0")<=s3 && _T("9")>=s3) num+=s3.GetAt(0)-_T('0');
-								if(_T("a")<=s3 && _T("f")>=s3) num+=s3.GetAt(0)-_T('a')+10;
-								if(_T("A")<=s3 && _T("F")>=s3) num+=s3.GetAt(0)-_T('A')+10;
-								ft.Format(_T("%s::%04d"),fname,num+1);
-							}else
-								ft.Format(_T("%s::%04d"),fname,_tstoi(s)+1);
-							_tcscpy(p.fol,ft);						
-							st=ss.Find(',',ed);ed=ss.Find(',',st+1); s=ss.Mid(st+1,(ed-1)-st);
-							_tcscpy(p.name,s);
-							if(syo==0){	syo=1;syos=p.fol;modesub=p.sub;	fnn = p.name;}
-							Add(p.name,p.sub,p.loop1,p.loop2,p.art,p.alb,p.fol,0,0);
+			int b = ta2p.Load(fname);
+			ss = ta2p.GetArtist(); if (b == -1) { ta1p.Load(fname); ss = ta1p.GetArtist(); } _tcscpy(p.art, ss);
+			ss = ta2p.GetTitle(); if (b == -1) ss = ta1p.GetTitle(); if (ss == "")ss = ft; _tcscpy(p.name, ss);
+			ss = ta2p.GetAlbum(); if (b == -1) ss = ta1p.GetAlbum(); _tcscpy(p.alb, ss);
+		}
+		else if ((ft.Right(4) == ".m4a" || ft.Right(4) == ".M4A")) {
+			CFile ff;
+			char buf[1024];
+			ff.Open(fname, CFile::modeRead|CFile::shareDenyNone, NULL);
+			int flg, read = ff.Read(bufimage, sizeof(bufimage));
+			ff.Close();
+			p.sub = -2;
+			_tcscpy(p.fol, fname);
+			flg = 0;
+			int i;
+			for (i = 0; i < read - 4; i++) {
+				if (bufimage[i] == 'u' && bufimage[i + 1] == 'd' && bufimage[i + 2] == 't' && bufimage[i + 3] == 'a') {
+					int j;
+					for (j = i + 4; j < read - 4; j++) {
+						if (bufimage[j] == 'a' && bufimage[j + 1] == 'l' && bufimage[j + 2] == 'b' && bufimage[j + 7] == 'd' && bufimage[j + 8] == 'a' && bufimage[j + 9] == 't' && bufimage[j + 10] == 'a') {
+							j +=19;
+							for (int k = j; k < read - 4; k++) {
+								if (bufimage[k] == 0) {
+									flg = 1;
+									buf[k - j] = 0;
+									buf[k - j + 1] = 0;
+									buf[k - j + 2] = 0;
+									break;
+								}
+								buf[k-j] = bufimage[k];
+							}
+						}
+						if (flg == 1) {
+							const int wlen = ::MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf), NULL, 0);
+							TCHAR* buff = new TCHAR[wlen + 1];
+							if (::MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf), buff, wlen))
+							{
+								buff[wlen] = _T('\0');
+							}
+							wcscpy(p.alb, buff);
+							delete[] buff;
+							flg = 0;
+							break;
+						}
+					}
+					for (j = i + 4; j < read - 4; j++) {
+						if (bufimage[j] == 'A' && bufimage[j + 1] == 'R' && bufimage[j + 2] == 'T' && bufimage[j + 7] == 'd' && bufimage[j + 8] == 'a' && bufimage[j + 9] == 't' && bufimage[j + 10] == 'a') {
+							j +=19;
+							for (int k = j; k < read - 4; k++) {
+								if (bufimage[k] == 0) {
+									flg = 1;
+									buf[k - j] = 0;
+									buf[k - j + 1] = 0;
+									buf[k - j + 2] = 0;
+									break;
+								}
+								buf[k - j] = bufimage[k];
+							}
+						}
+						if (flg == 1) {
+							const int wlen = ::MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf), NULL, 0);
+							TCHAR* buff = new TCHAR[wlen + 1];
+							if (::MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf), buff, wlen))
+							{
+								buff[wlen] = _T('\0');
+							}
+							wcscpy(p.art, buff);
+							delete[] buff;
+							flg = 0;
+							break;
+						}
+					}
+					for (j = i + 4; j < read - 4; j++) {
+						if (bufimage[j] == 'n' && bufimage[j + 1] == 'a' && bufimage[j + 2] == 'm' && bufimage[j + 7] == 'd' && bufimage[j + 8] == 'a' && bufimage[j + 9] == 't' && bufimage[j + 10] == 'a') {
+							j += 19;
+							for (int k = j; k < read - 4; k++) {
+								if (bufimage[k] == 0) {
+									flg = 1;
+									buf[k - j] = 0;
+									buf[k - j + 1] = 0;
+									buf[k - j + 2] = 0;
+									break;
+								}
+								buf[k - j] = bufimage[k];
+							}
+						}
+						if (flg == 1) {
+							const int wlen = ::MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf), NULL, 0);
+							TCHAR* buff = new TCHAR[wlen + 1];
+							if (::MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf), buff, wlen))
+							{
+								buff[wlen] = _T('\0');
+							}
+							wcscpy(p.name, buff);
+							delete[] buff;
+							flg = 0;
+							break;
+						}
+					}
+				}
+			}
+		}
+		else {
+			p.sub = -2;
+			_tcscpy(p.name, ft);
+			_tcscpy(p.fol, fname);
+			p.alb[0] = p.art[0] = NULL; p.loop1 = p.loop2 = 0;
+			TCHAR kpi[512]; kpi[0] = 0;
+			plugs(fname, &p, kpi);
+			if (kpi[0]) {
+				ft = fname.Left(fname.ReverseFind('.')); ft += ".m3u";
+				ss = fname.Right(4); ss.MakeLower();
+				if (ss == ".kss") {
+					CStdioFile f; if (f.Open(ft, CFile::modeRead | CFile::typeText, NULL)) {
+						TCHAR buf[256]; int st, ed, tmp;
+						for (;;) {
+							if (f.ReadString(buf, 256) == FALSE) break;
+							if (buf[0] == _T('#') || buf[0] == _T('\r') || buf[0] == _T('\n')) continue;
+							ss = buf;
+							st = ss.Find(',', 0); ed = ss.Find(',', st + 1); s = ss.Mid(st + 1, (ed - 1) - st);
+							if (s.Left(1) == _T("$")) {
+								int num = 0;
+								CString s3 = s.Mid(1, 1);
+								if (_T("0") <= s3 && _T("9") >= s3) num = s3.GetAt(0) - _T('0');
+								if (_T("a") <= s3 && _T("f") >= s3) num = s3.GetAt(0) - _T('a') + 10;
+								if (_T("A") <= s3 && _T("F") >= s3) num = s3.GetAt(0) - _T('A') + 10;
+								s3 = s.Mid(2, 1); num *= 10;
+								if (_T("0") <= s3 && _T("9") >= s3) num += s3.GetAt(0) - _T('0');
+								if (_T("a") <= s3 && _T("f") >= s3) num += s3.GetAt(0) - _T('a') + 10;
+								if (_T("A") <= s3 && _T("F") >= s3) num += s3.GetAt(0) - _T('A') + 10;
+								ft.Format(_T("%s::%04d"), fname, num + 1);
+							}
+							else
+								ft.Format(_T("%s::%04d"), fname, _tstoi(s) + 1);
+							_tcscpy(p.fol, ft);
+							st = ss.Find(',', ed); ed = ss.Find(',', st + 1); s = ss.Mid(st + 1, (ed - 1) - st);
+							_tcscpy(p.name, s);
+							if (syo == 0) { syo = 1; syos = p.fol; modesub = p.sub;	fnn = p.name; }
+							Add(p.name, p.sub, p.loop1, p.loop2, p.art, p.alb, p.fol, 0, 0);
 						}
 						f.Close();
 						return;
 					}
 				}
-				ft=fname.Left(fname.ReverseFind('.'));ft+=".frm";
-				if(ss==".nsf"){
-					CStdioFile f; if(f.Open(ft,CFile::modeRead|CFile::typeText,NULL)){
-						TCHAR buf[256];int st,ed,tmp;
-						f.ReadString(buf,256);
-						f.ReadString(buf,256);
-						_tcscpy(p.alb,buf);
-						f.ReadString(buf,256);
-						s=buf;int j=s.Find(_T("songs"));if(j>=0){
-							int k=s.Find(_T("S.E."));
-							int l=s.ReverseFind('(');ss=s.Mid(l+1,3);j=_tstoi(ss);
-							if(k>=0){l=s.ReverseFind('&');ss=s.Mid(l+1,3);j+=_tstoi(ss);}
-							for(l=0;l<j;l++){
-								s=fname.Right(fname.GetLength()-fname.ReverseFind('\\')-1);
-								ss.Format(_T("%s::%04d"),s,l+1);
-								_tcscpy(p.name,ss);
-								ss.Format(_T("%s::%04d"),fname,l+1);
-								_tcscpy(p.fol,ss);
-								if(syo==0){	syo=1;syos=p.fol;modesub=p.sub;	fnn = p.name;}
-								Add(p.name,p.sub,p.loop1,p.loop2,p.art,p.alb,p.fol,0,0);
+				ft = fname.Left(fname.ReverseFind('.')); ft += ".frm";
+				if (ss == ".nsf") {
+					CStdioFile f; if (f.Open(ft, CFile::modeRead | CFile::typeText, NULL)) {
+						TCHAR buf[256]; int st, ed, tmp;
+						f.ReadString(buf, 256);
+						f.ReadString(buf, 256);
+						_tcscpy(p.alb, buf);
+						f.ReadString(buf, 256);
+						s = buf; int j = s.Find(_T("songs")); if (j >= 0) {
+							int k = s.Find(_T("S.E."));
+							int l = s.ReverseFind('('); ss = s.Mid(l + 1, 3); j = _tstoi(ss);
+							if (k >= 0) { l = s.ReverseFind('&'); ss = s.Mid(l + 1, 3); j += _tstoi(ss); }
+							for (l = 0; l < j; l++) {
+								s = fname.Right(fname.GetLength() - fname.ReverseFind('\\') - 1);
+								ss.Format(_T("%s::%04d"), s, l + 1);
+								_tcscpy(p.name, ss);
+								ss.Format(_T("%s::%04d"), fname, l + 1);
+								_tcscpy(p.fol, ss);
+								if (syo == 0) { syo = 1; syos = p.fol; modesub = p.sub;	fnn = p.name; }
+								Add(p.name, p.sub, p.loop1, p.loop2, p.art, p.alb, p.fol, 0, 0);
 							}
 						}
 						f.Close();
 						return;
 					}
-				}					
-				if(ss==".gbs"){
-					CFile f; if(f.Open(fname,CFile::modeRead,NULL)){
+				}
+				if (ss == ".gbs") {
+					CFile f; if (f.Open(fname, CFile::modeRead, NULL)) {
 						char buf[32];
-						f.Read(buf,16);int i=buf[4];
-						f.Read(buf,32);
+						f.Read(buf, 16); int i = buf[4];
+						f.Read(buf, 32);
 #if UNICODE
 						TCHAR ss1[512];
-						MultiByteToWideChar(CP_ACP,0,(LPCSTR)buf,-1,ss1,2000);
-						_tcscpy(p.name,ss1);
+						MultiByteToWideChar(CP_ACP, 0, (LPCSTR)buf, -1, ss1, 2000);
+						_tcscpy(p.name, ss1);
 #else
-						_tcscpy(p.name,buf);
+						_tcscpy(p.name, buf);
 #endif
-						f.Read(buf,32);
+						f.Read(buf, 32);
 #if UNICODE
-						MultiByteToWideChar(CP_ACP,0,(LPCSTR)buf,-1,ss1,2000);
-						_tcscpy(p.alb,ss1);
+						MultiByteToWideChar(CP_ACP, 0, (LPCSTR)buf, -1, ss1, 2000);
+						_tcscpy(p.alb, ss1);
 #else
-						_tcscpy(p.alb,buf);
+						_tcscpy(p.alb, buf);
 #endif
-						f.Read(buf,32);
+						f.Read(buf, 32);
 #if UNICODE
-						MultiByteToWideChar(CP_ACP,0,(LPCSTR)buf,-1,ss1,2000);
-						_tcscpy(p.art,ss1);
+						MultiByteToWideChar(CP_ACP, 0, (LPCSTR)buf, -1, ss1, 2000);
+						_tcscpy(p.art, ss1);
 #else
-						_tcscpy(p.art,buf);
+						_tcscpy(p.art, buf);
 #endif
 						f.Close();
-						for(int j=0;j<i;j++){
-							ss.Format(_T("%s::%04d"),fname,j+1);_tcscpy(p.fol,ss);
-							if(syo==0){	syo=1;syos=p.fol;modesub=p.sub;	fnn = p.name;}
-							Add(p.name,p.sub,p.loop1,p.loop2,p.art,p.alb,p.fol,0,0);
+						for (int j = 0; j < i; j++) {
+							ss.Format(_T("%s::%04d"), fname, j + 1); _tcscpy(p.fol, ss);
+							if (syo == 0) { syo = 1; syos = p.fol; modesub = p.sub;	fnn = p.name; }
+							Add(p.name, p.sub, p.loop1, p.loop2, p.art, p.alb, p.fol, 0, 0);
 						}
 						return;
 					}
 				}
-				if(ss==".hes"){
-					for(int i=1;i<257;i++){
-						ft.Format(_T("%s::%04d"),fname,i);
-						_tcscpy(p.fol,ft);
-						ss=fname.Right(fname.GetLength()-fname.ReverseFind('\\')-1);
-						ft.Format(_T("%s::%04d"),ss,i);
-						_tcscpy(p.name,ft);						
-						if(syo==0){	syo=1;syos=p.fol;modesub=p.sub;fnn = p.name;	}
-						Add(p.name,p.sub,p.loop1,p.loop2,p.art,p.alb,p.fol,0,0);
+				if (ss == ".hes") {
+					for (int i = 1; i < 257; i++) {
+						ft.Format(_T("%s::%04d"), fname, i);
+						_tcscpy(p.fol, ft);
+						ss = fname.Right(fname.GetLength() - fname.ReverseFind('\\') - 1);
+						ft.Format(_T("%s::%04d"), ss, i);
+						_tcscpy(p.name, ft);
+						if (syo == 0) { syo = 1; syos = p.fol; modesub = p.sub; fnn = p.name; }
+						Add(p.name, p.sub, p.loop1, p.loop2, p.art, p.alb, p.fol, 0, 0);
 					}
 					return;
 				}
-				if(ss==".ovi"||ss==".opi"||ss==".ozi"){
-					CFile f;char buf[512],*buf2;
-					f.Open(fname,CFile::modeRead|CFile::shareDenyRead,NULL);
-					if(f.GetLength()>512)
-						f.Seek(-512,CFile::end);
+				if (ss == ".ovi" || ss == ".opi" || ss == ".ozi") {
+					CFile f; char buf[512], *buf2;
+					f.Open(fname, CFile::modeRead | CFile::shareDenyRead, NULL);
+					if (f.GetLength() > 512)
+						f.Seek(-512, CFile::end);
 					else
 						f.SeekToBegin();
-					f.Read(buf,512);
+					f.Read(buf, 512);
 					int i = 0;
 					f.Close();
-					for(;i<500;i++){
-						if(buf[i]=='F'&&buf[i+1]=='M'&&buf[i+2]=='C') break;
+					for (; i < 500; i++) {
+						if (buf[i] == 'F'&&buf[i + 1] == 'M'&&buf[i + 2] == 'C') break;
 					}
-					if(i!=500){
-						buf2=buf+i+4; ss=buf2;
-						int st=ss.Find(0x0d,0);
-						ft=ss.Left(st);_tcscpy(p.name,ft);
-						int ed=ss.Find(0x0d,st+2);
-						ft=ss.Mid(st+1,ed-st-1);_tcscpy(p.art,ft);
-						st=ss.Find(0x0d,ed+2);
-						ft=ss.Mid(ed+1,st-ed-1);_tcscpy(p.alb,ft);
-						if(syo==0){	syo=1;syos=p.fol;modesub=p.sub;fnn = p.name;	}
-						Add(p.name,p.sub,p.loop1,p.loop2,p.art,p.alb,p.fol,0,0);
+					if (i != 500) {
+						buf2 = buf + i + 4; ss = buf2;
+						int st = ss.Find(0x0d, 0);
+						ft = ss.Left(st); _tcscpy(p.name, ft);
+						int ed = ss.Find(0x0d, st + 2);
+						ft = ss.Mid(st + 1, ed - st - 1); _tcscpy(p.art, ft);
+						st = ss.Find(0x0d, ed + 2);
+						ft = ss.Mid(ed + 1, st - ed - 1); _tcscpy(p.alb, ft);
+						if (syo == 0) { syo = 1; syos = p.fol; modesub = p.sub; fnn = p.name; }
+						Add(p.name, p.sub, p.loop1, p.loop2, p.art, p.alb, p.fol, 0, 0);
 						return;
 					}
 				}
-				ss=fname.Right(2);ss.MakeLower();
-				ft=fname.Right(3);ft.MakeLower();
-				if(ss==".m" || ft==".mz"){
-					CFile ff;char buf[512],*buf2;
-					ff.Open(fname,CFile::modeRead|CFile::shareDenyNone,NULL);
-					if(ff.GetLength()>512)
-						ff.Seek(-512,CFile::end);
+				ss = fname.Right(2); ss.MakeLower();
+				ft = fname.Right(3); ft.MakeLower();
+				if (ss == ".m" || ft == ".mz") {
+					CFile ff; char buf[512], *buf2;
+					ff.Open(fname, CFile::modeRead | CFile::shareDenyNone, NULL);
+					if (ff.GetLength() > 512)
+						ff.Seek(-512, CFile::end);
 					else
 						ff.SeekToBegin();
-					ff.Read(buf,512);
-					int jj=ff.GetLength();if(jj>510) jj=510;
-					jj-=3;
+					ff.Read(buf, 512);
+					int jj = ff.GetLength(); if (jj > 510) jj = 510;
+					jj -= 3;
 					int i;
-					for(i=jj;i>0;i--){
-						if(buf[i]==0&&(buf[i+1]==0||(BYTE)buf[i+1]==255)&&buf[i+2]==0)break;
+					for (i = jj; i > 0; i--) {
+						if (buf[i] == 0 && (buf[i + 1] == 0 || (BYTE)buf[i + 1] == 255) && buf[i + 2] == 0)break;
 					}
 					ff.Close();
-					if(i!=0){
-						buf2=buf+i+3;
+					if (i != 0) {
+						buf2 = buf + i + 3;
 						int j = 0;
-						for(;;j++)if(buf2[j]==0)break;
+						for (;; j++)if (buf2[j] == 0)break;
 #if UNICODE
 						TCHAR ss1[512];
-						MultiByteToWideChar(CP_ACP,0,(LPCSTR)buf2,-1,ss1,2000);
-						_tcscpy(p.name,ss1);buf2+=j;
+						MultiByteToWideChar(CP_ACP, 0, (LPCSTR)buf2, -1, ss1, 2000);
+						_tcscpy(p.name, ss1); buf2 += j;
 #else
-						_tcscpy(p.name,buf2);buf2+=j;
+						_tcscpy(p.name, buf2); buf2 += j;
 #endif
-						for(j=0;;j++)if(buf2[j]!=0)break;
-						buf2+=j;
-						for(j=0;;j++)if(buf2[j]==0)break;
+						for (j = 0;; j++)if (buf2[j] != 0)break;
+						buf2 += j;
+						for (j = 0;; j++)if (buf2[j] == 0)break;
 #if UNICODE
-						MultiByteToWideChar(CP_ACP,0,(LPCSTR)buf2,-1,ss1,2000);
-						_tcscpy(p.art,ss1);buf2+=j;
+						MultiByteToWideChar(CP_ACP, 0, (LPCSTR)buf2, -1, ss1, 2000);
+						_tcscpy(p.art, ss1); buf2 += j;
 #else
-						_tcscpy(p.art,buf2);buf2+=j;
+						_tcscpy(p.art, buf2); buf2 += j;
 #endif
-						for(j=0;;j++)if(buf2[j]!=0)break;
-						buf2+=j;
-						for(j=0;;j++)if(buf2[j]==0)break;
+						for (j = 0;; j++)if (buf2[j] != 0)break;
+						buf2 += j;
+						for (j = 0;; j++)if (buf2[j] == 0)break;
 #if UNICODE
-						MultiByteToWideChar(CP_ACP,0,(LPCSTR)buf2,-1,ss1,2000);
-						_tcscpy(p.alb,ss1);buf2+=j;
+						MultiByteToWideChar(CP_ACP, 0, (LPCSTR)buf2, -1, ss1, 2000);
+						_tcscpy(p.alb, ss1); buf2 += j;
 #else
-						_tcscpy(p.alb,buf2);buf2+=j;
+						_tcscpy(p.alb, buf2); buf2 += j;
 #endif
-						if(syo==0){	syo=1;syos=p.fol;modesub=p.sub;fnn = p.name;	}
-						Add(p.name,p.sub,p.loop1,p.loop2,p.art,p.alb,p.fol,0,0);
+						if (syo == 0) { syo = 1; syos = p.fol; modesub = p.sub; fnn = p.name; }
+						Add(p.name, p.sub, p.loop1, p.loop2, p.art, p.alb, p.fol, 0, 0);
 					}
 					return;
 				}
-				ft=fname.Right(4);ft.MakeLower();
-				if(ft==".tta"){
-					CFile ff;char buf[512],*buf2;
-					ff.Open(fname,CFile::modeRead|CFile::shareDenyNone,NULL);
-					if(ff.GetLength()>0x80)
-						ff.Seek(-0x80,CFile::end);
+				ft = fname.Right(4); ft.MakeLower();
+				if (ft == ".tta") {
+					CFile ff; char buf[512], *buf2;
+					ff.Open(fname, CFile::modeRead | CFile::shareDenyNone, NULL);
+					if (ff.GetLength() > 0x80)
+						ff.Seek(-0x80, CFile::end);
 					else
 						ff.SeekToBegin();
-					ff.Read(buf,0x80);
+					ff.Read(buf, 0x80);
 					int i = 0;
-					for(;i<0x80;i++){
-						if(buf[i+0]=='T'&&buf[i+1]=='A'&&buf[i+2]=='G')break;
+					for (; i < 0x80; i++) {
+						if (buf[i + 0] == 'T'&&buf[i + 1] == 'A'&&buf[i + 2] == 'G')break;
 					}
 					ff.Close();
-					if(i!=0x80){
-						buf2=buf+i+3;
+					if (i != 0x80) {
+						buf2 = buf + i + 3;
 #if UNICODE
 						TCHAR ss1[512];
-						TCHAR buf3=buf2[30]; buf2[30]=0;
-						MultiByteToWideChar(CP_ACP,0,(LPCSTR)buf2,-1,ss1,2000);
-						buf2[30]=buf3;
-						_tcscpy(p.name,ss1);buf2+=30;
+						TCHAR buf3 = buf2[30]; buf2[30] = 0;
+						MultiByteToWideChar(CP_ACP, 0, (LPCSTR)buf2, -1, ss1, 2000);
+						buf2[30] = buf3;
+						_tcscpy(p.name, ss1); buf2 += 30;
 #else
-						_tcscpy(p.name,buf2);buf2+=30;
+						_tcscpy(p.name, buf2); buf2 += 30;
 #endif
 #if UNICODE
-						buf3=buf2[30]; buf2[30]=0;
-						MultiByteToWideChar(CP_ACP,0,(LPCSTR)buf2,-1,ss1,2000);
-						buf2[30]=buf3;
-						_tcscpy(p.art,ss1);buf2+=30;
+						buf3 = buf2[30]; buf2[30] = 0;
+						MultiByteToWideChar(CP_ACP, 0, (LPCSTR)buf2, -1, ss1, 2000);
+						buf2[30] = buf3;
+						_tcscpy(p.art, ss1); buf2 += 30;
 #else
-						_tcscpy(p.art,buf2);buf2+=30;
+						_tcscpy(p.art, buf2); buf2 += 30;
 #endif
 #if UNICODE
-						buf3=buf2[30]; buf2[30]=0;
-						MultiByteToWideChar(CP_ACP,0,(LPCSTR)buf2,-1,ss1,2000);
-						buf2[30]=buf3;
-						_tcscpy(p.alb,ss1);buf2+=30;
+						buf3 = buf2[30]; buf2[30] = 0;
+						MultiByteToWideChar(CP_ACP, 0, (LPCSTR)buf2, -1, ss1, 2000);
+						buf2[30] = buf3;
+						_tcscpy(p.alb, ss1); buf2 += 30;
 #else
-						_tcscpy(p.alb,buf2);buf2+=30;
+						_tcscpy(p.alb, buf2); buf2 += 30;
 #endif
-						if(syo==0){	syo=1;syos=p.fol;modesub=p.sub;fnn = p.name;	}
-						Add(p.name,p.sub,p.loop1,p.loop2,p.art,p.alb,p.fol,0,0);
+						if (syo == 0) { syo = 1; syos = p.fol; modesub = p.sub; fnn = p.name; }
+						Add(p.name, p.sub, p.loop1, p.loop2, p.art, p.alb, p.fol, 0, 0);
 					}
 					return;
 				}
 			}
 
 		}
-		s=fname;s.MakeLower();
-		if(s.Right(4)==".png" || s.Right(4)==".url" || s.Right(4)==".jpg" || s.Right(4)==".bmp" || s.Right(4)==".cue" || s.Right(4)==".iso" || s.Right(4)==".bin" || s.Right(4)==".img" || s.Right(4)==".mds" || s.Right(4)==".mdf" || s.Right(4)==".ccd" || s.Right(4)==".sub" || s.Right(4)==".pdf" || s.Right(4)==".com" || s.Right(4)==".exe" || s.Right(4)==".dll" || s.Right(4)==".bat" || s.Right(4)==".reg" || s.Right(4)==".msi" || s.Right(4)==".nfo" || s.Right(4)==".diz" || s.Right(4)==".gif" || s.Right(4)==".ico" ||
-		   s.Right(4)==".zip" || s.Right(4)==".lzh" || s.Right(4)==".cab" || s.Right(4)==".rar" || s.Right(4)==".txt" || s.Right(4)==".doc" || s.Right(4)=="html" || s.Right(4)==".htm" || s.Right(4)==".ini" || s.Right(4)==".xml" || s.Right(4)==".kar" || s.Right(4)==".hed" || s.Right(4)==".mzi" || s.Right(4)==".mag" || s.Right(4)==".mvi" || s.Right(4)==".lvi" || s.Right(4)==".mpi" || s.Right(4)==".pvi" || s.Right(4)==".pzi" || s.Right(4)==".p86" || s.Right(4)==".mml" || s.Right(4)==".m3u" || s.Right(4)==".frm" || s.Right(7)==".psflib" || s.Right(8)==".psf2lib" || s.Right(7)==".usflib" || s.Right(7)==".2sflib" || s.Right(3)==".gb" || s.Right(7)==".gsflib" || s.Right(4)==".pdx"){}else{
-			if(syo==0){	syo=1;syos=p.fol;modesub=p.sub;fnn = p.name;	}
-			Add(p.name,p.sub,p.loop1,p.loop2,p.art,p.alb,p.fol,0,0);
+		s = fname; s.MakeLower();
+		if (s.Right(4) == ".png" || s.Right(4) == ".url" || s.Right(4) == ".jpg" || s.Right(4) == ".bmp" || s.Right(4) == ".cue" || s.Right(4) == ".iso" || s.Right(4) == ".bin" || s.Right(4) == ".img" || s.Right(4) == ".mds" || s.Right(4) == ".mdf" || s.Right(4) == ".ccd" || s.Right(4) == ".sub" || s.Right(4) == ".pdf" || s.Right(4) == ".com" || s.Right(4) == ".exe" || s.Right(4) == ".dll" || s.Right(4) == ".bat" || s.Right(4) == ".reg" || s.Right(4) == ".msi" || s.Right(4) == ".nfo" || s.Right(4) == ".diz" || s.Right(4) == ".gif" || s.Right(4) == ".ico" ||
+			s.Right(4) == ".zip" || s.Right(4) == ".lzh" || s.Right(4) == ".cab" || s.Right(4) == ".rar" || s.Right(4) == ".txt" || s.Right(4) == ".doc" || s.Right(4) == "html" || s.Right(4) == ".htm" || s.Right(4) == ".ini" || s.Right(4) == ".xml" || s.Right(4) == ".kar" || s.Right(4) == ".hed" || s.Right(4) == ".mzi" || s.Right(4) == ".mag" || s.Right(4) == ".mvi" || s.Right(4) == ".lvi" || s.Right(4) == ".mpi" || s.Right(4) == ".pvi" || s.Right(4) == ".pzi" || s.Right(4) == ".p86" || s.Right(4) == ".mml" || s.Right(4) == ".m3u" || s.Right(4) == ".frm" || s.Right(7) == ".psflib" || s.Right(8) == ".psf2lib" || s.Right(7) == ".usflib" || s.Right(7) == ".2sflib" || s.Right(3) == ".gb" || s.Right(7) == ".gsflib" || s.Right(4) == ".pdx") {
+		}
+		else {
+			if (syo == 0) { syo = 1; syos = p.fol; modesub = p.sub; fnn = p.name; }
+			Add(p.name, p.sub, p.loop1, p.loop2, p.art, p.alb, p.fol, 0, 0);
 		}
 		return;
 	}
 	CFileFind f;
-	if(f.FindFile(ft)){
-		int b=1;
-		for(;b;){
-			b=f.FindNextFile();
-			s=f.GetFileName();
-			if(f.IsDirectory()==0){
-				if(s.Right(4)==".ogg" || s.Right(4)==".OGG"){
-					p.sub=-1;
+	if (f.FindFile(ft)) {
+		int b = 1;
+		for (; b;) {
+			b = f.FindNextFile();
+			s = f.GetFileName();
+			if (f.IsDirectory() == 0) {
+				if (s.Right(4) == ".ogg" || s.Right(4) == ".OGG") {
+					p.sub = -1;
 					FILE *fp;
 					fp = _tfopen(f.GetFilePath(), _T("rb"));
-					if(fp == NULL){
+					if (fp == NULL) {
 						continue;
 					}
-					if(ov_open(fp, &vf1, NULL, 0) < 0) {
+					if (ov_open(fp, &vf1, NULL, 0) < 0) {
 						fclose(fp);
 						continue;
 					}
 					CString cc;
-					_tcscpy(p.name,s);
-					for(int iii=0;iii<vf1.vc->comments;iii++){
-						cc=vf1.vc->user_comments[iii];
-						if(cc.Left(6)=="TITLE=")
+					_tcscpy(p.name, s);
+					for (int iii = 0; iii < vf1.vc->comments; iii++) {
+						cc = vf1.vc->user_comments[iii];
+						if (cc.Left(6) == "TITLE=")
 						{
 #if _UNICODE
-							ss=UTF8toUNI(cc.Mid(6));
+							ss = UTF8toUNI(cc.Mid(6));
 #else
-							ss=UTF8toSJIS(cc.Mid(6));
+							ss = UTF8toSJIS(cc.Mid(6));
 #endif
-							_tcscpy(p.name,ss);
+							_tcscpy(p.name, ss);
 						}
-						if(cc.Left(7)=="ARTIST=")
+						if (cc.Left(7) == "ARTIST=")
 						{
 #if _UNICODE
-							ss=UTF8toUNI(cc.Mid(7));
+							ss = UTF8toUNI(cc.Mid(7));
 #else
-							ss=UTF8toSJIS(cc.Mid(7));
+							ss = UTF8toSJIS(cc.Mid(7));
 #endif
-							_tcscpy(p.art,ss);
+							_tcscpy(p.art, ss);
 						}
-						if(cc.Left(6)=="ALBUM=")
+						if (cc.Left(6) == "ALBUM=")
 						{
 #if _UNICODE
-							ss=UTF8toUNI(cc.Mid(6));
+							ss = UTF8toUNI(cc.Mid(6));
 #else
-							ss=UTF8toSJIS(cc.Mid(6));
+							ss = UTF8toSJIS(cc.Mid(6));
 #endif
-							_tcscpy(p.alb,ss);
+							_tcscpy(p.alb, ss);
 						}
 					}
 					ov_clear(&vf1);
 					fclose(fp);
-					s=f.GetFilePath();
-					_tcscpy(p.fol,s);
-					p.alb[0]=p.art[0]=NULL;p.loop1=p.loop2=0;
-				}else if((s.Right(4)==".mp3" || s.Right(4)==".MP3" || s.Right(4)==".mp2" || s.Right(4)==".MP2" ||
-					s.Right(4)==".mp1" || s.Right(4)==".MP1" || s.Right(4)==".rmp" || s.Right(4)==".RMP")){
-					p.sub=-10;p.loop1=p.loop2=0;
-					s=f.GetFilePath();
-					_tcscpy(p.fol,s);
+					s = f.GetFilePath();
+					_tcscpy(p.fol, s);
+					p.alb[0] = p.art[0] = NULL; p.loop1 = p.loop2 = 0;
+				}
+				else if ((s.Right(4) == ".mp3" || s.Right(4) == ".MP3" || s.Right(4) == ".mp2" || s.Right(4) == ".MP2" ||
+					s.Right(4) == ".mp1" || s.Right(4) == ".MP1" || s.Right(4) == ".rmp" || s.Right(4) == ".RMP")) {
+					p.sub = -10; p.loop1 = p.loop2 = 0;
+					s = f.GetFilePath();
+					_tcscpy(p.fol, s);
 					CId3tagv1 ta1p;
 					CId3tagv2 ta2p;
-					int b=ta2p.Load(s);
-					ss=ta2p.GetArtist();if(b==-1){ta1p.Load(s); ss=ta1p.GetArtist();} _tcscpy(p.art,ss);
-					ss=ta2p.GetTitle(); if(b==-1) ss=ta1p.GetTitle();if(ss=="")ss=f.GetFileName(); _tcscpy(p.name,ss);
-					ss=ta2p.GetAlbum(); if(b==-1) ss=ta1p.GetAlbum(); _tcscpy(p.alb,ss);
-				}else{
-					p.sub=-2;
-					_tcscpy(p.name,s);
-					s=f.GetFilePath();
-					_tcscpy(p.fol,s);
-					p.alb[0]=p.art[0]=NULL;p.loop1=p.loop2=0;
-					HKMP kmp=NULL;
-					KMPMODULE *mod=NULL;
-					TCHAR kpi[512]={0};
-					plugs(s,&p,kpi);
-					if(kpi[0]){
-						ss=f.GetFilePath();
-						ft=ss.Left(ss.ReverseFind('.'));ft+=".m3u";
-						ss=f.GetFileName().Right(4);ss.MakeLower();
-						if(ss==".kss"){
-							CStdioFile f; if(f.Open(ft,CFile::modeRead|CFile::typeText,NULL)){
-								TCHAR buf[256];int st,ed,tmp;
-								for(;;){
-									if(f.ReadString(buf,256)==FALSE) break;
-									if(buf[0]=='#' || buf[0]==10) continue;
-									ss=buf;
-									st=ss.Find(',',0);ed=ss.Find(',',st+1); s=ss.Mid(st+1,(ed-1)-st);
-									if(s.Left(1)==_T("$")){
-										int num=0;
-										CString s3=s.Mid(1,1);
-										if(_T("0")<=s3 && _T("9")>=s3) num=s3.GetAt(0)-_T('0');
-										if(_T("a")<=s3 && _T("f")>=s3) num=s3.GetAt(0)-_T('a')+10;
-										if(_T("A")<=s3 && _T("F")>=s3) num=s3.GetAt(0)-_T('A')+10;
-										s3=s.Mid(2,1);num*=10;
-										if(_T("0")<=s3 && _T("9")>=s3) num+=s3.GetAt(0)-_T('0');
-										if(_T("a")<=s3 && _T("f")>=s3) num+=s3.GetAt(0)-_T('a')+10;
-										if(_T("A")<=s3 && _T("F")>=s3) num+=s3.GetAt(0)-_T('A')+10;
-										ft.Format(_T("%s::%04d"),fname,num+1);
-									}else
-										ft.Format(_T("%s::%04d"),fname,_tstoi(s)+1);
-									_tcscpy(p.fol,ft);						
-									st=ss.Find(',',ed);ed=ss.Find(',',st+1); s=ss.Mid(st+1,(ed-1)-st);
-									_tcscpy(p.name,s);						
-									if(syo==0){	syo=1;syos=p.fol;modesub=p.sub;	fnn = p.name;}
-									Add(p.name,p.sub,p.loop1,p.loop2,p.art,p.alb,p.fol,0,0);
+					int b = ta2p.Load(s);
+					ss = ta2p.GetArtist(); if (b == -1) { ta1p.Load(s); ss = ta1p.GetArtist(); } _tcscpy(p.art, ss);
+					ss = ta2p.GetTitle(); if (b == -1) ss = ta1p.GetTitle(); if (ss == "")ss = f.GetFileName(); _tcscpy(p.name, ss);
+					ss = ta2p.GetAlbum(); if (b == -1) ss = ta1p.GetAlbum(); _tcscpy(p.alb, ss);
+				}
+				else if ((s.Right(4) == ".m4a" || s.Right(4) == ".M4A")) {
+					CFile ff;
+					char buf[1024];
+					ff.Open(s, CFile::modeRead, NULL);
+					int flg, read = ff.Read(bufimage, sizeof(bufimage));
+					ff.Close();
+					p.sub = -2;
+					_tcscpy(p.fol, s);
+					flg = 0;
+					int i;
+					for (i = 0; i < read - 4; i++) {
+						if (bufimage[i] == 'u' && bufimage[i + 1] == 'd' && bufimage[i + 2] == 't' && bufimage[i + 3] == 'a') {
+							int j;
+							for (j = i + 4; j < read - 4; j++) {
+								if (bufimage[j] == 'a' && bufimage[j + 1] == 'l' && bufimage[j + 2] == 'b' && bufimage[j + 7] == 'd' && bufimage[j + 8] == 'a' && bufimage[j + 9] == 't' && bufimage[j + 10] == 'a') {
+									j +=19;
+									for (int k = j; k < read - 4; k++) {
+										if (bufimage[k] == 0) {
+											flg = 1;
+											buf[k - j] = 0;
+											buf[k - j + 1] = 0;
+											buf[k - j + 2] = 0;
+											break;
+										}
+										buf[k - j] = bufimage[k];
+									}
+								}
+								if (flg == 1) {
+									const int wlen = ::MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf), NULL, 0);
+									TCHAR* buff = new TCHAR[wlen + 1];
+									if (::MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf), buff, wlen))
+									{
+										buff[wlen] = _T('\0');
+									}
+									wcscpy(p.alb, buff);
+									delete[] buff;
+									flg = 0;
+									break;
+								}
+							}
+							for (j = i + 4; j < read - 4; j++) {
+								if (bufimage[j] == 'A' && bufimage[j + 1] == 'R' && bufimage[j + 2] == 'T' && bufimage[j + 7] == 'd' && bufimage[j + 8] == 'a' && bufimage[j + 9] == 't' && bufimage[j + 10] == 'a') {
+									j +=19;
+									for (int k = j; k < read - 4; k++) {
+										if (bufimage[k] == 0) {
+											flg = 1;
+											buf[k - j] = 0;
+											buf[k - j + 1] = 0;
+											buf[k - j + 2] = 0;
+											break;
+										}
+										buf[k - j] = bufimage[k];
+									}
+								}
+								if (flg == 1) {
+									const int wlen = ::MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf), NULL, 0);
+									TCHAR* buff = new TCHAR[wlen + 1];
+									if (::MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf), buff, wlen))
+									{
+										buff[wlen] = _T('\0');
+									}
+									wcscpy(p.art, buff);
+									delete[] buff;
+									flg = 0;
+									break;
+								}
+							}
+							for (j = i + 4; j < read - 4; j++) {
+								if (bufimage[j] == 'n' && bufimage[j + 1] == 'a' && bufimage[j + 2] == 'm' && bufimage[j + 7] == 'd' && bufimage[j + 8] == 'a' && bufimage[j + 9] == 't' && bufimage[j + 10] == 'a') {
+									j +=19;
+									for (int k = j; k < read - 4; k++) {
+										if (bufimage[k] == 0) {
+											flg = 1;
+											buf[k - j] = 0;
+											buf[k - j + 1] = 0;
+											buf[k - j + 2] = 0;
+											break;
+										}
+										buf[k - j] = bufimage[k];
+									}
+								}
+								if (flg == 1) {
+									const int wlen = ::MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf), NULL, 0);
+									TCHAR* buff = new TCHAR[wlen + 1];
+									if (::MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf), buff, wlen))
+									{
+										buff[wlen] = _T('\0');
+									}
+									wcscpy(p.name, buff);
+									delete[] buff;
+									flg = 0;
+									break;
+								}
+							}
+						}
+					}
+				}
+				else {
+					p.sub = -2;
+					_tcscpy(p.name, s);
+					s = f.GetFilePath();
+					_tcscpy(p.fol, s);
+					p.alb[0] = p.art[0] = NULL; p.loop1 = p.loop2 = 0;
+					HKMP kmp = NULL;
+					KMPMODULE *mod = NULL;
+					TCHAR kpi[512] = { 0 };
+					plugs(s, &p, kpi);
+					if (kpi[0]) {
+						ss = f.GetFilePath();
+						ft = ss.Left(ss.ReverseFind('.')); ft += ".m3u";
+						ss = f.GetFileName().Right(4); ss.MakeLower();
+						if (ss == ".kss") {
+							CStdioFile f; if (f.Open(ft, CFile::modeRead | CFile::typeText, NULL)) {
+								TCHAR buf[256]; int st, ed, tmp;
+								for (;;) {
+									if (f.ReadString(buf, 256) == FALSE) break;
+									if (buf[0] == '#' || buf[0] == 10) continue;
+									ss = buf;
+									st = ss.Find(',', 0); ed = ss.Find(',', st + 1); s = ss.Mid(st + 1, (ed - 1) - st);
+									if (s.Left(1) == _T("$")) {
+										int num = 0;
+										CString s3 = s.Mid(1, 1);
+										if (_T("0") <= s3 && _T("9") >= s3) num = s3.GetAt(0) - _T('0');
+										if (_T("a") <= s3 && _T("f") >= s3) num = s3.GetAt(0) - _T('a') + 10;
+										if (_T("A") <= s3 && _T("F") >= s3) num = s3.GetAt(0) - _T('A') + 10;
+										s3 = s.Mid(2, 1); num *= 10;
+										if (_T("0") <= s3 && _T("9") >= s3) num += s3.GetAt(0) - _T('0');
+										if (_T("a") <= s3 && _T("f") >= s3) num += s3.GetAt(0) - _T('a') + 10;
+										if (_T("A") <= s3 && _T("F") >= s3) num += s3.GetAt(0) - _T('A') + 10;
+										ft.Format(_T("%s::%04d"), fname, num + 1);
+									}
+									else
+										ft.Format(_T("%s::%04d"), fname, _tstoi(s) + 1);
+									_tcscpy(p.fol, ft);
+									st = ss.Find(',', ed); ed = ss.Find(',', st + 1); s = ss.Mid(st + 1, (ed - 1) - st);
+									_tcscpy(p.name, s);
+									if (syo == 0) { syo = 1; syos = p.fol; modesub = p.sub;	fnn = p.name; }
+									Add(p.name, p.sub, p.loop1, p.loop2, p.art, p.alb, p.fol, 0, 0);
 								}
 								f.Close();
 								continue;
 							}
 						}
-						ss=f.GetFilePath();
-						ft=ss.Left(ss.ReverseFind('.'));ft+=".frm";
-						ss=f.GetFileName().Right(4);ss.MakeLower();
-						if(ss==".nsf"){
-							CStdioFile ff; if(ff.Open(ft,CFile::modeRead|CFile::typeText,NULL)){
-								TCHAR buf[256];int st,ed,tmp;
-								ff.ReadString(buf,256);
-								ff.ReadString(buf,256);
-//#if UNICODE
-//								TCHAR ss1[512];
-//								MultiByteToWideChar(CP_ACP,0,(LPCSTR)buf,-1,ss1,2000);
-//								_tcscpy(p.alb,ss1);
-//#else
-								_tcscpy(p.alb,buf);
-//#endif
-								ff.ReadString(buf,256);
-								s=buf;int j=s.Find(_T("songs"));if(j>=0){
-									int k=s.Find(_T("S.E."));
-									int l=s.ReverseFind('(');ss=s.Mid(l+1,3);j=_tstoi(ss);
-									if(k>=0){l=s.ReverseFind('&');ss=s.Mid(l+1,3);j+=_tstoi(ss);}
-									for(l=0;l<j;l++){
-										ss=f.GetFilePath();
-										s=ss.Right(ss.GetLength()-ss.ReverseFind('\\')-1);
-										ss.Format(_T("%s::%04d"),s,l+1);
-										_tcscpy(p.name,ss);
-										ss.Format(_T("%s::%04d"),f.GetFilePath(),l+1);
-										_tcscpy(p.fol,ss);
-										if(syo==0){	syo=1;syos=p.fol;modesub=p.sub;	fnn = p.name;}
-										Add(p.name,p.sub,p.loop1,p.loop2,p.art,p.alb,p.fol,0,0);
+						ss = f.GetFilePath();
+						ft = ss.Left(ss.ReverseFind('.')); ft += ".frm";
+						ss = f.GetFileName().Right(4); ss.MakeLower();
+						if (ss == ".nsf") {
+							CStdioFile ff; if (ff.Open(ft, CFile::modeRead | CFile::typeText, NULL)) {
+								TCHAR buf[256]; int st, ed, tmp;
+								ff.ReadString(buf, 256);
+								ff.ReadString(buf, 256);
+								//#if UNICODE
+								//								TCHAR ss1[512];
+								//								MultiByteToWideChar(CP_ACP,0,(LPCSTR)buf,-1,ss1,2000);
+								//								_tcscpy(p.alb,ss1);
+								//#else
+								_tcscpy(p.alb, buf);
+								//#endif
+								ff.ReadString(buf, 256);
+								s = buf; int j = s.Find(_T("songs")); if (j >= 0) {
+									int k = s.Find(_T("S.E."));
+									int l = s.ReverseFind('('); ss = s.Mid(l + 1, 3); j = _tstoi(ss);
+									if (k >= 0) { l = s.ReverseFind('&'); ss = s.Mid(l + 1, 3); j += _tstoi(ss); }
+									for (l = 0; l < j; l++) {
+										ss = f.GetFilePath();
+										s = ss.Right(ss.GetLength() - ss.ReverseFind('\\') - 1);
+										ss.Format(_T("%s::%04d"), s, l + 1);
+										_tcscpy(p.name, ss);
+										ss.Format(_T("%s::%04d"), f.GetFilePath(), l + 1);
+										_tcscpy(p.fol, ss);
+										if (syo == 0) { syo = 1; syos = p.fol; modesub = p.sub;	fnn = p.name; }
+										Add(p.name, p.sub, p.loop1, p.loop2, p.art, p.alb, p.fol, 0, 0);
 									}
 								}
 								ff.Close();
 								continue;
 							}
-						}					
-						if(ss==".gbs"){
-							CFile ff; if(ff.Open(f.GetFilePath(),CFile::modeRead,NULL)){
+						}
+						if (ss == ".gbs") {
+							CFile ff; if (ff.Open(f.GetFilePath(), CFile::modeRead, NULL)) {
 								char buf[32];
-								ff.Read(buf,16);int i=buf[4];
-								ff.Read(buf,32);
+								ff.Read(buf, 16); int i = buf[4];
+								ff.Read(buf, 32);
 #if UNICODE
 								TCHAR ss1[512];
-								MultiByteToWideChar(CP_ACP,0,(LPCSTR)buf,-1,ss1,2000);
-								_tcscpy(p.name,ss1);
+								MultiByteToWideChar(CP_ACP, 0, (LPCSTR)buf, -1, ss1, 2000);
+								_tcscpy(p.name, ss1);
 #else
-								_tcscpy(p.name,buf);
+								_tcscpy(p.name, buf);
 #endif
-								ff.Read(buf,32);
+								ff.Read(buf, 32);
 #if UNICODE
-								MultiByteToWideChar(CP_ACP,0,(LPCSTR)buf,-1,ss1,2000);
-								_tcscpy(p.alb,ss1);
+								MultiByteToWideChar(CP_ACP, 0, (LPCSTR)buf, -1, ss1, 2000);
+								_tcscpy(p.alb, ss1);
 #else
-								_tcscpy(p.alb,buf);
+								_tcscpy(p.alb, buf);
 #endif
-								ff.Read(buf,32);
+								ff.Read(buf, 32);
 #if UNICODE
-								MultiByteToWideChar(CP_ACP,0,(LPCSTR)buf,-1,ss1,2000);
-								_tcscpy(p.art,ss1);
+								MultiByteToWideChar(CP_ACP, 0, (LPCSTR)buf, -1, ss1, 2000);
+								_tcscpy(p.art, ss1);
 #else
-								_tcscpy(p.art,buf);
+								_tcscpy(p.art, buf);
 #endif
 								ff.Close();
-								for(int j=0;j<i;j++){
-									ss.Format(_T("%s::%04d"),f.GetFilePath(),j+1);_tcscpy(p.fol,ss);
-									if(syo==0){	syo=1;syos=p.fol;modesub=p.sub;	fnn = p.name;}
-									Add(p.name,p.sub,p.loop1,p.loop2,p.art,p.alb,p.fol,0,0);
+								for (int j = 0; j < i; j++) {
+									ss.Format(_T("%s::%04d"), f.GetFilePath(), j + 1); _tcscpy(p.fol, ss);
+									if (syo == 0) { syo = 1; syos = p.fol; modesub = p.sub;	fnn = p.name; }
+									Add(p.name, p.sub, p.loop1, p.loop2, p.art, p.alb, p.fol, 0, 0);
 								}
 								continue;
 							}
 						}
-						if(ss==".hes"){
-							for(int i=1;i<257;i++){
-								ft.Format(_T("%s::%04d"),f.GetFileName(),i);
-								_tcscpy(p.name,ft);
-								ft.Format(_T("%s::%04d"),f.GetFilePath(),i);
-								if(syo==0){	syo=1;syos=p.fol;modesub=p.sub;fnn = p.name;	}
-								_tcscpy(p.fol,ft);						
-								Add(p.name,p.sub,p.loop1,p.loop2,p.art,p.alb,p.fol,0,0);
+						if (ss == ".hes") {
+							for (int i = 1; i < 257; i++) {
+								ft.Format(_T("%s::%04d"), f.GetFileName(), i);
+								_tcscpy(p.name, ft);
+								ft.Format(_T("%s::%04d"), f.GetFilePath(), i);
+								if (syo == 0) { syo = 1; syos = p.fol; modesub = p.sub; fnn = p.name; }
+								_tcscpy(p.fol, ft);
+								Add(p.name, p.sub, p.loop1, p.loop2, p.art, p.alb, p.fol, 0, 0);
 							}
 							continue;
 						}
-						if(ss==".ovi"||ss==".opi"||ss==".ozi"){
-							CFile ff;char buf[512],*buf2;
-							ff.Open(f.GetFilePath(),CFile::modeRead|CFile::shareDenyNone,NULL);
-							if(ff.GetLength()>512)
-								ff.Seek(-512,CFile::end);
+						if (ss == ".ovi" || ss == ".opi" || ss == ".ozi") {
+							CFile ff; char buf[512], *buf2;
+							ff.Open(f.GetFilePath(), CFile::modeRead | CFile::shareDenyNone, NULL);
+							if (ff.GetLength() > 512)
+								ff.Seek(-512, CFile::end);
 							else
 								ff.SeekToBegin();
-							ff.Read(buf,512);
+							ff.Read(buf, 512);
 							ff.Close();
 							int i = 0;
-							for(;i<500;i++){
-								if(buf[i]=='F'&&buf[i+1]=='M'&&buf[i+2]=='C') break;
+							for (; i < 500; i++) {
+								if (buf[i] == 'F'&&buf[i + 1] == 'M'&&buf[i + 2] == 'C') break;
 							}
-							if(i!=500){
-								buf2=buf+i+4; ss=buf2;
-								int st=ss.Find(0x0d,0);
-								ft=ss.Left(st);_tcscpy(p.name,ft);
-								int ed=ss.Find(0x0d,st+2);
-								ft=ss.Mid(st+1,ed-st-1);_tcscpy(p.art,ft);
-								st=ss.Find(0x0d,ed+2);
-								ft=ss.Mid(ed+1,st-ed-1);_tcscpy(p.alb,ft);
-								if(syo==0){	syo=1;syos=p.fol;modesub=p.sub;fnn = p.name;	}
-								Add(p.name,p.sub,p.loop1,p.loop2,p.art,p.alb,p.fol,0,0);
+							if (i != 500) {
+								buf2 = buf + i + 4; ss = buf2;
+								int st = ss.Find(0x0d, 0);
+								ft = ss.Left(st); _tcscpy(p.name, ft);
+								int ed = ss.Find(0x0d, st + 2);
+								ft = ss.Mid(st + 1, ed - st - 1); _tcscpy(p.art, ft);
+								st = ss.Find(0x0d, ed + 2);
+								ft = ss.Mid(ed + 1, st - ed - 1); _tcscpy(p.alb, ft);
+								if (syo == 0) { syo = 1; syos = p.fol; modesub = p.sub; fnn = p.name; }
+								Add(p.name, p.sub, p.loop1, p.loop2, p.art, p.alb, p.fol, 0, 0);
 								continue;
 							}
 						}
-						ss=f.GetFileName().Right(2);ss.MakeLower();
-						ft=f.GetFileName().Right(3);ft.MakeLower();
-						if(ss==".m" || ft==".mz"){
-							CFile ff;char buf[512],*buf2;
-							ff.Open(f.GetFilePath(),CFile::modeRead|CFile::shareDenyNone,NULL);
-							if(ff.GetLength()>512)
-								ff.Seek(-512,CFile::end);
+						ss = f.GetFileName().Right(2); ss.MakeLower();
+						ft = f.GetFileName().Right(3); ft.MakeLower();
+						if (ss == ".m" || ft == ".mz") {
+							CFile ff; char buf[512], *buf2;
+							ff.Open(f.GetFilePath(), CFile::modeRead | CFile::shareDenyNone, NULL);
+							if (ff.GetLength() > 512)
+								ff.Seek(-512, CFile::end);
 							else
 								ff.SeekToBegin();
-							ff.Read(buf,512);
-							int jj=ff.GetLength();if(jj>510) jj=510;
-							jj-=3;
+							ff.Read(buf, 512);
+							int jj = ff.GetLength(); if (jj > 510) jj = 510;
+							jj -= 3;
 							int i;
-							for(i=jj;i>0;i--){
-								if(buf[i]==0&&buf[i+1]==0&&buf[i+2]==0)break;
+							for (i = jj; i > 0; i--) {
+								if (buf[i] == 0 && buf[i + 1] == 0 && buf[i + 2] == 0)break;
 							}
 							ff.Close();
-							if(i!=0){
-								buf2=buf+i+3;
+							if (i != 0) {
+								buf2 = buf + i + 3;
 								int j = 0;
-								for(;;j++)if(buf2[j]==0)break;
+								for (;; j++)if (buf2[j] == 0)break;
 #if UNICODE
 								TCHAR ss1[512];
-								MultiByteToWideChar(CP_ACP,0,(LPCSTR)buf2,-1,ss1,2000);
-								_tcscpy(p.name,ss1);buf2+=j;
+								MultiByteToWideChar(CP_ACP, 0, (LPCSTR)buf2, -1, ss1, 2000);
+								_tcscpy(p.name, ss1); buf2 += j;
 #else
-								_tcscpy(p.name,buf2);buf2+=j;
+								_tcscpy(p.name, buf2); buf2 += j;
 #endif
-								for(j=0;;j++)if(buf2[j]!=0)break;
-								buf2+=j;
-								for(j=0;;j++)if(buf2[j]==0)break;
+								for (j = 0;; j++)if (buf2[j] != 0)break;
+								buf2 += j;
+								for (j = 0;; j++)if (buf2[j] == 0)break;
 #if UNICODE
-								MultiByteToWideChar(CP_ACP,0,(LPCSTR)buf2,-1,ss1,2000);
-								_tcscpy(p.art,ss1);buf2+=j;
+								MultiByteToWideChar(CP_ACP, 0, (LPCSTR)buf2, -1, ss1, 2000);
+								_tcscpy(p.art, ss1); buf2 += j;
 #else
-								_tcscpy(p.art,buf2);buf2+=j;
+								_tcscpy(p.art, buf2); buf2 += j;
 #endif
-								for(j=0;;j++)if(buf2[j]!=0)break;
-								buf2+=j;
-								for(j=0;;j++)if(buf2[j]==0)break;
+								for (j = 0;; j++)if (buf2[j] != 0)break;
+								buf2 += j;
+								for (j = 0;; j++)if (buf2[j] == 0)break;
 #if UNICODE
-								MultiByteToWideChar(CP_ACP,0,(LPCSTR)buf2,-1,ss1,2000);
-								_tcscpy(p.alb,ss1);buf2+=j;
+								MultiByteToWideChar(CP_ACP, 0, (LPCSTR)buf2, -1, ss1, 2000);
+								_tcscpy(p.alb, ss1); buf2 += j;
 #else
-								_tcscpy(p.alb,buf2);buf2+=j;
+								_tcscpy(p.alb, buf2); buf2 += j;
 #endif
-								if(syo==0){	syo=1;syos=p.fol;modesub=p.sub;fnn = p.name;	}
-								Add(p.name,p.sub,p.loop1,p.loop2,p.art,p.alb,p.fol,0,0);
+								if (syo == 0) { syo = 1; syos = p.fol; modesub = p.sub; fnn = p.name; }
+								Add(p.name, p.sub, p.loop1, p.loop2, p.art, p.alb, p.fol, 0, 0);
 								continue;
 							}
 						}
-						ft=f.GetFileName().Right(4);ft.MakeLower();
-						if(ft==".tta"){
-							CFile ff;char buf[512],*buf2;
-							ff.Open(f.GetFilePath(),CFile::modeRead|CFile::shareDenyNone,NULL);
-							if(ff.GetLength()>0x80)
-								ff.Seek(-0x80,CFile::end);
+						ft = f.GetFileName().Right(4); ft.MakeLower();
+						if (ft == ".tta") {
+							CFile ff; char buf[512], *buf2;
+							ff.Open(f.GetFilePath(), CFile::modeRead | CFile::shareDenyNone, NULL);
+							if (ff.GetLength() > 0x80)
+								ff.Seek(-0x80, CFile::end);
 							else
 								ff.SeekToBegin();
-							ff.Read(buf,0x80);
+							ff.Read(buf, 0x80);
 							int i = 0;
-							for(;i<0x80;i++){
-								if(buf[i+0]=='T'&&buf[i+1]=='A'&&buf[i+2]=='G')break;
+							for (; i < 0x80; i++) {
+								if (buf[i + 0] == 'T'&&buf[i + 1] == 'A'&&buf[i + 2] == 'G')break;
 							}
 							ff.Close();
-							if(i!=0x80){
-								buf2=buf+i+3;
-								for(int j=0;;j++)if(buf2[j]==0)break;
+							if (i != 0x80) {
+								buf2 = buf + i + 3;
+								for (int j = 0;; j++)if (buf2[j] == 0)break;
 #if UNICODE
 								TCHAR ss1[512];
-								TCHAR buf3=buf2[30]; buf2[30]=0;
-								MultiByteToWideChar(CP_ACP,0,(LPCSTR)buf2,-1,ss1,2000);
-								buf2[30]=buf3;
-								_tcscpy(p.name,ss1);buf2+=30;
+								TCHAR buf3 = buf2[30]; buf2[30] = 0;
+								MultiByteToWideChar(CP_ACP, 0, (LPCSTR)buf2, -1, ss1, 2000);
+								buf2[30] = buf3;
+								_tcscpy(p.name, ss1); buf2 += 30;
 #else
-								_tcscpy(p.name,buf2);buf2+=30;
+								_tcscpy(p.name, buf2); buf2 += 30;
 #endif
 #if UNICODE
-								buf3=buf2[30]; buf2[30]=0;
-								MultiByteToWideChar(CP_ACP,0,(LPCSTR)buf2,-1,ss1,2000);
-								buf2[30]=buf3;
-								_tcscpy(p.art,ss1);buf2+=30;
+								buf3 = buf2[30]; buf2[30] = 0;
+								MultiByteToWideChar(CP_ACP, 0, (LPCSTR)buf2, -1, ss1, 2000);
+								buf2[30] = buf3;
+								_tcscpy(p.art, ss1); buf2 += 30;
 #else
-								_tcscpy(p.art,buf2);buf2+=30;
+								_tcscpy(p.art, buf2); buf2 += 30;
 #endif
 #if UNICODE
-								buf3=buf2[30]; buf2[30]=0;
-								MultiByteToWideChar(CP_ACP,0,(LPCSTR)buf2,-1,ss1,2000);
-								buf2[30]=buf3;
-								_tcscpy(p.alb,ss1);buf2+=30;
+								buf3 = buf2[30]; buf2[30] = 0;
+								MultiByteToWideChar(CP_ACP, 0, (LPCSTR)buf2, -1, ss1, 2000);
+								buf2[30] = buf3;
+								_tcscpy(p.alb, ss1); buf2 += 30;
 #else
-								_tcscpy(p.alb,buf2);buf2+=30;
+								_tcscpy(p.alb, buf2); buf2 += 30;
 #endif
-								if(syo==0){	syo=1;syos=p.fol;modesub=p.sub;fnn = p.name;	}
-								Add(p.name,p.sub,p.loop1,p.loop2,p.art,p.alb,p.fol,0,0);
+								if (syo == 0) { syo = 1; syos = p.fol; modesub = p.sub; fnn = p.name; }
+								Add(p.name, p.sub, p.loop1, p.loop2, p.art, p.alb, p.fol, 0, 0);
 								continue;
 							}
 						}
@@ -1242,12 +1445,14 @@ void CPlayList::Fol(CString fname)
 					}
 				}
 				s.MakeLower();
-				if(s.Right(4)==".png" || s.Right(4)==".url" || s.Right(4)==".jpg" || s.Right(4)==".bmp" || s.Right(4)==".cue" || s.Right(4)==".iso" || s.Right(4)==".bin" || s.Right(4)==".img" || s.Right(4)==".mds" || s.Right(4)==".mdf" || s.Right(4)==".ccd" || s.Right(4)==".sub" || s.Right(4)==".pdf" || s.Right(4)==".com" || s.Right(4)==".exe" || s.Right(4)==".dll" || s.Right(4)==".bat" || s.Right(4)==".reg" || s.Right(4)==".msi" || s.Right(4)==".nfo" || s.Right(4)==".diz" || s.Right(4)==".gif" || s.Right(4)==".ico" ||
-				   s.Right(4)==".zip" || s.Right(4)==".lzh" || s.Right(4)==".cab" || s.Right(4)==".rar" || s.Right(4)==".txt" || s.Right(4)==".doc" || s.Right(4)=="html" || s.Right(4)==".htm" || s.Right(4)==".ini" || s.Right(4)==".xml" || s.Right(4)==".kar" || s.Right(4)==".hed" || s.Right(4)==".mzi" || s.Right(4)==".mag" || s.Right(4)==".mvi" || s.Right(4)==".lvi" || s.Right(4)==".mpi" || s.Right(4)==".pvi" || s.Right(4)==".pzi" || s.Right(4)==".p86" || s.Right(4)==".mml" || s.Right(4)==".m3u" || s.Right(4)==".frm" || s.Right(7)==".psflib" || s.Right(8)==".psf2lib" || s.Right(7)==".usflib" || s.Right(7)==".2sflib" || s.Right(3)==".gb" || s.Right(7)==".gsflib" || s.Right(4)==".pdx"){}else{
-					if(syo==0){
-						syo=1;syos=p.fol;modesub=p.sub;fnn = p.name;
+				if (s.Right(4) == ".png" || s.Right(4) == ".url" || s.Right(4) == ".jpg" || s.Right(4) == ".bmp" || s.Right(4) == ".cue" || s.Right(4) == ".iso" || s.Right(4) == ".bin" || s.Right(4) == ".img" || s.Right(4) == ".mds" || s.Right(4) == ".mdf" || s.Right(4) == ".ccd" || s.Right(4) == ".sub" || s.Right(4) == ".pdf" || s.Right(4) == ".com" || s.Right(4) == ".exe" || s.Right(4) == ".dll" || s.Right(4) == ".bat" || s.Right(4) == ".reg" || s.Right(4) == ".msi" || s.Right(4) == ".nfo" || s.Right(4) == ".diz" || s.Right(4) == ".gif" || s.Right(4) == ".ico" ||
+					s.Right(4) == ".zip" || s.Right(4) == ".lzh" || s.Right(4) == ".cab" || s.Right(4) == ".rar" || s.Right(4) == ".txt" || s.Right(4) == ".doc" || s.Right(4) == "html" || s.Right(4) == ".htm" || s.Right(4) == ".ini" || s.Right(4) == ".xml" || s.Right(4) == ".kar" || s.Right(4) == ".hed" || s.Right(4) == ".mzi" || s.Right(4) == ".mag" || s.Right(4) == ".mvi" || s.Right(4) == ".lvi" || s.Right(4) == ".mpi" || s.Right(4) == ".pvi" || s.Right(4) == ".pzi" || s.Right(4) == ".p86" || s.Right(4) == ".mml" || s.Right(4) == ".m3u" || s.Right(4) == ".frm" || s.Right(7) == ".psflib" || s.Right(8) == ".psf2lib" || s.Right(7) == ".usflib" || s.Right(7) == ".2sflib" || s.Right(3) == ".gb" || s.Right(7) == ".gsflib" || s.Right(4) == ".pdx") {
+				}
+				else {
+					if (syo == 0) {
+						syo = 1; syos = p.fol; modesub = p.sub; fnn = p.name;
 					}
-					Add(p.name,p.sub,p.loop1,p.loop2,p.art,p.alb,p.fol,0,0);
+					Add(p.name, p.sub, p.loop1, p.loop2, p.art, p.alb, p.fol, 0, 0);
 				}
 			}
 		}
@@ -1527,6 +1732,16 @@ void timerpl1(UINT nIDEvent,CPlayList* pl)
 		if(pl->GetFocus()==NULL){return;}
 		if(pl->m_find.GetFocus()->m_hWnd==pl->m_find.m_hWnd){return;}
 		{
+			HWND rtn;
+			TCHAR Name[1024];
+			long Leng = sizeof(Name);
+			rtn = GetActiveWindow();
+			GetWindowTextW(rtn, Name, Leng);
+			CString sss;
+			sss = Name;
+			if (sss != _T("プレイリスト")) {
+				return;
+			}
 			if((GetKeyState(VK_RETURN)&0x8000)==0 && kk==1)
 				kk=0;
 			if(GetKeyState(VK_RETURN)&0x8000 && kk==0){

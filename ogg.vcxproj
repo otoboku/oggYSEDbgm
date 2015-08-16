@@ -321,7 +321,10 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='uni|Win32'">
     <LibraryPath>C:\Program Files (x86)\Intel\Composer XE 2013 SP1\compiler\lib\ia32;C:\Microsoft SDKs\Windows\v7.0\lib;C:\ogg\lib;C:\DirectX SDK (February 2010)\Lib\x86;C:\DXSDK\Lib;$(LibraryPath)</LibraryPath>
-    <IncludePath>C:\Microsoft SDKs\Windows\v7.0\Include;C:\Microsoft SDKs\Windows\v7.0\Include\gl;C:\Microsoft SDKs\Windows\v7.0\VC\Include;C:\ogg\include;$(IncludePath);</IncludePath>
+    <IncludePath>C:\PROJECTS\APPLICATION3\faad2-2.7\common\mp4ff;C:\PROJECTS\APPLICATION3\faad2-2.7\include;C:\Microsoft SDKs\Windows\v7.0\Include;C:\Microsoft SDKs\Windows\v7.0\Include\gl;C:\Microsoft SDKs\Windows\v7.0\VC\Include;C:\ogg\include;$(IncludePath);</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='uni_de|Win32'">
+    <IncludePath>C:\PROJECTS\APPLICATION3\faad2-2.7\include;C:\Microsoft SDKs\Windows\v7.0\Include;C:\Microsoft SDKs\Windows\v7.0\Include\gl;C:\Microsoft SDKs\Windows\v7.0\VC\Include;C:\DXSDK\Include;C:\DirectX SDK (February 2010)\Include;C:\ogg\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Midl>
@@ -1193,6 +1196,7 @@
     <ClInclude Include="itiran_YSO.h" />
     <ClInclude Include="Kpilist.h" />
     <ClInclude Include="ListSyosai.h" />
+    <ClInclude Include="m4a.h" />
     <ClInclude Include="Mp3Image.h" />
     <ClInclude Include="Nishi.h" />
     <ClInclude Include="ogg.h" />

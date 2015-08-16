@@ -66,7 +66,11 @@
 #include "mp3.h"
 #include "OSVersion.h"
 
+//#include "neaacdec.h"
+//#include "m4a.h"
+
 static mp3 mp3_;
+//static m4a m4a_;
 int readadpcm(CFile &adpcmf,char* bw,int len);
 int readadpcmzwei(CFile &adpcmf,char* bw,int len);
 int readadpcmgurumin(CFile &adpcmf,char* bw,int len);
@@ -1803,6 +1807,7 @@ void COggDlg::play()
 	lo=loc=locs=0;
     //Stereo 16bit 44kHz
 	loc=0;
+	
 //-------------------------------------------------------------------
 	if(m_dsb != NULL) m_dsb->Release();
 	m_dsb = NULL;
@@ -1879,6 +1884,9 @@ void COggDlg::play()
 		mp3file=ss;
 		wav_start();
 //		playwavmp3(bufwav3,0,dwDataLen*4,0);
+	}
+	else if (mode == -9) { // M4a
+		
 	}else if(mode==-3){
 		ret2=0;
 //		st1();
@@ -1891,7 +1899,7 @@ void COggDlg::play()
 		CString ss;
 		ss=filen.Left(filen.ReverseFind(':')-1);
 		ZeroMemory(&sikpi,sizeof(sikpi));
-		sikpi.dwSamplesPerSec=48000; sikpi.dwChannels=2; sikpi.dwSeekable=1; sikpi.dwLength=-1; sikpi.dwBitsPerSample=16;
+		sikpi.dwSamplesPerSec=96000; sikpi.dwChannels=2; sikpi.dwSeekable=1; sikpi.dwLength=-1; sikpi.dwBitsPerSample=16;
 		if(mod){
 			if(ss==""){
 				if(mod->Init) mod->Init();
@@ -1962,7 +1970,6 @@ void COggDlg::play()
 	WAVEFORMATEX wfx1;
     wfx1.wFormatTag = WAVE_FORMAT_PCM;
 	if(!(wavch==1 || wavch==2)) wavch=2;
-	if(wavbit==0 || wavbit>48000) wavbit=44100;
     wfx1.nChannels = wavch;
     wfx1.nSamplesPerSec = wavbit;
 	wfx1.wBitsPerSample = wavsam;

@@ -343,6 +343,9 @@
     <ClInclude Include="OSVersion.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="m4a.h">
+      <Filter>ライブラリ</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\ico00001.ico">
