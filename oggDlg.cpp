@@ -2060,10 +2060,6 @@ void COggDlg::play()
 		m_time.SetSelection(loop1,(loop1+loop2));
 		m_time.Invalidate();
 	}
-	DWORD dwDataLen1;
-	m_dsb->Lock(0,WAVDALen,(LPVOID *)&pdsb,&dwDataLen1,NULL,0,0);
-	memcpy(pdsb,bufwav3,dwDataLen1);
-	m_dsb->Unlock(pdsb,dwDataLen1,NULL,0);
 	int len1,len2,len3;
 	ULONG PlayCursor,WriteCursor=0;
 	if(m_dsb)m_dsb->GetCurrentPosition(&PlayCursor, &WriteCursor);//Ä¶ˆÊ’uæ“¾

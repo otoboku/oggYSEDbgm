@@ -210,6 +210,7 @@ UINT HandleNotifications(LPVOID)
 		int len1=0,len2=0,len3,len4;
 		len1=(int)WriteCursor-(int)oldw;//‘‚«‚İ”ÍˆÍæ“¾
 		len2=0;
+		if (len1 == 0 && len2 == 0) continue;
 		if(len1<0){
 			len1=OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM-oldw; len2=WriteCursor;}
 		if(len2<0)

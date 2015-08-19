@@ -79,24 +79,34 @@ CString COSVersion::GetVersionString()
 				break;
 			}
 			if (in.dwMinorVersion == 2) {
-				ss = _T("Windows Server 2003");
-				if ((in.wSuiteMask & VER_SUITE_DATACENTER)
-					== VER_SUITE_DATACENTER)
-				{
-					ss += " Datacenter Edition";
-				}
-				else if ((in.wSuiteMask & VER_SUITE_ENTERPRISE)
-					== VER_SUITE_ENTERPRISE)
-				{
-					ss += " Enterprise Edition";
-				}
-				else if (in.wSuiteMask == VER_SUITE_BLADE)
-				{
-					ss += " Web Edition";
-				}
-				else
-				{
-					ss += " Standard Edition";
+				if (in.wProductType == VER_NT_WORKSTATION){
+					ss = _T("Windows XP");
+					if ((in.wSuiteMask & VER_SUITE_PERSONAL) == VER_SUITE_PERSONAL) {
+						ss += " Home Edition";
+					}
+					else {
+						ss += " Professional Edition";
+					}
+				}else{
+					ss = _T("Windows Server 2003");
+					if ((in.wSuiteMask & VER_SUITE_DATACENTER)
+						== VER_SUITE_DATACENTER)
+					{
+						ss += " Datacenter Edition";
+					}
+					else if ((in.wSuiteMask & VER_SUITE_ENTERPRISE)
+						== VER_SUITE_ENTERPRISE)
+					{
+						ss += " Enterprise Edition";
+					}
+					else if (in.wSuiteMask == VER_SUITE_BLADE)
+					{
+						ss += " Web Edition";
+					}
+					else
+					{
+						ss += " Standard Edition";
+					}
 				}
 				break;
 			}
