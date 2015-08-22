@@ -680,10 +680,16 @@ void CPlayList::Fol(CString fname)
 		else if ((ft.Right(4) == ".m4a" || ft.Right(4) == ".M4A")) {
 			CFile ff;
 			char buf[1024];
+			TCHAR kpi[512];
 			ff.Open(fname, CFile::modeRead|CFile::shareDenyNone, NULL);
 			int flg, read = ff.Read(bufimage, sizeof(bufimage));
 			ff.Close();
-			p.sub = -2;
+			kpi[0] = 0;
+			plugs(s, &p, kpi);
+			if (kpi[0] == 0)
+				p.sub = -3;
+			else
+				p.sub = -2;
 			_tcscpy(p.fol, fname);
 			flg = 0;
 			int i;
@@ -1194,10 +1200,16 @@ void CPlayList::Fol(CString fname)
 				else if ((s.Right(4) == ".m4a" || s.Right(4) == ".M4A")) {
 					CFile ff;
 					char buf[1024];
+					TCHAR kpi[512];
 					ff.Open(s, CFile::modeRead | CFile::shareDenyNone, NULL);
 					int flg, read = ff.Read(bufimage, sizeof(bufimage));
 					ff.Close();
-					p.sub = -2;
+					kpi[0] = 0;
+					plugs(s, &p, kpi);
+					if (kpi[0] == 0)
+						p.sub = -3;
+					else
+						p.sub = -2;
 					_tcscpy(p.fol, s);
 					flg = 0;
 					int i;

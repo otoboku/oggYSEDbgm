@@ -19,8 +19,9 @@
 //#include "dsound.h"
 
 extern int fade1;
-extern 	LPDIRECTSOUND m_ds;
-extern 	LPDIRECTSOUNDBUFFER m_dsb;
+extern 	LPDIRECTSOUND8 m_ds;
+extern 	LPDIRECTSOUNDBUFFER m_dsb1;
+extern 	LPDIRECTSOUNDBUFFER8 m_dsb;
 extern 	LPDIRECTSOUND3DBUFFER m_dsb3d;
 extern	LPDIRECTSOUNDBUFFER m_p;
 extern LPDIRECTSOUND3DBUFFER m_lpDS3DBuffer;
@@ -35,7 +36,8 @@ extern LPDIRECTSOUNDNOTIFY dsnf2;
 extern UINT HandleNotifications(LPVOID lpvoid);
 extern ULONG WAVDALen;
 extern UINT ttt;
-#define BUFSZ			(8192*2)
+extern int wavch,wavbit, wavsam;
+#define BUFSZ			(2048*6)
 #define HIGHDIV			4
 #define BUFSZH			(BUFSZ/HIGHDIV)
 #define SQRT_BUFSZ2		64
@@ -43,16 +45,16 @@ extern UINT ttt;
 #define ABS(N)			( (N)<0 ? -(N) : (N) )
 #define OUTPUT_BUFFER_SIZE  BUFSZ
 #define OUTPUT_BUFFER_NUM   10
-extern void playwavds(char*bw);
-extern void playwavds2(char*bw,int len);
-extern BOOL playwavadpcm(char* bw,int old,int l1,int l2);
+extern void playwavds(BYTE*bw);
+extern void playwavds2(BYTE*bw,int len);
+extern BOOL playwavadpcm(BYTE* bw,int old,int l1,int l2);
 extern int mode;
 extern save savedata;
 LPDIRECTSOUND3DLISTENER m_listener=NULL;
 
 CString COggDlg::init(HWND hwnd,int sm)
 {
-	DirectSoundCreate(NULL,&m_ds,NULL);
+	DirectSoundCreate8(NULL,&m_ds,NULL);
 	if(m_ds==NULL) return _T("DirectSoundを生成できません。\nDirectX7が正常にインストールされているか確認してください。");
 	if(m_ds->SetCooperativeLevel(hwnd,DSSCL_PRIORITY)!=DS_OK){
 		return _T("DirectSoundの強調レベルを設定できません。\nDirectX7が正常にインストールされているか確認してください。");
@@ -81,11 +83,12 @@ CString COggDlg::init(HWND hwnd,int sm)
 		WAVEFORMATEX p;
 		ZeroMemory(&p,sizeof(p));
 		p.wFormatTag=WAVE_FORMAT_PCM;
-		p.nChannels=2;
-		p.nSamplesPerSec=sm;
-		p.nBlockAlign=4;
-		p.nAvgBytesPerSec=p.nSamplesPerSec*p.nBlockAlign;
-		p.wBitsPerSample=24;
+		p.nChannels= wavch;
+		p.nSamplesPerSec= wavbit;
+		p.wBitsPerSample = wavsam;
+		p.nBlockAlign = p.nChannels * p.wBitsPerSample / 8;
+		p.nAvgBytesPerSec = p.nSamplesPerSec * p.nBlockAlign;
+		p.cbSize = 0;
 		m_p->SetFormat(&p);
 	}
 	//m_p->QueryInterface(IID_IDirectSound3DListener, (LPVOID*)&m_listener);
@@ -129,6 +132,7 @@ BOOL COggDlg::ReleaseDXSound(void)
 		Closeds();
 		if(m_dsb3d != NULL){m_dsb3d->Release();m_dsb3d =NULL;}
 		if(m_dsb != NULL) {m_dsb->Release();m_dsb=NULL;}
+		if (m_dsb1 != NULL) { m_dsb1->Release(); m_dsb1 = NULL; }
 		if(m_lpDS3DBuffer != NULL){m_lpDS3DBuffer->Release();}
 		m_dsb =NULL;
 		m_lpDS3DBuffer= NULL;
@@ -142,10 +146,10 @@ BOOL COggDlg::ReleaseDXSound(void)
 	return TRUE;
 }
 
-extern void playwavds2(char* bw,int old,int l1,int l2);
-extern int playwavkpi(char* bw,int old,int l1,int l2);
-extern int playwavmp3(char* bw,int old,int l1,int l2);
-extern char bufwav3[OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM*60];
+extern void playwavds2(BYTE* bw,int old,int l1,int l2);
+extern int playwavkpi(BYTE* bw,int old,int l1,int l2);
+extern int playwavmp3(BYTE* bw,int old,int l1,int l2);
+extern BYTE bufwav3[OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM*6];
 extern int ps;
 extern COggDlg *og;
 extern BOOL thn;
@@ -169,7 +173,7 @@ UINT HandleNotifications(LPVOID)
 //	char bufwav2[OUTPUT_BUFFER_SIZE];
 	HANDLE ev[] = {(HANDLE)og->timer};
 //	ULONG PlayCursor,WriteCursor=OUTPUT_BUFFER_SIZE*4,oldw=OUTPUT_BUFFER_SIZE*4;
-	ULONG PlayCursor,WriteCursor=0,oldw=OUTPUT_BUFFER_SIZE*4,oldw2;
+	ULONG PlayCursor,WriteCursor=0,oldw=OUTPUT_BUFFER_SIZE*2,oldw2;
 	m_dsb->SetCurrentPosition(0);
 	if(mode==-10){
 		oldw=OUTPUT_BUFFER_SIZE*2;
@@ -212,9 +216,11 @@ UINT HandleNotifications(LPVOID)
 		len2=0;
 		if (len1 == 0 && len2 == 0) continue;
 		if(len1<0){
-			len1=OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM-oldw; len2=WriteCursor;}
+			len1=OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM-oldw; len2= WriteCursor;}
 		if(len2<0)
 			len2=0;
+		//len1 = (len1 / (wavsam / 8)) * (wavsam / 8);
+		//len2 = (len2 / (wavsam / 8)) * (wavsam / 8);
 		len4=len1+len2;
 		if((mode>=10 && mode<=20) || mode<-10)
 			playwavadpcm(bufwav3,oldw,len1,len2);//データ獲得

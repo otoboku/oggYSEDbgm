@@ -58,6 +58,7 @@ void CRender::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDCANCEL3, m_kpi);
 	DDX_Control(pDX, IDC_CHECK47, m_mp3orig);
 	DDX_Control(pDX, IDC_CHECK48, m_audiost);
+	DDX_Control(pDX, IDC_CHECK49, m_24);
 }
 
 
@@ -83,6 +84,8 @@ BEGIN_MESSAGE_MAP(CRender, CDialog)
 	ON_BN_CLICKED(IDCANCEL3, &CRender::Onkpi)
 	ON_BN_CLICKED(IDC_FONT, &CRender::OnFontMain)
 	ON_BN_CLICKED(IDC_FONT2, &CRender::OnFontList)
+	ON_BN_CLICKED(IDOK, &CRender::OnBnClickedOk)
+	ON_BN_CLICKED(IDC_CHECK49, &CRender::OnBnClicked24bit)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -135,6 +138,7 @@ BOOL CRender::OnInitDialog()
 	}
 	m_mp3orig.SetCheck(savedata.mp3orig);
 	m_audiost.SetCheck(savedata.audiost);
+	m_24.SetCheck(savedata.bit24);
 
 	m_tooltip.Create(this);
 	m_tooltip.Activate(TRUE);
@@ -165,6 +169,7 @@ BOOL CRender::OnInitDialog()
 	m_tooltip.AddTool(GetDlgItem(IDC_CHECK46),_T("kpiの音量を5倍にします。"));
 	m_tooltip.AddTool(GetDlgItem(IDC_CHECK47),_T("mp3のデコーダをオリジナルのデコーダを使わずに、独自で使ったデコーダを使う。\nエラーなどで演奏できないときにチェック入れて下さい。\nまた独自で正常にならない時ははずして下さい。"));
 	m_tooltip.AddTool(GetDlgItem(IDC_CHECK48),_T("複数音声のある動画を再生する時に、再生前に\n音声ストリームの選択画面を表示します。\n通常ストリーム1がメインとして使われ、ストリーム2以降はコメンタリや英語音声などに使われています。"));
+	m_tooltip.AddTool(GetDlgItem(IDC_CHECK49), _T("対応しているkpiを24bit(ハイレゾ)で再生します。\n通常は16bitですが、まれに対応しているものがあります。\n音割れについては考慮されていないため、spcなど倍率を上げないといけないものは気をつけて下さい。"));
 	m_tooltip.SetDelayTime( TTDT_AUTOPOP, 10000 );
 	m_tooltip.SendMessage(TTM_SETMAXTIPWIDTH, 0, 512);
 
@@ -190,7 +195,8 @@ void CRender::OnOK()
 	savedata.vob=m_vob.GetCheck();
 	savedata.haali=m_haali.GetCheck();
 	savedata.audiost=m_audiost.GetCheck();
-//	savedata.mp3orig=m_mp3orig.GetCheck();
+	savedata.bit24 = m_24.GetCheck();
+	//	savedata.mp3orig=m_mp3orig.GetCheck();
 	CDialog::OnOK();
 }
 
@@ -382,6 +388,12 @@ void CRender::Onkpi30()
 	savedata.kpivol=5;
 }
 
+void CRender::OnBnClicked24bit()
+{
+	// TODO: ここにコントロール通知ハンドラー コードを追加します。
+	savedata.bit24 = m_24.GetCheck();
+}
+
 #include "Kpilist.h"
 void CRender::Onkpi()
 {
@@ -418,3 +430,12 @@ void CRender::OnFontList()
 		pl->m_lc.SetFont(fontDlg.GetFont());
 	}
 }
+
+
+void CRender::OnBnClickedOk()
+{
+	// TODO: ここにコントロール通知ハンドラー コードを追加します。
+	CDialog::OnOK();
+}
+
+

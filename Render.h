@@ -87,6 +87,9 @@ public:
 	afx_msg void OnFontList();
 	CButton m_mp3orig;
 	CButton m_audiost;
+	CButton m_24;
+	afx_msg void OnBnClickedOk();
+	afx_msg void OnBnClicked24bit();
 };
 
 //{{AFX_INSERT_LOCATION}}

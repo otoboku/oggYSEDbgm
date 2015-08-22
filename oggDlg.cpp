@@ -143,9 +143,9 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 int fade1,playf;
-LPDIRECTSOUND m_ds;
-LPDIRECTSOUNDBUFFER m_dsb=NULL;
-//LPDIRECTSOUNDBUFFER8 m_dsb=NULL;
+LPDIRECTSOUND8 m_ds;
+LPDIRECTSOUNDBUFFER m_dsb1=NULL;
+LPDIRECTSOUNDBUFFER8 m_dsb=NULL;
 LPDIRECTSOUND3DBUFFER m_dsb3d=NULL;
 
 LPDIRECTSOUNDBUFFER m_p;
@@ -158,12 +158,12 @@ ULONG WAVDALen;
 UINT WAVDAStartLen;
 
 int randomno;
-int playwavkpi(char* bw,int old,int l1,int l2);
-int readkpi(char*bw,int cnt);
-int playwavmp3(char* bw,int old,int l1,int l2);
-int readmp3(char*bw,int cnt);
-void playwavds2(char* bw,int old,int l1,int l2);
-BOOL playwavadpcm(char* bw,int old,int l1,int l2);
+int playwavkpi(BYTE* bw,int old,int l1,int l2);
+int readkpi(BYTE*bw,int cnt);
+int playwavmp3(BYTE* bw,int old,int l1,int l2);
+int readmp3(BYTE*bw,int cnt);
+void playwavds2(BYTE* bw,int old,int l1,int l2);
+BOOL playwavadpcm(BYTE* bw,int old,int l1,int l2);
 //スレッド
 UINT wavread(LPVOID);
 extern BYTE bufimage[0x30000f];
@@ -950,8 +950,8 @@ int ret2;
 
 //#define OUTPUT_BUFFER_NUM   10
 #define OUTPUT_BUFFER_SIZE  BUFSZ
-char bufwav[OUTPUT_BUFFER_SIZE*60];
-char buf[OUTPUT_BUFFER_NUM][OUTPUT_BUFFER_SIZE];
+BYTE bufwav[OUTPUT_BUFFER_SIZE*6];
+BYTE buf[OUTPUT_BUFFER_NUM][OUTPUT_BUFFER_SIZE];
 LPWAVEHDR  g_OutputBuffer[OUTPUT_BUFFER_NUM];
 	long data_size;
 
@@ -961,7 +961,7 @@ int tt=0;
 int killw;
 ULONG PlayCursora,WriteCursora;
 double oggsize2=0;
-	char bufwav3[OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM*60];
+	BYTE bufwav3[OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM*2];
 //////////////////////////////////////////////////////////////////////////////
 long LoadOggVorbis(const TCHAR *file_name, int word, char **ogg,CSliderCtrl &m_time)
 {
@@ -1058,10 +1058,10 @@ void wav_start()
 	wh.WaveFmt.wf.wFormatTag      = WAVE_FORMAT_PCM;
 	wh.WaveFmt.wf.nChannels       = wavch;
 	wh.WaveFmt.wf.nSamplesPerSec  = wavbit;
-	wh.WaveFmt.wf.nAvgBytesPerSec = wavbit * 2 * 2;
-	wh.WaveFmt.wf.nBlockAlign     = 2 * 2;
-	wh.WaveFmt.wBitsPerSample  = 2 * 8;
-
+	wh.WaveFmt.wBitsPerSample = wavsam;
+	wh.WaveFmt.wf.nBlockAlign = wh.WaveFmt.wf.nChannels * wh.WaveFmt.wBitsPerSample / 8;
+	wh.WaveFmt.wf.nAvgBytesPerSec = wh.WaveFmt.wf.nSamplesPerSec * wh.WaveFmt.wf.nBlockAlign;
+	wh.ckSizeFmt = 16;
 	memcpy(wh.ckidData, "data", 4);
 
 	/* メモリへのヘッダの書き込み */
@@ -1899,7 +1899,7 @@ void COggDlg::play()
 		CString ss;
 		ss=filen.Left(filen.ReverseFind(':')-1);
 		ZeroMemory(&sikpi,sizeof(sikpi));
-		sikpi.dwSamplesPerSec=96000; sikpi.dwChannels=2; sikpi.dwSeekable=1; sikpi.dwLength=-1; sikpi.dwBitsPerSample=16;
+		sikpi.dwSamplesPerSec=96000; sikpi.dwChannels=2; sikpi.dwSeekable=1; sikpi.dwLength=-1; sikpi.dwBitsPerSample=((savedata.bit24==1)?24:16);
 		if(mod){
 			if(ss==""){
 				if(mod->Init) mod->Init();
@@ -1977,7 +1977,7 @@ void COggDlg::play()
     wfx1.nAvgBytesPerSec = wfx1.nSamplesPerSec * wfx1.nBlockAlign;
     wfx1.cbSize = 0;
 
-	if(wavbit2!=wavbit||si1.dwBitsPerSample||sikpi.dwBitsPerSample){
+	if(wavbit2!=wavbit||wavsam==24||si1.dwBitsPerSample||sikpi.dwBitsPerSample){
 		ReleaseDXSound();
 		init(m_hWnd,wavbit);
 	}
@@ -2008,12 +2008,14 @@ void COggDlg::play()
 	ZeroMemory(&dsbd,sizeof(DSBUFFERDESC));
 	dsbd.dwSize = sizeof(DSBUFFERDESC);
 	dsbd.dwFlags = DSBCAPS_GLOBALFOCUS | DSBCAPS_GETCURRENTPOSITION2 | DSBCAPS_CTRLVOLUME;// | DSBCAPS_CTRL3D;
-	dsbd.dwBufferBytes = WAVDALen;
+	dsbd.dwBufferBytes = OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM;
 	dsbd.lpwfxFormat = &wfx1;
 	//dsbd.guid3DAlgorithm = DS3DALG_HRTF_LIGHT;
 	HRESULT r;
+	r = m_ds->CreateSoundBuffer(&dsbd, &m_dsb1, NULL);
 	for(i=0;i<10;i++){
-		r=m_ds->CreateSoundBuffer(&dsbd,&m_dsb,NULL);
+		r = m_dsb1->QueryInterface(IID_IDirectSoundBuffer8, (void**)&m_dsb);
+
 		if(m_dsb == NULL){DoEvent();Sleep(100); continue;} else break;
 	}
 	if(m_dsb == NULL){
@@ -2703,10 +2705,10 @@ int                 nsamp;
 int readadpcm2(char* bw,int cnt);
 int seekadpcm(int pos);
 
-BOOL playwavadpcm(char* bw,int old,int l1,int l2)
+BOOL playwavadpcm(BYTE* bw,int old,int l1,int l2)
 {
 //	playb+=(l1+l2)/4;
-	int rrr=readadpcm2(bw+old,l1);
+	int rrr=readadpcm2((char*)bw+old,l1);
 	if(l1 != rrr){
 		if(endf==1){
 			l1=rrr; fade1=1;
@@ -2715,11 +2717,11 @@ BOOL playwavadpcm(char* bw,int old,int l1,int l2)
 			playb=loop1;
 			seekadpcm(loop1);
 			poss=0;
-			readadpcm2(bw+old+rrr,(int)l1-rrr);
+			readadpcm2((char*)bw+old+rrr,(int)l1-rrr);
 		}
 	}
 	if(l2){
-		rrr=readadpcm2(bw,l2);
+		rrr=readadpcm2((char*)bw,l2);
 		if(l2 != rrr){
 			if(endf==1){
 				l2=rrr; fade1=1;
@@ -2728,7 +2730,7 @@ BOOL playwavadpcm(char* bw,int old,int l1,int l2)
 				playb=loop1;
 				seekadpcm(loop1);
 				poss=0;
-				readadpcm2(bw+rrr,(int)l2-rrr);
+				readadpcm2((char*)bw+rrr,(int)l2-rrr);
 			}
 		}
 	}
@@ -3149,7 +3151,7 @@ int readadpcmarc(CFile&adpcmf,char* bw,int len)
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-int playwavkpi(char* bw,int old,int l1,int l2)
+int playwavkpi(BYTE* bw,int old,int l1,int l2)
 {
 	if(og->mod==NULL) return 0;  
 	playb+=(l1+l2)/4;
@@ -3181,8 +3183,20 @@ int playwavkpi(char* bw,int old,int l1,int l2)
 	return l1+l2;
 }
 
-BYTE bufkpi[OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM*100];
-int readkpi(char*bw,int cnt)
+typedef struct tagInt24
+{
+	char byData;
+	short data;
+
+	operator int()
+	{
+		return (byData + data << 8);
+	};
+
+}INT24, *LPINT24;
+
+BYTE bufkpi[OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM * 3];
+int readkpi(BYTE*bw,int cnt)
 {
 	_set_se_translator( trans_func );
 	DWORD cnt1=og->sikpi.dwUnitRender*2,cnt2=(DWORD)cnt,cnt4;if(cnt1==0) cnt1=1024;
@@ -3216,40 +3230,80 @@ int readkpi(char*bw,int cnt)
 		if(cnt3!=0)	memcpy(bufkpi,bufkpi+cnt2,cnt3);
 	}
 	short *b,c;
+	INT24 *b24;
 	b=(short*)bw;
+	b24 = (INT24*)bw;
 //	CString sss=og->kpi;
 	CString sss;
 	sss=filen.Right(filen.GetLength()-filen.ReverseFind('.')-1);
 	sss.MakeLower();
 	if(sss=="spc"){
-//	if(sss.Right(9)=="kbspc.kpi"||sss.Right(10)=="kb_nez.kpi"||sss.Right(13)=="kbsnesapu.kpi"){
 		if(savedata.spc!=1)
-			for(int i=0;i<cnt/2;i++){
-				int c=(int)b[i];
-				if(savedata.spc==2)	c=(int)((float)b[i]*2.0f);
-				else if(savedata.spc==4) c=(int)((float)b[i]*3.0f);
-				else if(savedata.spc==8) c=(int)((float)b[i]*4.0f);
-				else if(savedata.spc==16) c=(int)((float)b[i]*5.0f);
-				if(c>=32768)c=32767;
-				if(c<=-32767)c=-32766;
-				b[i]=(short)c;
+			if (wavsam == 24) {
+				for (int i = 0; i < cnt / 3; i++) {
+					float c4 = (float)b24[i].data;
+					if (savedata.spc == 2)	c4 = c4 * 3.0f;
+					else if (savedata.spc == 4) c4 = c4 * 6.0f;
+					else if (savedata.spc == 8) c4 = c4 * 9.0f;
+					else if (savedata.spc == 16) c4 = c4 * 12.0f;
+					if (c4 >= 32768.0f)c4 = 32767.0f;
+					if (c4 < -32768.0f)c4 = -32768.0f;
+					b24[i].data = (short)c4;
+				}
+			}
+			else {
+				for (int i = 0; i < cnt / 2; i++) {
+					int c = (int)b[i];
+					if (savedata.spc == 2)	c = (int)((float)b[i] * 2.0f);
+					else if (savedata.spc == 4) c = (int)((float)b[i] * 3.0f);
+					else if (savedata.spc == 8) c = (int)((float)b[i] * 4.0f);
+					else if (savedata.spc == 16) c = (int)((float)b[i] * 5.0f);
+					if (c >= 32768)c = 32767;
+					if (c < -32768)c = -32768;
+					b[i] = (short)c;
+				}
 			}
 	}
 	if(savedata.kpivol!=1){
-		for(int i=0;i<cnt/2;i++){
-			int c=(int)b[i];
-			if(savedata.kpivol==2)	c=(int)((float)b[i]*2.0f);
-			else if(savedata.kpivol==3) c=(int)((float)b[i]*3.0f);
-			else if(savedata.kpivol==4) c=(int)((float)b[i]*4.0f);
-			else if(savedata.kpivol==5) c=(int)((float)b[i]*5.0f);
-			if(c>=32768)c=32767;
-			if(c<=-32767)c=-32766;
-			b[i]=(short)c;
+		if (wavsam == 24) {
+			for (int i = 0; i < cnt / 3; i++) {
+				float c4 = (float)b24[i].data;
+				if (savedata.kpivol == 2)	c4 = c4 * 3.0f;
+				else if (savedata.kpivol == 4) c4 = c4 * 6.0f;
+				else if (savedata.kpivol == 8) c4 = c4 * 9.0f;
+				else if (savedata.kpivol == 16) c4 = c4 * 12.0f;
+				if (c4 >= 32768.0f)c4 = 32767.0f;
+				if (c4 < -32768.0f)c4 = -32768.0f;
+				b24[i].data = (short)c4;
+			}
+		}
+		else {
+			for (int i = 0; i < cnt / 2; i++) {
+				int c = (int)b[i];
+				if (savedata.kpivol == 2)	c = (int)((float)b[i] * 2.0f);
+				else if (savedata.kpivol == 3) c = (int)((float)b[i] * 3.0f);
+				else if (savedata.kpivol == 4) c = (int)((float)b[i] * 4.0f);
+				else if (savedata.kpivol == 5) c = (int)((float)b[i] * 5.0f);
+				if (c >= 32768)c = 32767;
+				if (c < -32768)c = -32768;
+				b[i] = (short)c;
+			}
 		}
 	}
 	fade+=fadeadd;if(fade<0.0001){fade=0.0;fadeadd=0;}
 	//fadeを三乗して計算密度を変更
-	for(int i=0;i<cnt/2;i++){	c=b[i]; c=(short)(((float)c) * fade * fade); b[i]=c;	}
+	if (wavsam == 24) {
+		float c4;
+		for (int i = 0; i < cnt / 3; i++) {
+			c4 = (float)b24[i].data;
+			c4 = c4 * fade * fade;
+			b24[i].data = (short)c4;
+			b24[i].byData = 0;
+		}
+	}
+	else {
+		for (int i = 0; i < cnt / 2; i++) { c = b[i]; c = (short)(((float)c) * fade * fade); b[i] = c; }
+	}
 	if((UINT)wl<(UINT)0x7fff0000){
 		if(cc1==1)	cc.Write(bw,cnt);
 		wl+=cnt;
@@ -3265,7 +3319,7 @@ int readkpi(char*bw,int cnt)
 	return cnt;
 }
 
-int playwavmp3(char* bw,int old,int l1,int l2)
+int playwavmp3(BYTE* bw,int old,int l1,int l2)
 {
 	playb+=(l1+l2);
     //データ読み込み
@@ -3297,7 +3351,7 @@ int playwavmp3(char* bw,int old,int l1,int l2)
 	return l1+l2;
 }
 
-int readmp3(char*bw,int cnt)
+int readmp3(BYTE*bw,int cnt)
 {
 	int r=1,rr=cnt-poss;
 	if(savedata.mp3orig)
@@ -3310,21 +3364,45 @@ int readmp3(char*bw,int cnt)
 		poss-=cnt;
 		if(poss!=0){ memcpy(bufkpi,bufkpi+cnt,poss); }
 	}
+	INT24 *b24;
+	b24 = (INT24*)bw;
 	short *b,c;
 	b=(short*)bw;
-	for(int i=0;i<cnt/2;i++){
-		int c=(int)b[i];
-		if(savedata.mp3==2)	c=(int)((float)b[i]*1.5f);
-		else if(savedata.mp3==3) c=(int)((float)b[i]*2.0f);
-		else if(savedata.mp3==4) c=(int)((float)b[i]*2.5f);
-		else if(savedata.mp3==5) c=(int)((float)b[i]*3.0f);
-		if(c>=32768)c=32767;
-		if(c<=-32767)c=-32766;
-		b[i]=(short)c;
+	if (wavsam == 24) {
+		for (int i = 0; i < cnt / 3; i++) {
+
+			INT24 c3 = (INT24)b24[i];
+			int c4 = c3.data;
+			if (savedata.mp3 == 2)	c4 = (int)((float)c4 * 3.0f);
+			else if (savedata.mp3 == 4) c4 = (int)((float)c4 * 6.0f);
+			else if (savedata.mp3 == 8) c4 = (int)((float)c4 * 9.0f);
+			else if (savedata.mp3 == 16) c4 = (int)((float)c4 * 12.0f);
+			if (c4 >= 32768)c4 = 32767;
+			if (c4 <= -32767)c4 = -32766;
+			c3.data = (short)c4;
+			b24[i] = c3;
+		}
+	}
+	else {
+		for (int i = 0; i < cnt / 2; i++) {
+			int c = (int)b[i];
+			if (savedata.mp3 == 2)	c = (int)((float)b[i] * 1.5f);
+			else if (savedata.mp3 == 3) c = (int)((float)b[i] * 2.0f);
+			else if (savedata.mp3 == 4) c = (int)((float)b[i] * 2.5f);
+			else if (savedata.mp3 == 5) c = (int)((float)b[i] * 3.0f);
+			if (c >= 32768)c = 32767;
+			if (c <= -32767)c = -32766;
+			b[i] = (short)c;
+		}
 	}
 	fade+=fadeadd;if(fade<0.0001){fade=0.0;fadeadd=0;}
 	//fadeを三乗して計算密度を変更
-	for(int i=0;i<cnt/2;i++){	c=b[i]; c=(short)(((float)c) * fade * fade); b[i]=c;	}
+	if (wavsam == 24) {
+		for (int i = 0; i < cnt / 3; i++) { c = b24[i].data; c = (short)(((float)c) * fade * fade); b24[i].data = c; }
+	}
+	else {
+		for (int i = 0; i < cnt / 2; i++) { c = b[i]; c = (short)(((float)c) * fade * fade); b[i] = c; }
+	}
 	if((UINT)wl<(UINT)0x7fff0000){
 		if(cc1==1)	cc.Write(bw,cnt);
 		wl+=cnt;
@@ -3335,12 +3413,12 @@ int readmp3(char*bw,int cnt)
 	return cnt;
 }
 
-void playwavds2(char* bw,int old,int l1,int l2)
+void playwavds2(BYTE* bw,int old,int l1,int l2)
 {
 //	return;
 //	playb+=(l1+l2)/4;
     //データ読み込み
-	int rrr=mcopy(bw+old,l1);
+	int rrr=mcopy((char*)bw+old,l1);
 	if(l1 != rrr){
 		if(endf==1){
 			l1=rrr; fade1=1;
@@ -3348,11 +3426,11 @@ void playwavds2(char* bw,int old,int l1,int l2)
 			loopcnt++;
 			playb=loop1;
 			ov_pcm_seek(&vf,(ogg_int64_t)loop1);poss=0;
-			mcopy(bw+old+rrr,(int)l1-rrr);
+			mcopy((char*)bw+old+rrr,(int)l1-rrr);
 		}
 	}
 	if(l2){
-		rrr=mcopy(bw,l2);
+		rrr=mcopy((char*)bw,l2);
 		if(l2 != rrr){
 			if(endf==1){
 				l2=rrr; fade1=1;
@@ -3360,13 +3438,13 @@ void playwavds2(char* bw,int old,int l1,int l2)
 				loopcnt++;
 				playb=loop1;
 				ov_pcm_seek(&vf,(ogg_int64_t)loop1);poss=0;
-				mcopy(bw+rrr,(int)l2-rrr);
+				mcopy((char*)bw+rrr,(int)l2-rrr);
 			}
 		}
 	}
 }
 
-void playwavds(char* bw)
+void playwavds(BYTE* bw)
 {
     //データ読み込み
 	loc++;
@@ -3374,7 +3452,7 @@ void playwavds(char* bw)
 	lo++;
 	if( lo==OUTPUT_BUFFER_NUM) lo=0;
 	DWORD dwDataLen = OUTPUT_BUFFER_SIZE;
-	int rrr=mcopy(buf[lo],dwDataLen);
+	int rrr=mcopy((char*)buf[lo],dwDataLen);
 	if((int)dwDataLen != rrr)
 	{
 		if(endf==1)
@@ -3385,7 +3463,7 @@ void playwavds(char* bw)
 			loopcnt++;
 			playb=loop1;
 			ov_pcm_seek(&vf,(ogg_int64_t)loop1);poss=0;
-			mcopy(buf[lo]+rrr,(int)dwDataLen-rrr);
+			mcopy((char*)buf[lo]+rrr,(int)dwDataLen-rrr);
 		}
 	}
 	memcpy(bw,buf[lo],dwDataLen);
@@ -3397,7 +3475,7 @@ void playwav()
 	lo++;
 	if( lo==OUTPUT_BUFFER_NUM) lo=0;
 	DWORD dwDataLen = OUTPUT_BUFFER_SIZE;
-	int rrr=mcopy(buf[lo],dwDataLen);
+	int rrr=mcopy((char*)buf[lo],dwDataLen);
 	if((int)dwDataLen != rrr)
 	{
 		if(endf==1)
@@ -3408,7 +3486,7 @@ void playwav()
 			loopcnt++;
 			playb=loop1;
 			ov_pcm_seek(&vf,(ogg_int64_t)loop1);poss=0;
-			mcopy(buf[lo]+rrr,(int)dwDataLen-rrr);
+			mcopy((char*)buf[lo]+rrr,(int)dwDataLen-rrr);
 		}
 	}
 	
@@ -3690,7 +3768,6 @@ void COggDlg::stop()
 			cc.Read(&wh1,sizeof(wh1));
 			wh1.ckSizeRIFF=wl+44-8;
 			wh1.ckSizeData=wl;
-			wh1.ckSizeFmt=16;
 			cc.SeekToBegin();
 			cc.Write(&wh1,sizeof(wh1));
 			cc.Close();
@@ -3764,7 +3841,6 @@ void COggDlg::stop1()
 			cc.Read(&wh1,sizeof(wh1));
 			wh1.ckSizeRIFF=wl+44-8;
 			wh1.ckSizeData=wl;
-			wh1.ckSizeFmt=16;
 			cc.SeekToBegin();
 			cc.Write(&wh1,sizeof(wh1));
 			cc.Close();
@@ -3895,7 +3971,7 @@ int mcopy(char* a,int len)
 	if((int)playb+lenl > loop1+loop2 && endf==0)lenl=(loop1+loop2) - (int)playb;
 	if((int)playb>data_size/4 && endf==1) return 0;
 	for(;;){
-		ret = ov_read(&vf, (bufwav+poss*4), 4096, 0, 2, 1, &current_section)/4;
+		ret = ov_read(&vf, (char*)(bufwav+poss*4), 4096, 0, 2, 1, &current_section)/4;
 		poss+=ret;
 		if(ret==0) break;
 		if(lenl<=poss)	break;
@@ -4145,13 +4221,13 @@ void COggDlg::timerp()
 			s.Format(_T("channel:不明"),wavch);
 			moji(s,1,64,0x7fffff);
 		}else if(mode==-3){
-			s.Format(_T("data:%dHz %s"),wavbit,(wavch==1)?_T("mono"):_T("stereo"));
-			if(wavch==3)s.Format(_T("data:%dHz %s"),wavbit,_T("2.1ch"));
-			if(wavch==4)s.Format(_T("data:%dHz %s"),wavbit,_T("3.1ch"));
-			if(wavch==5)s.Format(_T("data:%dHz %s"),wavbit,_T("4.1ch"));
-			if(wavch==6)s.Format(_T("data:%dHz %s"),wavbit,_T("5.1ch"));
-			if(wavch==7)s.Format(_T("data:%dHz %s"),wavbit,_T("6.1ch"));
-			if(wavch==8)s.Format(_T("data:%dHz %s"),wavbit,_T("7.1ch"));
+			s.Format(_T("data:%dHz %s %dbit"),wavbit,(wavch==1)?_T("mono"):_T("stereo"),wavsam);
+			if(wavch==3)s.Format(_T("data:%dHz %s %dbit"),wavbit,_T("2.1ch"), wavsam);
+			if(wavch==4)s.Format(_T("data:%dHz %s %dbit"),wavbit,_T("3.1ch"), wavsam);
+			if(wavch==5)s.Format(_T("data:%dHz %s %dbit"),wavbit,_T("4.1ch"), wavsam);
+			if(wavch==6)s.Format(_T("data:%dHz %s %dbit"),wavbit,_T("5.1ch"), wavsam);
+			if(wavch==7)s.Format(_T("data:%dHz %s %dbit"),wavbit,_T("6.1ch"), wavsam);
+			if(wavch==8)s.Format(_T("data:%dHz %s %dbit"),wavbit,_T("7.1ch"), wavsam);
 			moji(s,1,48,0x7fffff);
 			sss=kpi;
 			s.Format(_T("kpi :%s"),sss.Right(sss.GetLength()-sss.ReverseFind('\\')-1));
@@ -6024,6 +6100,9 @@ void COggDlg::OnRestart()
 	}
 }
 
+
+#define BUFSZ1 (8192)
+#define BUFSZH1			(BUFSZ1/HIGHDIV)
 //スペアナ表示
 ULONG PlayCursor=0,WriteCursor=0,PlayCursor2=0;
 void COggDlg::Speana()
@@ -6033,8 +6112,10 @@ void COggDlg::Speana()
 	double dt,dta;
 //	if(loc==locs) return;
 	locs=loc;
+
 	//ステレオ44.1k(char)→モノラル44.1k(short)へ
-	short buf2[BUFSZ*6],bufL[BUFSZ*6],bufR[BUFSZ*6],buf3[BUFSZ*6];
+	short buf2[BUFSZ1*6],bufL[BUFSZ1*6],bufR[BUFSZ1*6],buf3[BUFSZ1*6];
+	INT24 buf324[BUFSZ1 * 6];
 	char *buf4; buf4=(char*)buf3;
 	int bui;
 	//プレイ位置から獲得
@@ -6044,36 +6125,49 @@ void COggDlg::Speana()
 	else{PlayCursor=PlayCursor2;}
 	if(PlayCursor>OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM) PlayCursor=0;
 	memcpy(bufwav3+(OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM),bufwav3,OUTPUT_BUFFER_SIZE*2);
-	memcpy(buf4,bufwav3+PlayCursor,OUTPUT_BUFFER_SIZE*2);
-	for(i=0;i<BUFSZ/4;i++){
-		bui= buf3[i*2];
-		bui+= buf3[i*2+1];
-		bui/=2;
-		buf2[i]=bui;
-		bufL[i]=buf3[i*2];
-		bufR[i]=buf3[i*2+1];
+	memcpy(buf4,bufwav3+PlayCursor,16384);
+	memcpy(buf324, bufwav3 + PlayCursor, 24576);
+	if (wavsam == 24) {
+		for (i = 0; i < BUFSZ1 / 4; i++) {
+			bui = buf324[i*2].data;
+			bui += (int)buf324[i*2 + 1].data;
+			bui /= 2;
+			buf2[i] = bui;
+			bufL[i] = buf324[i*2].data;
+			bufR[i] = buf324[i*2 + 1].data;
+		}
+	}
+	else {
+		for (i = 0; i < BUFSZ1 / 4; i++) {
+			bui = buf3[i * 2];
+			bui += buf3[i * 2 + 1];
+			bui /= 2;
+			buf2[i] = bui;
+			bufL[i] = buf3[i * 2];
+			bufR[i] = buf3[i * 2 + 1];
+		}
 	}
 	//FFTの準備
 	if(m_st.GetCheck()==FALSE){
-		for(i=0; i<BUFSZH/4; i++) {
+		for(i=0; i<BUFSZH1/4; i++) {
 			aFFT2[i] = ((int)buf2[i]) * fnWFilter[i*HIGHDIV*2] * (1.0 / 32768);
-			aFFT2[i+BUFSZH/4] = ((int)buf2[i+BUFSZ/8]) * fnWFilter[BUFSZ/2-(i+1)*HIGHDIV*2] * (1.0 / 32768);
+			aFFT2[i+BUFSZH1/4] = ((int)buf2[i+BUFSZ1/8]) * fnWFilter[BUFSZ1/2-(i+1)*HIGHDIV*2] * (1.0 / 32768);
 		}
 		ipTab2[0] = 0;
-		ddst(BUFSZH/2, -1, aFFT2, ipTab2, wTab2); // 高速離散サイン変換
+		ddst(BUFSZH1/2, -1, aFFT2, ipTab2, wTab2); // 高速離散サイン変換
 	}else{
-		for(i=0; i<BUFSZH/4; i++) { //2048 /4 512
+		for(i=0; i<BUFSZH1/4; i++) { //2048 /4 512
 			aFFT2[i] = ((int)bufL[i]) * fnWFilter[i*HIGHDIV*2] * (1.0 / 32768);
-			aFFT2[i+BUFSZH/4] = ((int)bufL[i+BUFSZ/8]) * fnWFilter[BUFSZ/2-(i+1)*HIGHDIV*2] * (1.0 / 32768);
+			aFFT2[i+BUFSZH1/4] = ((int)bufL[i+BUFSZ1/8]) * fnWFilter[BUFSZ1/2-(i+1)*HIGHDIV*2] * (1.0 / 32768);
 		}
 		ipTab2[0] = 0;
-		ddst(BUFSZH/2, -1, aFFT2, ipTab2, wTab2); // 高速離散サイン変換
-		for(i=0; i<BUFSZH/4; i++) { //2048 /4 512
+		ddst(BUFSZH1/2, -1, aFFT2, ipTab2, wTab2); // 高速離散サイン変換
+		for(i=0; i<BUFSZH1/4; i++) { //2048 /4 512
 			aFFT2a[i] = ((int)bufR[i]) * fnWFilter[i*HIGHDIV*2] * (1.0 / 32768);
-			aFFT2a[i+BUFSZH/4] = ((int)bufR[i+BUFSZ/8]) * fnWFilter[BUFSZ/2-(i+1)*HIGHDIV*2] * (1.0 / 32768);
+			aFFT2a[i+BUFSZH1/4] = ((int)bufR[i+BUFSZ1/8]) * fnWFilter[BUFSZ1/2-(i+1)*HIGHDIV*2] * (1.0 / 32768);
 		}
 		ipTab2[0] = 0;
-		ddst(BUFSZH/2, -1, aFFT2a, ipTab2, wTab2); // 高速離散サイン変換
+		ddst(BUFSZH1/2, -1, aFFT2a, ipTab2, wTab2); // 高速離散サイン変換
 	}
 	// 直流成分＆低周波ノイズをカット
 	for(i=0; i<2; i++) {
@@ -6091,7 +6185,7 @@ void COggDlg::Speana()
 				if(dt < ABS(aFFT2[j])) dt = ABS(aFFT2[j]); // 区間内の最大値を採用
 			dt *= (double)HIGHDIV*((double)(28+i/4)/100.0)*2.0;
 			// 単位を dB に
-			dt = dt / ( BUFSZ / 2048 / 2);
+			dt = dt / ( BUFSZ1 / 2048 / 2);
 			if(dt>0) d = (int)( log10( dt * dt ) * (80/5));
 			if( d > 80 ) d = 80; else if( d < 0 ) d = 0;
 			if(spelv[i]<d){spelv[i]=d;spetm[i]=0;}
@@ -6106,8 +6200,8 @@ void COggDlg::Speana()
 			dt *= (double)HIGHDIV*((double)(28+i/4)/100.0)*2.0;
 			dta *= (double)HIGHDIV*((double)(28+i/4)/100.0)*2.0;
 			// 単位を dB に
-			dt = dt / ( BUFSZ / 2048 / 2);
-			dta= dta/ ( BUFSZ / 2048 / 2);
+			dt = dt / ( BUFSZ1 / 2048 / 2);
+			dta= dta/ ( BUFSZ1 / 2048 / 2);
 			if(dt>0) d = (int)( log10( dt * dt ) * (80/5) );
 			if( d > 80 ) d = 80; else if( d < 0 ) d = 0;
 			if(spelv[100+i]<d){spelv[100+i]=d;spetm[100+i]=0;}
@@ -6126,6 +6220,7 @@ void COggDlg::Speana()
 		}
 	}
 }
+
 
 void COggDlg::OnButton5() 
 {

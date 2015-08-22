@@ -63,10 +63,10 @@ struct dither {
   mad_fixed_t random;
 };
 
-#define BUFSZ			(8192*2)
+#define BUFSZ			(2048*6)
 #define OUTPUT_BUFFER_SIZE  BUFSZ
 #define OUTPUT_BUFFER_NUM   10
-extern char bufwav3[OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM*60];
+extern BYTE bufwav3[OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM*2];
 extern BOOL wavwait,thend;
 extern char *adbuf,*adbuf2;
 extern ULONG WAVDALen;

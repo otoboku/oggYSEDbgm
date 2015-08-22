@@ -172,6 +172,8 @@ struct save{
 	int savecheck;
 	int savecheck_mp3;
 	int savecheck_dshow;
+
+	int bit24;
 };
 
 

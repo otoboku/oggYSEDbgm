@@ -140,6 +140,7 @@ BOOL COggApp::InitInstance()
 	_tcscpy(savedata.font2,_T("ƒƒCƒŠƒI"));
 	savedata.savecheck_mp3 = 1;
 	savedata.savecheck_dshow = 1;
+	savedata.bit24 = 0;
 
 #if _UNICODE
 	if(GetKeyState(VK_CONTROL) < 0){
