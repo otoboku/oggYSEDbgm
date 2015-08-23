@@ -3242,10 +3242,10 @@ int readkpi(BYTE*bw,int cnt)
 			if (wavsam == 24) {
 				for (int i = 0; i < cnt / 3; i++) {
 					float c4 = (float)b24[i].data;
-					if (savedata.spc == 2)	c4 = c4 * 3.0f;
-					else if (savedata.spc == 4) c4 = c4 * 6.0f;
-					else if (savedata.spc == 8) c4 = c4 * 9.0f;
-					else if (savedata.spc == 16) c4 = c4 * 12.0f;
+					if (savedata.spc == 2)	c4 = c4 * 2.0f;
+					else if (savedata.spc == 4) c4 = c4 * 3.0f;
+					else if (savedata.spc == 8) c4 = c4 * 4.0f;
+					else if (savedata.spc == 16) c4 = c4 * 5.0f;
 					if (c4 >= 32768.0f)c4 = 32767.0f;
 					if (c4 < -32768.0f)c4 = -32768.0f;
 					b24[i].data = (short)c4;
@@ -3268,10 +3268,10 @@ int readkpi(BYTE*bw,int cnt)
 		if (wavsam == 24) {
 			for (int i = 0; i < cnt / 3; i++) {
 				float c4 = (float)b24[i].data;
-				if (savedata.kpivol == 2)	c4 = c4 * 3.0f;
-				else if (savedata.kpivol == 4) c4 = c4 * 6.0f;
-				else if (savedata.kpivol == 8) c4 = c4 * 9.0f;
-				else if (savedata.kpivol == 16) c4 = c4 * 12.0f;
+				if (savedata.kpivol == 2)	c4 = c4 * 2.0f;
+				else if (savedata.kpivol == 4) c4 = c4 * 3.0f;
+				else if (savedata.kpivol == 8) c4 = c4 * 4.0f;
+				else if (savedata.kpivol == 16) c4 = c4 * 5.0f;
 				if (c4 >= 32768.0f)c4 = 32767.0f;
 				if (c4 < -32768.0f)c4 = -32768.0f;
 				b24[i].data = (short)c4;
@@ -3373,10 +3373,10 @@ int readmp3(BYTE*bw,int cnt)
 
 			INT24 c3 = (INT24)b24[i];
 			int c4 = c3.data;
-			if (savedata.mp3 == 2)	c4 = (int)((float)c4 * 3.0f);
-			else if (savedata.mp3 == 4) c4 = (int)((float)c4 * 6.0f);
-			else if (savedata.mp3 == 8) c4 = (int)((float)c4 * 9.0f);
-			else if (savedata.mp3 == 16) c4 = (int)((float)c4 * 12.0f);
+			if (savedata.mp3 == 2)	c4 = (int)((float)c4 * 2.0f);
+			else if (savedata.mp3 == 4) c4 = (int)((float)c4 * 3.0f);
+			else if (savedata.mp3 == 8) c4 = (int)((float)c4 * 4.0f);
+			else if (savedata.mp3 == 16) c4 = (int)((float)c4 * 5.0f);
 			if (c4 >= 32768)c4 = 32767;
 			if (c4 <= -32767)c4 = -32766;
 			c3.data = (short)c4;
@@ -4076,21 +4076,21 @@ void COggDlg::timerp()
 		tb1=t1%60;
 		tc1=tt%100;
 	}else{
-		t3=(double)oggsize/(double)(wavbit*2*wavch);
+		t3=(double)oggsize/(double)(wavbit*2*wavch)/(double)(wavsam/16.0f);
 		if(mode==-10) t3*=4.0;
 		tt=(int)(t3*100.0);
 		t1=tt/100;
 		ta=t1/60;
 		tb=t1%60;
 		tc=tt%100;
-		t3=(double)playb/(double)((wavch==2)?wavbit:(wavbit/2));
+		t3=(double)playb/(double)((wavch==2)?wavbit:(wavbit/2)) / (double)(wavsam / 16.0f);
 		if(mode==-10)t3/=4;
 		tt=(int)(t3*100.0);
 		t1=tt/100;
 		ta1=t1/60;
 		tb1=t1%60;
 		tc1=tt%100;
-		t3=(double)wl/(double)(wavbit*2*wavch);
+		t3=(double)wl/(double)(wavbit*2*wavch) / (double)(wavsam / 16.0f);
 		tt=(int)(t3*100.0);
 		t1=tt/100;
 		tag=t1/60;
