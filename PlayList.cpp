@@ -357,6 +357,10 @@ int CPlayList::Add(CString name,int sub,int loop1,int loop2,CString art,CString 
 			ss=fol.Right(fol.GetLength()-fol.ReverseFind('.')-1);
 			s.Format(_T("%sファイル"),ss);break;
 		case -1:s="oggファイル";break;
+		case -9:
+			s = fol; s.MakeLower();
+			if (s.Right(3) == "m4a") { s = "m4aファイル"; break; }
+			if (s.Right(3) == "aac") { s = "aacファイル"; break; }
 		case -10:
 			s=fol;s.MakeLower();
 			if(s.Right(3)=="mp3"){ s="mp3ファイル";break;}
@@ -677,6 +681,17 @@ void CPlayList::Fol(CString fname)
 			ss = ta2p.GetTitle(); if (b == -1) ss = ta1p.GetTitle(); if (ss == "")ss = ft; _tcscpy(p.name, ss);
 			ss = ta2p.GetAlbum(); if (b == -1) ss = ta1p.GetAlbum(); _tcscpy(p.alb, ss);
 		}
+		else if ((ft.Right(4) == ".aac" || ft.Right(4) == ".AAC")) {
+//			TCHAR kpi[512];
+//			kpi[0] = 0;
+//			plugs(s, &p, kpi);
+//			if (kpi[0] == 0)
+//				p.sub = -3;
+//			else
+//				p.sub = -2;
+			p.sub = -9;
+			_tcscpy(p.fol, fname);
+		}
 		else if ((ft.Right(4) == ".m4a" || ft.Right(4) == ".M4A")) {
 			CFile ff;
 			char buf[1024];
@@ -690,6 +705,8 @@ void CPlayList::Fol(CString fname)
 				p.sub = -3;
 			else
 				p.sub = -2;
+			if(savedata.m4a==1)
+				p.sub = -9;
 			_tcscpy(p.fol, fname);
 			flg = 0;
 			int i;
@@ -1124,6 +1141,7 @@ void CPlayList::Fol(CString fname)
 			s.Right(4) == ".zip" || s.Right(4) == ".lzh" || s.Right(4) == ".cab" || s.Right(4) == ".rar" || s.Right(4) == ".txt" || s.Right(4) == ".doc" || s.Right(4) == "html" || s.Right(4) == ".htm" || s.Right(4) == ".ini" || s.Right(4) == ".xml" || s.Right(4) == ".kar" || s.Right(4) == ".hed" || s.Right(4) == ".mzi" || s.Right(4) == ".mag" || s.Right(4) == ".mvi" || s.Right(4) == ".lvi" || s.Right(4) == ".mpi" || s.Right(4) == ".pvi" || s.Right(4) == ".pzi" || s.Right(4) == ".p86" || s.Right(4) == ".mml" || s.Right(4) == ".m3u" || s.Right(4) == ".frm" || s.Right(7) == ".psflib" || s.Right(8) == ".psf2lib" || s.Right(7) == ".usflib" || s.Right(7) == ".2sflib" || s.Right(3) == ".gb" || s.Right(7) == ".gsflib" || s.Right(4) == ".pdx") {
 		}
 		else {
+
 			if (syo == 0) { syo = 1; syos = p.fol; modesub = p.sub; fnn = p.name; }
 			Add(p.name, p.sub, p.loop1, p.loop2, p.art, p.alb, p.fol, 0, 0);
 		}
@@ -1197,7 +1215,18 @@ void CPlayList::Fol(CString fname)
 					ss = ta2p.GetTitle(); if (b == -1) ss = ta1p.GetTitle(); if (ss == "")ss = f.GetFileName(); _tcscpy(p.name, ss);
 					ss = ta2p.GetAlbum(); if (b == -1) ss = ta1p.GetAlbum(); _tcscpy(p.alb, ss);
 				}
-				else if ((s.Right(4) == ".m4a" || s.Right(4) == ".M4A")) {
+				else if ((ft.Right(4) == ".aac" || ft.Right(4) == ".AAC")) {
+					//			TCHAR kpi[512];
+					//			kpi[0] = 0;
+					//			plugs(s, &p, kpi);
+					//			if (kpi[0] == 0)
+					//				p.sub = -3;
+					//			else
+					//				p.sub = -2;
+					p.sub = -9;
+					_tcscpy(p.fol, fname);
+				}
+				else if ((ft.Right(4) == ".m4a" || ft.Right(4) == ".M4A")) {
 					CFile ff;
 					char buf[1024];
 					TCHAR kpi[512];
@@ -1210,6 +1239,8 @@ void CPlayList::Fol(CString fname)
 						p.sub = -3;
 					else
 						p.sub = -2;
+					if (savedata.m4a == 1)
+						p.sub = -9;
 					_tcscpy(p.fol, s);
 					flg = 0;
 					int i;

@@ -324,7 +324,7 @@
     <IncludePath>C:\PROJECTS\APPLICATION3\faad2-2.7\common\mp4ff;C:\PROJECTS\APPLICATION3\faad2-2.7\include;C:\Microsoft SDKs\Windows\v7.0\Include;C:\Microsoft SDKs\Windows\v7.0\Include\gl;C:\Microsoft SDKs\Windows\v7.0\VC\Include;C:\ogg\include;$(IncludePath);</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='uni_de|Win32'">
-    <IncludePath>C:\PROJECTS\APPLICATION3\faad2-2.7\include;C:\Microsoft SDKs\Windows\v7.0\Include;C:\Microsoft SDKs\Windows\v7.0\Include\gl;C:\Microsoft SDKs\Windows\v7.0\VC\Include;C:\DXSDK\Include;C:\DirectX SDK (February 2010)\Include;C:\ogg\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\PROJECTS\APPLICATION3\faad2-2.7\common\mp4ff;C:\PROJECTS\APPLICATION3\faad2-2.7\include;C:\Microsoft SDKs\Windows\v7.0\Include;C:\Microsoft SDKs\Windows\v7.0\Include\gl;C:\Microsoft SDKs\Windows\v7.0\VC\Include;C:\ogg\include;$(IncludePath);</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Midl>
@@ -878,7 +878,7 @@
       <Culture>0x0411</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>User32.lib;uafxcw.lib;Libcmt.lib;libvorbisfile_static.lib;libogg_static.lib;libvorbis_static.lib;winmm.lib;dxguid.lib;dsound.lib;strmiids.lib;libmad_sse2.lib;mfuuid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>User32.lib;uafxcw.lib;libvorbisfile_static.lib;libogg_static.lib;libvorbis_static.lib;winmm.lib;dxguid.lib;dsound.lib;strmiids.lib;libmad_sse2.lib;mfuuid.lib;libfaad.lib;mp4ff.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>C:\PROJECTS\APPLICATION3\ogg_binary\oggYSEDbgm_uni.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <ProgramDatabaseFile>uni/oggYSEDbgm.pdb</ProgramDatabaseFile>
@@ -986,7 +986,7 @@
       <Culture>0x0411</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>libvorbisfile_static.lib;libogg_static.lib;libvorbis_static.lib;winmm.lib;dxguid.lib;dsound.lib;strmiids.lib;libmad_sse2.lib;mfuuid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libvorbisfile_static.lib;libogg_static.lib;libvorbis_static.lib;winmm.lib;dxguid.lib;dsound.lib;strmiids.lib;libmad_sse2.lib;mfuuid.lib;libfaad.lib;mp4ff.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>C:\PROJECTS\APPLICATION3\ogg_all2005\uni_de\ogg.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -995,6 +995,7 @@
       <OptimizeReferences>false</OptimizeReferences>
       <EnableCOMDATFolding>false</EnableCOMDATFolding>
       <TargetMachine>MachineX86</TargetMachine>
+      <IgnoreSpecificDefaultLibraries>Libcmt.lib</IgnoreSpecificDefaultLibraries>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>additional.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>

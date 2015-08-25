@@ -66,11 +66,11 @@
 #include "mp3.h"
 #include "OSVersion.h"
 
-//#include "neaacdec.h"
-//#include "m4a.h"
+#include "neaacdec.h"
+#include "m4a.h"
 
 static mp3 mp3_;
-//static m4a m4a_;
+static m4a m4a_;
 int readadpcm(CFile &adpcmf,char* bw,int len);
 int readadpcmzwei(CFile &adpcmf,char* bw,int len);
 int readadpcmgurumin(CFile &adpcmf,char* bw,int len);
@@ -160,6 +160,8 @@ UINT WAVDAStartLen;
 int randomno;
 int playwavkpi(BYTE* bw,int old,int l1,int l2);
 int readkpi(BYTE*bw,int cnt);
+int playwavm4a(BYTE* bw, int old, int l1, int l2);
+int readm4a(BYTE*bw, int cnt);
 int playwavmp3(BYTE* bw,int old,int l1,int l2);
 int readmp3(BYTE*bw,int cnt);
 void playwavds2(BYTE* bw,int old,int l1,int l2);
@@ -1752,7 +1754,7 @@ void COggDlg::play()
 		g_pThread->PostThreadMessage(WM_APP+100,NULL,NULL);
 
 		DoEvent();
-	}else if(mode==-3 || mode==-10){
+	}else if(mode==-3 || mode==-10 || mode==-9){
 	}else{
 		oggsize = LoadOggVorbis(filen, 2, &ogg,m_time);
 		if(oggsize<0) {
@@ -1886,7 +1888,140 @@ void COggDlg::play()
 //		playwavmp3(bufwav3,0,dwDataLen*4,0);
 	}
 	else if (mode == -9) { // M4a
-		
+		CString ss;
+		char buf[1024];
+		ss = filen.Left(filen.ReverseFind(':') - 1);
+		ZeroMemory(&sikpi, sizeof(sikpi));
+		sikpi.dwSamplesPerSec = 96000; sikpi.dwChannels = 2; sikpi.dwSeekable = 1; sikpi.dwLength = -1; sikpi.dwBitsPerSample = ((savedata.bit24 == 1) ? 24 : 16);
+		if (1) {
+			if (ss == "") {
+#if UNICODE
+				TCHAR *f = filen.GetBuffer();
+				char ff[2048];
+				WideCharToMultiByte(CP_ACP, 0, f, -1, ff, filen.GetLength() * 2 + 2, 0, 0);
+				kmp = m4a_.Open(ff, &sikpi);
+#else
+				kmp = m4a_.Open(filen, &sikpi);
+#endif
+				if (kmp == NULL) { m_saisai.EnableWindow(TRUE); return; }
+			}
+			else {
+#if UNICODE
+				TCHAR *f = ss.GetBuffer();
+				char ff[2048];
+				WideCharToMultiByte(CP_ACP, 0, f, -1, ff, filen.GetLength() * 2 + 2, 0, 0);
+				kmp = m4a_.Open(ff, &sikpi);
+#else
+				kmp = m4a_.Open(ss, &sikpi);
+#endif
+				if (kmp == NULL) { m_saisai.EnableWindow(TRUE); return; }
+				m4a_.SetPosition(kmp, _tstoi(filen.Right(4)) * 1000);
+			}
+		}
+		wavbit = sikpi.dwSamplesPerSec;	wavch = sikpi.dwChannels;	loop1 = 0; loop2 = (int)((double)sikpi.dwLength*(double)sikpi.dwSamplesPerSec / 1000.0);
+		wavsam = sikpi.dwBitsPerSample;
+		si1.dwSamplesPerSec = wavbit;
+		si1.dwChannels = wavch;
+		si1.dwBitsPerSample = wavsam;
+		kbps = 0;
+		CFile ff;
+		ff.Open(filen, CFile::modeRead | CFile::shareDenyNone, NULL);
+		int flg, read = ff.Read(bufimage, sizeof(bufimage));
+		ff.Close();
+		flg = 0;
+		int i;
+		for (i = 0; i < read - 4; i++) {
+			if (bufimage[i] == 'u' && bufimage[i + 1] == 'd' && bufimage[i + 2] == 't' && bufimage[i + 3] == 'a') {
+				int j;
+				for (j = i + 4; j < read - 4; j++) {
+					if (bufimage[j] == 'a' && bufimage[j + 1] == 'l' && bufimage[j + 2] == 'b' && bufimage[j + 7] == 'd' && bufimage[j + 8] == 'a' && bufimage[j + 9] == 't' && bufimage[j + 10] == 'a') {
+						j += 19;
+						for (int k = j; k < read - 4; k++) {
+							if (bufimage[k] == 0) {
+								flg = 1;
+								buf[k - j] = 0;
+								buf[k - j + 1] = 0;
+								buf[k - j + 2] = 0;
+								break;
+							}
+							buf[k - j] = bufimage[k];
+						}
+					}
+					if (flg == 1) {
+						const int wlen = ::MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf), NULL, 0);
+						TCHAR* buff = new TCHAR[wlen + 1];
+						if (::MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf), buff, wlen))
+						{
+							buff[wlen] = _T('\0');
+						}
+						tagalbum= buff;
+						delete[] buff;
+						flg = 0;
+						break;
+					}
+				}
+				for (j = i + 4; j < read - 4; j++) {
+					if (bufimage[j] == 'A' && bufimage[j + 1] == 'R' && bufimage[j + 2] == 'T' && bufimage[j + 7] == 'd' && bufimage[j + 8] == 'a' && bufimage[j + 9] == 't' && bufimage[j + 10] == 'a') {
+						j += 19;
+						for (int k = j; k < read - 4; k++) {
+							if (bufimage[k] == 0) {
+								flg = 1;
+								buf[k - j] = 0;
+								buf[k - j + 1] = 0;
+								buf[k - j + 2] = 0;
+								break;
+							}
+							buf[k - j] = bufimage[k];
+						}
+					}
+					if (flg == 1) {
+						const int wlen = ::MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf), NULL, 0);
+						TCHAR* buff = new TCHAR[wlen + 1];
+						if (::MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf), buff, wlen))
+						{
+							buff[wlen] = _T('\0');
+						}
+						tagname = buff;
+						delete[] buff;
+						flg = 0;
+						break;
+					}
+				}
+				for (j = i + 4; j < read - 4; j++) {
+					if (bufimage[j] == 'n' && bufimage[j + 1] == 'a' && bufimage[j + 2] == 'm' && bufimage[j + 7] == 'd' && bufimage[j + 8] == 'a' && bufimage[j + 9] == 't' && bufimage[j + 10] == 'a') {
+						j += 19;
+						for (int k = j; k < read - 4; k++) {
+							if (bufimage[k] == 0) {
+								flg = 1;
+								buf[k - j] = 0;
+								buf[k - j + 1] = 0;
+								buf[k - j + 2] = 0;
+								break;
+							}
+							buf[k - j] = bufimage[k];
+						}
+					}
+					if (flg == 1) {
+						const int wlen = ::MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf), NULL, 0);
+						TCHAR* buff = new TCHAR[wlen + 1];
+						if (::MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf), buff, wlen))
+						{
+							buff[wlen] = _T('\0');
+						}
+						tagfile = buff;
+						delete[] buff;
+						flg = 0;
+						break;
+					}
+				}
+			}
+		}
+
+		if (sikpi.dwLength == (DWORD)-1) loop2 = 0;	data_size = oggsize = loop2 * 4;
+		m_time.SetRange(0, (data_size) / 4, TRUE);
+		m4a_.SetPosition(kmp, 0);
+		wav_start();
+
 	}else if(mode==-3){
 		ret2=0;
 //		st1();
@@ -1969,13 +2104,67 @@ void COggDlg::play()
 
 	WAVEFORMATEX wfx1;
     wfx1.wFormatTag = WAVE_FORMAT_PCM;
-	if(!(wavch==1 || wavch==2)) wavch=2;
     wfx1.nChannels = wavch;
     wfx1.nSamplesPerSec = wavbit;
 	wfx1.wBitsPerSample = wavsam;
     wfx1.nBlockAlign = wfx1.nChannels * wfx1.wBitsPerSample / 8;
     wfx1.nAvgBytesPerSec = wfx1.nSamplesPerSec * wfx1.nBlockAlign;
     wfx1.cbSize = 0;
+
+	static const GUID GUID_SUBTYPE_PCM = { 0x00000001, 0x0000, 0x0010,{ 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71 } };
+
+	DWORD targetSpeakers = 0;
+	switch (wavch) {
+	case 1:
+		targetSpeakers |= SPEAKER_FRONT_CENTER;
+		break;
+	case 2:
+		targetSpeakers |=
+			SPEAKER_FRONT_LEFT
+			| SPEAKER_FRONT_RIGHT;
+		break;
+	case 3:
+		targetSpeakers |=
+			SPEAKER_FRONT_LEFT
+			| SPEAKER_FRONT_RIGHT
+			| SPEAKER_FRONT_CENTER
+			;
+	case 4:
+		targetSpeakers |=
+			SPEAKER_FRONT_LEFT
+			| SPEAKER_FRONT_RIGHT
+			| SPEAKER_FRONT_CENTER
+			| SPEAKER_BACK_CENTER
+			;
+	case 5:
+		targetSpeakers |=
+			SPEAKER_FRONT_LEFT
+			| SPEAKER_FRONT_RIGHT
+			| SPEAKER_FRONT_CENTER
+			| SPEAKER_BACK_LEFT
+			| SPEAKER_BACK_RIGHT
+			;
+	case 6:
+		targetSpeakers |=
+			SPEAKER_FRONT_LEFT
+			| SPEAKER_FRONT_RIGHT
+			| SPEAKER_FRONT_CENTER
+			| SPEAKER_LOW_FREQUENCY
+			| SPEAKER_BACK_LEFT
+			| SPEAKER_BACK_RIGHT
+			;
+	}
+	int nChannels = __popcnt(targetSpeakers);
+	WAVEFORMATEXTENSIBLE wfx = {};
+	wfx.Format.wFormatTag = WAVE_FORMAT_EXTENSIBLE;
+	wfx.Format.nChannels = nChannels;
+	wfx.Format.nSamplesPerSec = wavbit;
+	wfx.Format.wBitsPerSample = wavsam;
+	wfx.Format.nBlockAlign = (WORD)(wfx.Format.wBitsPerSample / 8 * wfx.Format.nChannels);
+	wfx.Format.nAvgBytesPerSec = (DWORD)(wfx.Format.nSamplesPerSec * wfx.Format.nBlockAlign);
+	wfx.Format.cbSize = sizeof(WAVEFORMATEXTENSIBLE) - sizeof(WAVEFORMATEX);
+	wfx.dwChannelMask = targetSpeakers;
+	wfx.SubFormat = GUID_SUBTYPE_PCM;
 
 	if(wavbit2!=wavbit||wavsam==24||si1.dwBitsPerSample||sikpi.dwBitsPerSample){
 		ReleaseDXSound();
@@ -2009,7 +2198,10 @@ void COggDlg::play()
 	dsbd.dwSize = sizeof(DSBUFFERDESC);
 	dsbd.dwFlags = DSBCAPS_GLOBALFOCUS | DSBCAPS_GETCURRENTPOSITION2 | DSBCAPS_CTRLVOLUME;// | DSBCAPS_CTRL3D;
 	dsbd.dwBufferBytes = OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM;
-	dsbd.lpwfxFormat = &wfx1;
+	if (wavch > 2)
+		dsbd.lpwfxFormat = (LPWAVEFORMATEX)&wfx;
+	else
+		dsbd.lpwfxFormat = &wfx1;
 	//dsbd.guid3DAlgorithm = DS3DALG_HRTF_LIGHT;
 	HRESULT r;
 	r = m_ds->CreateSoundBuffer(&dsbd, &m_dsb1, NULL);
@@ -2077,6 +2269,8 @@ void COggDlg::play()
 		playwavmp3(bufwav3,0,len1,len2);//データ獲得
 	else if(mode==-3)
 		playwavkpi(bufwav3,0,len1,len2);//データ獲得
+	else if (mode == -9)
+		playwavm4a(bufwav3, 0, len1, len2);//データ獲得
 	else
 		playwavds2(bufwav3,0,len1,len2);//データ獲得
 	m_dsb->Lock(0,len1+len2,(LPVOID *)&pdsb,(DWORD*)&len3,NULL,0,0);
@@ -2133,8 +2327,8 @@ void COggDlg::play()
 	loopcnt=0;
 	if(pl&&plw){
 		int plc;
-		if(mode==-10)
-			plc=pl->Add(tagfile,mode,loop1,loop2,tagname,tagalbum,filen,0,oggsize/(2*wavch*wavbit/4),1);
+		if(mode==-10||mode==-9)
+			plc=pl->Add(tagfile,mode,loop1,loop2,tagname,tagalbum,filen,0,(oggsize/(2*wavch*wavbit/4)/((mode==-9)?4:1)),1);
 		else if(mode==-3){
 			if(oggsize==0)
 				plc=pl->Add(tagfile,mode,loop1,loop2,tagname,tagalbum,filen,0,-1,1);
@@ -3183,19 +3377,85 @@ int playwavkpi(BYTE* bw,int old,int l1,int l2)
 	return l1+l2;
 }
 
-typedef struct tagInt24
+class Int24
 {
-	char byData;
-	short data;
+protected:
+	unsigned char value[3];
+public:
+	Int24() {}
 
-	operator int()
+	Int24(const Int24& val)
 	{
-		return (byData + data << 8);
-	};
+		*this = val;
+	}
 
-}INT24, *LPINT24;
+	operator int() const
+	{
+		/* Sign extend negative quantities */
+		if (value[2] & 0x80) {
+			return (0xff << 24) | (value[2] << 16)
+				| (value[1] << 8)
+				| value[0];
+		}
+		else {
+			return (value[2] << 16)
+				| (value[1] << 8)
+				| value[0];
+		}
+	}
+
+	Int24& operator= (const Int24& input)
+	{
+		value[0] = input.value[0];
+		value[1] = input.value[1];
+		value[2] = input.value[2];
+
+		return *this;
+	}
+
+	Int24& operator= (const int input)
+	{
+		value[0] = ((unsigned char*)&input)[0];
+		value[1] = ((unsigned char*)&input)[1];
+		value[2] = ((unsigned char*)&input)[2];
+
+		return *this;
+	}
+
+
+	operator bool() const
+	{
+		return (int)*this != 0;
+	}
+
+	bool operator! () const
+	{
+		return !((int)*this);
+	}
+
+	bool operator== (const Int24& val) const
+	{
+		return (int)*this == (int)val;
+	}
+
+	bool operator!= (const Int24& val) const
+	{
+		return (int)*this != (int)val;
+	}
+
+	bool operator>= (const Int24& val) const
+	{
+		return (int)*this >= (int)val;
+	}
+
+	bool operator<= (const Int24& val) const
+	{
+		return (int)*this <= (int)val;
+	}
+};
 
 BYTE bufkpi[OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM * 3];
+BYTE bufkpi2[OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM * 3];
 int readkpi(BYTE*bw,int cnt)
 {
 	_set_se_translator( trans_func );
@@ -3230,9 +3490,9 @@ int readkpi(BYTE*bw,int cnt)
 		if(cnt3!=0)	memcpy(bufkpi,bufkpi+cnt2,cnt3);
 	}
 	short *b,c;
-	INT24 *b24;
 	b=(short*)bw;
-	b24 = (INT24*)bw;
+	Int24 *b24c;
+	b24c = (Int24*)bw;
 //	CString sss=og->kpi;
 	CString sss;
 	sss=filen.Right(filen.GetLength()-filen.ReverseFind('.')-1);
@@ -3241,14 +3501,14 @@ int readkpi(BYTE*bw,int cnt)
 		if(savedata.spc!=1)
 			if (wavsam == 24) {
 				for (int i = 0; i < cnt / 3; i++) {
-					float c4 = (float)b24[i].data;
-					if (savedata.spc == 2)	c4 = c4 * 2.0f;
-					else if (savedata.spc == 4) c4 = c4 * 3.0f;
-					else if (savedata.spc == 8) c4 = c4 * 4.0f;
-					else if (savedata.spc == 16) c4 = c4 * 5.0f;
-					if (c4 >= 32768.0f)c4 = 32767.0f;
-					if (c4 < -32768.0f)c4 = -32768.0f;
-					b24[i].data = (short)c4;
+					int c4 = b24c[i];
+					if (savedata.spc == 2)	c4 = (int)((float)c4 * 2.0f);
+					else if (savedata.spc == 4) c4 = (int)((float)c4 * 3.0f);
+					else if (savedata.spc == 8) c4 = (int)((float)c4 * 4.0f);
+					else if (savedata.spc == 16) c4 = (int)((float)c4 * 5.0f);
+					if (c4 >  8388607)c4 = 8388607;
+					if (c4 < -8388608)c4 = -8388608;
+					b24c[i] = c4;
 				}
 			}
 			else {
@@ -3267,14 +3527,14 @@ int readkpi(BYTE*bw,int cnt)
 	if(savedata.kpivol!=1){
 		if (wavsam == 24) {
 			for (int i = 0; i < cnt / 3; i++) {
-				float c4 = (float)b24[i].data;
-				if (savedata.kpivol == 2)	c4 = c4 * 2.0f;
-				else if (savedata.kpivol == 4) c4 = c4 * 3.0f;
-				else if (savedata.kpivol == 8) c4 = c4 * 4.0f;
-				else if (savedata.kpivol == 16) c4 = c4 * 5.0f;
-				if (c4 >= 32768.0f)c4 = 32767.0f;
-				if (c4 < -32768.0f)c4 = -32768.0f;
-				b24[i].data = (short)c4;
+				int c4 = b24c[i];
+				if (savedata.kpivol == 2)	c4 = (int)((float)c4 * 2.0f);
+				else if (savedata.kpivol == 4) c4 = (int)((float)c4 * 3.0f);
+				else if (savedata.kpivol == 8) c4 = (int)((float)c4 * 4.0f);
+				else if (savedata.kpivol == 16) c4 = (int)((float)c4 * 5.0f);
+				if (c4 >  8388607)c4 = 8388607;
+				if (c4 < -8388608)c4 = -8388608;
+				b24c[i] = c4;
 			}
 		}
 		else {
@@ -3284,8 +3544,8 @@ int readkpi(BYTE*bw,int cnt)
 				else if (savedata.kpivol == 3) c = (int)((float)b[i] * 3.0f);
 				else if (savedata.kpivol == 4) c = (int)((float)b[i] * 4.0f);
 				else if (savedata.kpivol == 5) c = (int)((float)b[i] * 5.0f);
-				if (c >= 32768)c = 32767;
-				if (c < -32768)c = -32768;
+				if (c >= 32768.0f)c = 32767;
+				if (c < -32768.0f)c = -32768;
 				b[i] = (short)c;
 			}
 		}
@@ -3294,12 +3554,12 @@ int readkpi(BYTE*bw,int cnt)
 	//fadeを三乗して計算密度を変更
 	if (wavsam == 24) {
 		float c4;
+		int c5;
 		for (int i = 0; i < cnt / 3; i++) {
-			c4 = (float)b24[i].data;
-			c4 = c4 * fade * fade;
-			b24[i].data = (short)c4;
-			b24[i].byData = 0;
-		}
+			c5 = b24c[i]; c4 = (float)c5;
+			c4 = c4 * fade * fade; c5 = (int)c4;
+			b24c[i] = c5;
+			}
 	}
 	else {
 		for (int i = 0; i < cnt / 2; i++) { c = b[i]; c = (short)(((float)c) * fade * fade); b[i] = c; }
@@ -3316,6 +3576,173 @@ int readkpi(BYTE*bw,int cnt)
 	}
 	catch(...){}
 	if(cnt4<cnt) cnt=cnt4;
+	return cnt;
+}
+
+int playwavm4a(BYTE* bw, int old, int l1, int l2)
+{
+	playb += (l1 + l2) / 4;
+	//データ読み込み
+	int rrr = readm4a(bw + old, l1);
+	if (oggsize <= playb*4) {
+		fade1 = 1;
+	}
+	if (l1 != rrr) {
+		if (endf == 1) {
+			l1 = rrr; fade1 = 1;
+		}
+		else {
+			loopcnt++;
+			playb = loop1;
+			m4a_.SetPosition(og->kmp, 0);
+			readm4a(bw + old + rrr, l1 - rrr);
+		}
+	}
+	if (l2) {
+		rrr = readm4a(bw, l2);
+		if (l2 != rrr) {
+			if (endf == 1) {
+				l2 = rrr; fade1 = 1;
+			}
+			else {
+				loopcnt++;
+				playb = loop1;
+				m4a_.SetPosition(og->kmp, 0);
+				readm4a(bw + rrr, (int)l2 - rrr);
+			}
+		}
+	}
+	return l1 + l2;
+}
+
+int readm4a(BYTE*bw, int cnt)
+{
+	_set_se_translator(trans_func);
+	DWORD cnt1 = og->sikpi.dwUnitRender * 2, cnt2 = (DWORD)cnt, cnt4; if (cnt1 == 0) cnt1 = 1024;
+	DWORD r = 0;
+	try {
+		for (;;) {
+			if (cnt2 <= cnt3) { r = 1; break; }
+			r = m4a_.Render(og->kmp, (BYTE*)bufkpi + cnt3, cnt1);
+			if (r == 0) break;
+			cnt3 += r;
+		}
+		cnt4 = cnt3;
+		if (r == 0) cnt = 0;
+		memcpy(bufkpi2, bufkpi, cnt);
+		unsigned short *bf1, *bf2; bf1 = (unsigned short*)bw; bf2 = (unsigned short*)bufkpi2;
+
+		int cnt1 = cnt / 2;
+		switch (wavch)
+		{
+		case 1:
+		case 2:
+			memcpy(bw, bufkpi, cnt);
+			break;
+		case 3: // 2.1   
+			for (int sample = 0; sample < cnt1; sample += wavch)
+			{
+				int ChannelMap[3] = { 2,3,1 };
+				for (int ch = 0; ch < wavch; ch++)
+				{
+					*bf1++ = bf2[ChannelMap[ch] - 1];
+				}
+				bf2 += wavch;
+			}
+			break;
+		case 4: // Quad   
+			for (int sample = 0; sample < cnt1; sample += wavch)
+			{
+				int ChannelMap[4] = { 2,3,1,4 };
+				for (int ch = 0; ch < wavch; ch++)
+				{
+					*bf1++ = bf2[ChannelMap[ch] - 1];
+				}
+				bf2 += wavch;
+			}
+			break;
+		case 5: // Surround   
+			for (int sample = 0; sample < cnt1; sample += wavch)
+			{
+				int ChannelMap[5] = { 2,3,1,4,5 };
+				for (int ch = 0; ch < wavch; ch++)
+				{
+					*bf1++ = bf2[ChannelMap[ch] - 1];
+				}
+				bf2 += wavch;
+			}
+			break;
+		case 6: // 5.1   
+			for (int sample = 0; sample < cnt1; sample += wavch)
+			{
+				int ChannelMap[6] = { 2,3,1,6,4,5 };
+				for (int ch = 0; ch < wavch; ch++)
+				{
+					*bf1++ = bf2[ChannelMap[ch] - 1];
+				}
+				bf2 += wavch;
+			}
+			break;
+		}
+		if (cnt2 <= cnt3) {
+			cnt3 -= cnt2;
+			if (cnt3 != 0)	memcpy(bufkpi, bufkpi + cnt2, cnt3);
+		}
+		Int24 *b24c;
+		b24c = (Int24*)bw;
+		short *b, c;
+		b = (short*)bw;
+		if (wavsam == 24) {
+			for (int i = 0; i < cnt / 3; i++) {
+				int c4 = b24c[i];
+				if (savedata.mp3 == 2)	c4 = (int)((float)c4 * 2.0f);
+				else if (savedata.mp3 == 4) c4 = (int)((float)c4 * 3.0f);
+				else if (savedata.mp3 == 8) c4 = (int)((float)c4 * 4.0f);
+				else if (savedata.mp3 == 16) c4 = (int)((float)c4 * 5.0f);
+				if (c4 >  8388607)c4 = 8388607;
+				if (c4 < -8388608)c4 = -8388608;
+				b24c[i] = c4;
+			}
+		}
+		else {
+			for (int i = 0; i < cnt / 2; i++) {
+				int c = (int)b[i];
+				if (savedata.mp3 == 2)	c = (int)((float)b[i] * 1.5f);
+				else if (savedata.mp3 == 3) c = (int)((float)b[i] * 2.0f);
+				else if (savedata.mp3 == 4) c = (int)((float)b[i] * 2.5f);
+				else if (savedata.mp3 == 5) c = (int)((float)b[i] * 3.0f);
+				if (c >= 32768)c = 32767;
+				if (c <= -32767)c = -32766;
+				b[i] = (short)c;
+			}
+		}
+		fade += fadeadd; if (fade<0.0001) { fade = 0.0; fadeadd = 0; }
+		//fadeを三乗して計算密度を変更
+		if (wavsam == 24) {
+			float c4;
+			int c5;
+			for (int i = 0; i < cnt / 3; i++) {
+				c5 = b24c[i]; c4 = (float)c5;
+				c4 = c4 * fade * fade; c5 = (int)c4;
+				b24c[i] = c5;
+			}
+		}
+		else {
+			for (int i = 0; i < cnt / 2; i++) { c = b[i]; c = (short)(((float)c) * fade * fade); b[i] = c; }
+		}
+		if ((UINT)wl<(UINT)0x7fff0000) {
+			if (cc1 == 1)	cc.Write(bw, cnt);
+			wl += cnt;
+		}
+		lenl += cnt;
+		//	playb+=cnt/4;
+	}
+	catch (SE_Exception e) {
+	}
+	catch (_EXCEPTION_POINTERS *ep) {
+	}
+	catch (...) {}
+	if (cnt4<cnt) cnt = cnt4;
 	return cnt;
 }
 
@@ -3364,23 +3791,20 @@ int readmp3(BYTE*bw,int cnt)
 		poss-=cnt;
 		if(poss!=0){ memcpy(bufkpi,bufkpi+cnt,poss); }
 	}
-	INT24 *b24;
-	b24 = (INT24*)bw;
+	Int24 *b24c;
+	b24c = (Int24*)bw;
 	short *b,c;
 	b=(short*)bw;
 	if (wavsam == 24) {
 		for (int i = 0; i < cnt / 3; i++) {
-
-			INT24 c3 = (INT24)b24[i];
-			int c4 = c3.data;
+			int c4 = b24c[i];
 			if (savedata.mp3 == 2)	c4 = (int)((float)c4 * 2.0f);
 			else if (savedata.mp3 == 4) c4 = (int)((float)c4 * 3.0f);
 			else if (savedata.mp3 == 8) c4 = (int)((float)c4 * 4.0f);
 			else if (savedata.mp3 == 16) c4 = (int)((float)c4 * 5.0f);
-			if (c4 >= 32768)c4 = 32767;
-			if (c4 <= -32767)c4 = -32766;
-			c3.data = (short)c4;
-			b24[i] = c3;
+			if (c4 >  8388607)c4 = 8388607;
+			if (c4 < -8388608)c4 = -8388608;
+			b24c[i] = c4;
 		}
 	}
 	else {
@@ -3398,7 +3822,15 @@ int readmp3(BYTE*bw,int cnt)
 	fade+=fadeadd;if(fade<0.0001){fade=0.0;fadeadd=0;}
 	//fadeを三乗して計算密度を変更
 	if (wavsam == 24) {
-		for (int i = 0; i < cnt / 3; i++) { c = b24[i].data; c = (short)(((float)c) * fade * fade); b24[i].data = c; }
+		for (int i = 0; i < cnt / 3; i++) {
+			float c4;
+			int c5;
+			for (int i = 0; i < cnt / 3; i++) {
+				c5 = b24c[i]; c4 = (float)c5;
+				c4 = c4 * fade * fade; c5 = (int)c4;
+				b24c[i] = c5;
+			}
+		}
 	}
 	else {
 		for (int i = 0; i < cnt / 2; i++) { c = b[i]; c = (short)(((float)c) * fade * fade); b[i] = c; }
@@ -3532,11 +3964,15 @@ void COggDlg::dp(CString a)
 	if(filen.Right(1)=="\"") filen=filen.Left(filen.GetLength()-1);
 	ti=filen.Right(filen.GetLength()-filen.ReverseFind('\\')-1);
 	stop();
-	if(filen.Right(4)==".ogg" || filen.Right(4)==".OGG"){
-		fnn=ti;
-		mode=-1;modesub=-1;
+	if (filen.Right(4) == ".ogg" || filen.Right(4) == ".OGG") {
+		fnn = ti;
+		mode = -1; modesub = -1;
 		play();
-	}else if((filen.Right(4)==".mp3" || filen.Right(4)==".MP3" || filen.Right(4)==".mp2" || filen.Right(4)==".MP2" ||
+	}else if (filen.Right(4) == ".m4a" || filen.Right(4) == ".M4A" || filen.Right(4) == ".aac" || filen.Right(4) == ".AAC") {
+			fnn = ti;
+			mode = -9; modesub = -9;
+			play();
+		}else if((filen.Right(4)==".mp3" || filen.Right(4)==".MP3" || filen.Right(4)==".mp2" || filen.Right(4)==".MP2" ||
 		filen.Right(4)==".mp1" || filen.Right(4)==".MP1" || filen.Right(4)==".rmp" || filen.Right(4)==".RMP")){
 		fnn=ti;
 		mode=-10;modesub=-10;
@@ -3802,6 +4238,7 @@ void COggDlg::stop()
 		if(adbuf2)free(adbuf2);//delete [] adbuf2;
 		adbuf2=NULL;
 		if(mode==-10) mp3_.Close();
+		if (mode == -9) m4a_.Close(og->kmp);
 		if(mod){
 			if(mod->Close) mod->Close(kmp);
 			if(mod->Deinit) mod->Deinit();
@@ -4154,8 +4591,9 @@ void COggDlg::timerp()
 			if(g.Right(4)==".mp1") g="(mp1)";
 			s.Format(_T("file:音声ファイル%s"),g);
 		}
-		if(mode==-2||mode==-3) sss=filen.Right(filen.GetLength()-filen.ReverseFind('.')-1);
+		if(mode==-2||mode==-3||mode==-9) sss=filen.Right(filen.GetLength()-filen.ReverseFind('.')-1);
 		if(mode==-3) s.Format(_T("file:kpiファイル(%s)"),sss);
+		if (mode == -9) s.Format(_T("file:m4aファイル(%s)"), sss);
 		if(mode==-1) s.Format(_T("file:oggファイル"),sss);
 		if(mode==-2 && rate==0.0) s.Format(_T("file:音声ファイル(%s)"),sss);
 		if(mode==-2 && rate!=0.0) s.Format(_T("file:動画ファイル(%s)"),sss);
@@ -4232,11 +4670,11 @@ void COggDlg::timerp()
 			sss=kpi;
 			s.Format(_T("kpi :%s"),sss.Right(sss.GetLength()-sss.ReverseFind('\\')-1));
 			moji(s,1,64,0x7fffff);
-		}else if(mode==-10){
-			if(Vbr)
-				s.Format(_T("data:%3dk(VBR) %dHz"),kbps,si1.dwSamplesPerSec);
+		}else if(mode==-10 || mode == -9){
+			if (Vbr)
+				s.Format(_T("data:%3dk(VBR) %dHz"), (kbps == 0) ? mkps : kbps , si1.dwSamplesPerSec);
 			else
-				s.Format(_T("data:%3dk %dHz"),kbps,si1.dwSamplesPerSec);
+				s.Format(_T("data:%3dk %dHz"), (kbps == 0) ? mkps : kbps,si1.dwSamplesPerSec);
 			moji(s,1,48,0x7fffff);
 			s="Arti:";
 			moji(s,1,64,0x7fffff);
@@ -4272,7 +4710,7 @@ void COggDlg::timerp()
 				s.Format(_T("    :%7d-%9d"),loop1,loop2);
 			moji(s,1,64,0x7fefef);
 		}
-		if(mode==-10){
+		if(mode==-10 || mode == -9){
 			s="Albu:";
 			moji(s,1,80,0x7fffff);
 //			dcsub.FillSolidRect(0,0,3000,30,RGB(1,1,1));
@@ -5911,14 +6349,14 @@ void COggDlg::OnPause()
 		{
 			pMainFrame1->pause(0);
 		}
-		if(ogg!=NULL||adbuf2!=NULL||mod!=NULL||wav!=NULL)
+		if(ogg!=NULL||adbuf2!=NULL||mod!=NULL||wav!=NULL||mode==-9)
 			if(m_dsb && thn==FALSE){m_dsb->GetCurrentPosition(&PlayCursora, &WriteCursora);
 			m_dsb->Stop();}
 //			waveOutPause(hwo);
 		m_ps.SetWindowText(_T("再開"));
 		ps=1;
 	}else{
-		if(ogg!=NULL||adbuf2!=NULL||mod!=NULL||wav!=NULL){
+		if(ogg!=NULL||adbuf2!=NULL||mod!=NULL||wav!=NULL || mode == -9){
 //			DSBPOSITIONNOTIFY dsn[20];
 //			ttt = WAVDAStartLen;
 //			hNotifyEvent[0] = CreateEvent(NULL, FALSE, FALSE, NULL);
@@ -5970,8 +6408,11 @@ void COggDlg::OnRestart()
 	if(filen!=""){
 		ti=filen.Right(filen.GetLength()-filen.ReverseFind('\\')-1);
 		int sub_=mode;
-		if((filen.Right(4)==".ogg" || filen.Right(4)==".OGG") && mode<1){
-			modesub=-1;
+		if ((filen.Right(4) == ".ogg" || filen.Right(4) == ".OGG") && mode < 1) {
+			modesub = -1;
+			play();
+		}else if ((filen.Right(4) == ".m4a" || filen.Right(4) == ".M4A" || filen.Right(4) == ".aac" || filen.Right(4) == ".AAC") && mode < 1) {
+			modesub=-9;
 			play();
 		}else if(mode==-10 && (filen.Right(4)==".mp3" || filen.Right(4)==".MP3" || filen.Right(4)==".mp2" || filen.Right(4)==".MP2" ||
 			filen.Right(4)==".mp1" || filen.Right(4)==".MP1" || filen.Right(4)==".rmp" || filen.Right(4)==".RMP")){
@@ -6115,7 +6556,7 @@ void COggDlg::Speana()
 
 	//ステレオ44.1k(char)→モノラル44.1k(short)へ
 	short buf2[BUFSZ1*6],bufL[BUFSZ1*6],bufR[BUFSZ1*6],buf3[BUFSZ1*6];
-	INT24 buf324[BUFSZ1 * 6];
+	Int24 buf324[BUFSZ1 * 6];
 	char *buf4; buf4=(char*)buf3;
 	int bui;
 	//プレイ位置から獲得
@@ -6129,12 +6570,12 @@ void COggDlg::Speana()
 	memcpy(buf324, bufwav3 + PlayCursor, 24576);
 	if (wavsam == 24) {
 		for (i = 0; i < BUFSZ1 / 4; i++) {
-			bui = buf324[i*2].data;
-			bui += (int)buf324[i*2 + 1].data;
+			bui = (int)buf324[i*2]/8;
+			bui += (int)buf324[i*2 + 1]/8;
 			bui /= 2;
 			buf2[i] = bui;
-			bufL[i] = buf324[i*2].data;
-			bufR[i] = buf324[i*2 + 1].data;
+			bufL[i] = (int)buf324[i*2]/8;
+			bufR[i] = (int)buf324[i*2 + 1]/8;
 		}
 	}
 	else {
@@ -6402,6 +6843,14 @@ void COggDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 						sek=TRUE;
 						timer.SetEvent();
 					}
+				}
+				else if (mode == -9) {
+					playb = curpos;
+					if (1) {
+						m4a_.SetPosition(kmp, (DWORD)((double)playb / (((double)wavbit*(double)wavch) / 2000.0)));
+						sek = TRUE;
+						timer.SetEvent();
+					}
 				}else{
 					playb=curpos;
 					ov_pcm_seek(&vf,(ogg_int64_t)playb);
@@ -6476,11 +6925,20 @@ void COggDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 						sek=TRUE;
 						timer.SetEvent();
 					}
-				}else if(mode==-3){
-					playb=curpos;
-					if(mod){
-						if(mod->SetPosition&&sikpi.dwSeekable) mod->SetPosition(kmp,(DWORD)((double)playb/(((double)wavbit*(double)wavch)/2000.0)));
-						sek=TRUE;
+				}
+				else if (mode == -3) {
+					playb = curpos;
+					if (mod) {
+						if (mod->SetPosition&&sikpi.dwSeekable) mod->SetPosition(kmp, (DWORD)((double)playb / (((double)wavbit*(double)wavch) / 2000.0)));
+						sek = TRUE;
+						timer.SetEvent();
+					}
+				}
+				else if (mode == -9) {
+					playb = curpos;
+					if (1) {
+						m4a_.SetPosition(kmp, (DWORD)((double)playb / (((double)wavbit*(double)wavch) / 2000.0)));
+						sek = TRUE;
 						timer.SetEvent();
 					}
 				}else{
@@ -6554,6 +7012,13 @@ void COggDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 					if(mod){
 						if(mod->SetPosition&&sikpi.dwSeekable) mod->SetPosition(kmp,(DWORD)((double)playb/(((double)wavbit*(double)wavch)/2000.0)));
 						sek=TRUE;
+						timer.SetEvent();
+					}
+				}
+				else if (mode == -9) {
+					if (1) {
+						m4a_.SetPosition(kmp, (DWORD)((double)playb / (((double)wavbit*(double)wavch) / 2000.0)));
+						sek = TRUE;
 						timer.SetEvent();
 					}
 				}else{

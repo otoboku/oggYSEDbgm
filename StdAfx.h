@@ -174,6 +174,8 @@ struct save{
 	int savecheck_dshow;
 
 	int bit24;
+
+	int m4a;
 };
 
 

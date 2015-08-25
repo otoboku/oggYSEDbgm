@@ -90,6 +90,8 @@ public:
 	CButton m_24;
 	afx_msg void OnBnClickedOk();
 	afx_msg void OnBnClicked24bit();
+	CButton m_m4a;
+	afx_msg void OnBnClickedCheck50();
 };
 
 //{{AFX_INSERT_LOCATION}}

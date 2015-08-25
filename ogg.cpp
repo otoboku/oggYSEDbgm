@@ -141,6 +141,7 @@ BOOL COggApp::InitInstance()
 	savedata.savecheck_mp3 = 1;
 	savedata.savecheck_dshow = 1;
 	savedata.bit24 = 0;
+	savedata.m4a = 1;
 
 #if _UNICODE
 	if(GetKeyState(VK_CONTROL) < 0){
