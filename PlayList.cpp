@@ -615,6 +615,10 @@ void CPlayList::Fol(CString fname)
 		CString ff = fname.Left(fname.ReverseFind('\\') - 1);
 		_tchdir(ff);
 		ft = fname.Right(fname.GetLength() - fname.ReverseFind('\\') - 1);
+		CFile ff2;
+		ff2.Open(fname, CFile::modeRead | CFile::shareDenyNone, NULL);
+		ff2.Read(bufimage, 2);
+		ff2.Close();
 		if (ft.Right(4) == ".ogg" || ft.Right(4) == ".OGG") {
 			p.sub = -1;
 			FILE *fp;
@@ -681,18 +685,12 @@ void CPlayList::Fol(CString fname)
 			ss = ta2p.GetTitle(); if (b == -1) ss = ta1p.GetTitle(); if (ss == "")ss = ft; _tcscpy(p.name, ss);
 			ss = ta2p.GetAlbum(); if (b == -1) ss = ta1p.GetAlbum(); _tcscpy(p.alb, ss);
 		}
-		else if ((ft.Right(4) == ".aac" || ft.Right(4) == ".AAC")) {
-//			TCHAR kpi[512];
-//			kpi[0] = 0;
-//			plugs(s, &p, kpi);
-//			if (kpi[0] == 0)
-//				p.sub = -3;
-//			else
-//				p.sub = -2;
+		else if ((bufimage[0]==0xff && (bufimage[1]&0xf0==0xf0)) && (ft.Right(4) == ".aac" || ft.Right(4) == ".AAC")) {
 			p.sub = -9;
+			_tcscpy(p.name, ft);
 			_tcscpy(p.fol, fname);
 		}
-		else if ((ft.Right(4) == ".m4a" || ft.Right(4) == ".M4A")) {
+		else if ((ft.Right(4) == ".m4a" || ft.Right(4) == ".M4A" || ft.Right(4) == ".aac" || ft.Right(4) == ".AAC")) {
 			CFile ff;
 			char buf[1024];
 			TCHAR kpi[512];
@@ -707,6 +705,7 @@ void CPlayList::Fol(CString fname)
 				p.sub = -2;
 			if(savedata.m4a==1)
 				p.sub = -9;
+			_tcscpy(p.name, ft);
 			_tcscpy(p.fol, fname);
 			flg = 0;
 			int i;
@@ -810,6 +809,7 @@ void CPlayList::Fol(CString fname)
 				p.sub = -3;
 			else
 				p.sub = -2;
+			_tcscpy(p.name, ft);
 			_tcscpy(p.fol, fname);
 			flg = 0;
 			int i = 0, j;
@@ -1148,12 +1148,18 @@ void CPlayList::Fol(CString fname)
 		return;
 	}
 	CFileFind f;
+	_tchdir(fname);
 	if (f.FindFile(ft)) {
 		int b = 1;
 		for (; b;) {
 			b = f.FindNextFile();
 			s = f.GetFileName();
 			if (f.IsDirectory() == 0) {
+				ft = fname.Right(s.GetLength() - s.ReverseFind('\\') - 1);
+				CFile ff2;
+				ff2.Open(s, CFile::modeRead | CFile::shareDenyNone, NULL);
+				ff2.Read(bufimage, 2);
+				ff2.Close();
 				if (s.Right(4) == ".ogg" || s.Right(4) == ".OGG") {
 					p.sub = -1;
 					FILE *fp;
@@ -1215,18 +1221,12 @@ void CPlayList::Fol(CString fname)
 					ss = ta2p.GetTitle(); if (b == -1) ss = ta1p.GetTitle(); if (ss == "")ss = f.GetFileName(); _tcscpy(p.name, ss);
 					ss = ta2p.GetAlbum(); if (b == -1) ss = ta1p.GetAlbum(); _tcscpy(p.alb, ss);
 				}
-				else if ((ft.Right(4) == ".aac" || ft.Right(4) == ".AAC")) {
-					//			TCHAR kpi[512];
-					//			kpi[0] = 0;
-					//			plugs(s, &p, kpi);
-					//			if (kpi[0] == 0)
-					//				p.sub = -3;
-					//			else
-					//				p.sub = -2;
+				else if ((bufimage[0] == 0xff && (bufimage[1] & 0xf0 == 0xf0)) && (s.Right(4) == ".aac" || s.Right(4) == ".AAC")) {
 					p.sub = -9;
-					_tcscpy(p.fol, fname);
+					_tcscpy(p.name, s);
+					_tcscpy(p.fol, ft + L"\\" + s);
 				}
-				else if ((ft.Right(4) == ".m4a" || ft.Right(4) == ".M4A")) {
+				else if ((s.Right(4) == ".m4a" || s.Right(4) == ".M4A" || s.Right(4) == ".aac" || s.Right(4) == ".AAC")) {
 					CFile ff;
 					char buf[1024];
 					TCHAR kpi[512];
@@ -1241,7 +1241,8 @@ void CPlayList::Fol(CString fname)
 						p.sub = -2;
 					if (savedata.m4a == 1)
 						p.sub = -9;
-					_tcscpy(p.fol, s);
+					_tcscpy(p.name, s);
+					_tcscpy(p.fol, ft + L"\\" + s);
 					flg = 0;
 					int i;
 					for (i = 0; i < read - 4; i++) {
@@ -1344,7 +1345,8 @@ void CPlayList::Fol(CString fname)
 						p.sub = -3;
 					else
 						p.sub = -2;
-					_tcscpy(p.fol, s);
+					_tcscpy(p.name, s);
+					_tcscpy(p.fol, ft +L"\\"+ s);
 					flg = 0;
 					int i=0,j;
 					for (j = i; j < read - 6; j++) {

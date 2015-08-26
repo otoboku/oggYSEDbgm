@@ -1918,7 +1918,7 @@ void COggDlg::play()
 				m4a_.SetPosition(kmp, _tstoi(filen.Right(4)) * 1000);
 			}
 		}
-		wavbit = sikpi.dwSamplesPerSec;	wavch = sikpi.dwChannels;	loop1 = 0; loop2 = (int)((double)sikpi.dwLength*(double)sikpi.dwSamplesPerSec / 1000.0);
+		wavbit = sikpi.dwSamplesPerSec;	wavch = sikpi.dwChannels;	loop1 = 0; oggsize=loop2 = (int)((double)sikpi.dwLength*(double)sikpi.dwSamplesPerSec / 1000.0);
 		wavsam = sikpi.dwBitsPerSample;
 		si1.dwSamplesPerSec = wavbit;
 		si1.dwChannels = wavch;
@@ -1928,6 +1928,7 @@ void COggDlg::play()
 		ff.Open(filen, CFile::modeRead | CFile::shareDenyNone, NULL);
 		int flg, read = ff.Read(bufimage, sizeof(bufimage));
 		ff.Close();
+		tagname = filen.Right(filen.GetLength() - filen.ReverseFind('\\') - 1);
 		flg = 0;
 		int i;
 		for (i = 0; i < read - 4; i++) {
@@ -2017,8 +2018,9 @@ void COggDlg::play()
 			}
 		}
 
-		if (sikpi.dwLength == (DWORD)-1) loop2 = 0;	data_size = oggsize = loop2 * 4;
-		m_time.SetRange(0, (data_size) / 4, TRUE);
+		if (sikpi.dwLength == (DWORD)-1) loop2 = 0;
+		data_size = oggsize = loop2 * ((wavch == 1 || wavch == 2) ? 4 : wavch*2);
+		m_time.SetRange(0, (data_size) / ((wavch==1||wavch==2)?4:1), TRUE);
 		m4a_.SetPosition(kmp, 0);
 		wav_start();
 
@@ -2327,9 +2329,15 @@ void COggDlg::play()
 	loopcnt=0;
 	if(pl&&plw){
 		int plc;
-		if(mode==-10||mode==-9)
+		if(mode==-10)
 			plc=pl->Add(tagfile,mode,loop1,loop2,tagname,tagalbum,filen,0,(oggsize/(2*wavch*wavbit/4)/((mode==-9)?4:1)),1);
-		else if(mode==-3){
+		else if (mode == -9) {
+			double wavv[] = { 0,1.0,2.0,2.0,2.0,2.0,2.0 };//(double)(wavbit2/wavv[wavch])
+			plc = pl->Add(tagfile, mode, loop1, loop2, tagname, tagalbum, filen, 0,(int)(
+			(double)oggsize / (double)(wavbit * 2 * wavv[wavch]) / (double)(wavsam / 16.0f)
+				), 1);
+		}
+		else if (mode == -3) {
 			if(oggsize==0)
 				plc=pl->Add(tagfile,mode,loop1,loop2,tagname,tagalbum,filen,0,-1,1);
 			else
@@ -4513,21 +4521,23 @@ void COggDlg::timerp()
 		tb1=t1%60;
 		tc1=tt%100;
 	}else{
-		t3=(double)oggsize/(double)(wavbit*2*wavch)/(double)(wavsam/16.0f);
+		double wavv[] = { 0,1.0,2.0,2.0,2.0,2.0,2.0 };//(double)(wavbit2/wavv[wavch])
+		double wavv2[] = { 0,2.0,1.0,1.0/4.0,1.0/4.0,1.0/4.0,1.0/4.0 };//(double)(wavbit2/wavv[wavch])
+		t3=(double)oggsize/(double)(wavbit*2*wavv[wavch])/(double)(wavsam/16.0f);
 		if(mode==-10) t3*=4.0;
 		tt=(int)(t3*100.0);
 		t1=tt/100;
 		ta=t1/60;
 		tb=t1%60;
 		tc=tt%100;
-		t3=(double)playb/(double)((wavch==2)?wavbit:(wavbit/2)) / (double)(wavsam / 16.0f);
+		t3=(double)playb/ (double)(wavbit2 / wavv2[wavch]) / (double)(wavsam / 16.0f);
 		if(mode==-10)t3/=4;
 		tt=(int)(t3*100.0);
 		t1=tt/100;
 		ta1=t1/60;
 		tb1=t1%60;
 		tc1=tt%100;
-		t3=(double)wl/(double)(wavbit*2*wavch) / (double)(wavsam / 16.0f);
+		t3=(double)wl/(double)(wavbit*2 * wavv[wavch]) / (double)(wavsam / 16.0f);
 		tt=(int)(t3*100.0);
 		t1=tt/100;
 		tag=t1/60;
@@ -4557,7 +4567,7 @@ void COggDlg::timerp()
 		s="name:";
 		moji(s,1,0,0xffffff);
 		if(fnn!="")		ss=fnn;
-		if(mode==-10) ss=tagfile;
+		if(mode==-10||mode==-9) ss=tagfile;
 		if(stitle!="" && mode==-1)	ss=stitle;
 		int si=mojisub(ss,1,0,0xffffff);
 		if(si>MDC){
@@ -6847,7 +6857,8 @@ void COggDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 				else if (mode == -9) {
 					playb = curpos;
 					if (1) {
-						m4a_.SetPosition(kmp, (DWORD)((double)playb / (((double)wavbit*(double)wavch) / 2000.0)));
+						double wavv2[] = { 0,2.0,1.0,1.0 / 4.0,1.0 / 4.0,1.0 / 4.0,1.0 / 4.0 };
+						m4a_.SetPosition(kmp, (DWORD)((double)playb / (((double)(wavbit2 / wavv2[wavch])) / 200.0)));
 						sek = TRUE;
 						timer.SetEvent();
 					}
@@ -6937,7 +6948,8 @@ void COggDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 				else if (mode == -9) {
 					playb = curpos;
 					if (1) {
-						m4a_.SetPosition(kmp, (DWORD)((double)playb / (((double)wavbit*(double)wavch) / 2000.0)));
+						double wavv2[] = { 0,2.0,1.0,1.0 / 4.0,1.0 / 4.0,1.0 / 4.0,1.0 / 4.0 };
+						m4a_.SetPosition(kmp, (DWORD)((double)playb / (((double)(wavbit2 / wavv2[wavch])) / 200.0)));
 						sek = TRUE;
 						timer.SetEvent();
 					}
@@ -7017,7 +7029,8 @@ void COggDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 				}
 				else if (mode == -9) {
 					if (1) {
-						m4a_.SetPosition(kmp, (DWORD)((double)playb / (((double)wavbit*(double)wavch) / 2000.0)));
+						double wavv2[] = { 0,2.0,1.0,1.0 / 4.0,1.0 / 4.0,1.0 / 4.0,1.0 / 4.0 };
+						m4a_.SetPosition(kmp, (DWORD)((double)playb / (((double)(wavbit2 / wavv2[wavch])) / 200.0)));
 						sek = TRUE;
 						timer.SetEvent();
 					}
