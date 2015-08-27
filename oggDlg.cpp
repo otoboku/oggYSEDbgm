@@ -4531,7 +4531,7 @@ void COggDlg::timerp()
 		tb=t1%60;
 		tc=tt%100;
 		t3=(double)playb/ (double)(wavbit / wavv2[wavch]) / (double)(wavsam / 16.0f);
-		if (mode == -10) t3 *= 4.0;
+		if (mode == -10) t3 /= 4.0;
 		if (mode == -9 && wavch > 2) t3 *= wavch / 2.0;
 		tt=(int)(t3*100.0);
 		t1=tt/100;
