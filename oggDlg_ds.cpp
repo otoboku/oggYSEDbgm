@@ -191,20 +191,25 @@ UINT HandleNotifications(LPVOID)
 			::WaitForMultipleObjects(1, ev, FALSE, 40);
 //		else
 			//Sleep(1);
-			if(sek==1){
-				if(m_dsb)m_dsb->Stop();
-				oldw=0;
-				if((mode>=10 && mode<=20) || mode<-10)
-					playwavadpcm(bufwav3,oldw,OUTPUT_BUFFER_SIZE*4,0);//データ獲得
-				else if(mode==-10)
-					playwavmp3(bufwav3,oldw,OUTPUT_BUFFER_SIZE*4,0);//データ獲得
-				else if(mode==-3)
-					playwavkpi(bufwav3,oldw,OUTPUT_BUFFER_SIZE*4,0);//データ獲得
-				else if (mode == -9)
-					playwavm4a(bufwav3, oldw, OUTPUT_BUFFER_SIZE * 4, 0);//データ獲得
-				else
-					playwavds2(bufwav3,oldw,OUTPUT_BUFFER_SIZE*4,0);//データ獲得
-				oldw=OUTPUT_BUFFER_SIZE*4;WriteCursor=OUTPUT_BUFFER_SIZE*4;
+			if (sek == 1) {
+				if (m_dsb)m_dsb->Stop();
+				oldw = 0;
+				if ((mode >= 10 && mode <= 20) || mode < -10) {
+					playwavadpcm(bufwav3, oldw, OUTPUT_BUFFER_SIZE / 12 * wavch * 2, 0);//データ獲得
+				}
+				else if (mode == -10) {
+					playwavmp3(bufwav3, oldw, OUTPUT_BUFFER_SIZE / 12 * wavch * 2, 0);//データ獲得
+				}
+				else if (mode == -3) {
+					playwavkpi(bufwav3, oldw, OUTPUT_BUFFER_SIZE / 12 * wavch * 2, 0);//データ獲得
+				}
+				else if (mode == -9) {
+					playwavm4a(bufwav3, oldw, OUTPUT_BUFFER_SIZE / 12 * wavch * 2, 0);//データ獲得
+				}
+				else {
+					playwavds2(bufwav3, oldw, OUTPUT_BUFFER_SIZE / 12 * wavch * 2, 0);//データ獲得
+				}
+				oldw = OUTPUT_BUFFER_SIZE / 12 * wavch * 2; WriteCursor = OUTPUT_BUFFER_SIZE / 12 * wavch * 2;
 				if(m_dsb)m_dsb->SetCurrentPosition(0);
 				if(m_dsb)m_dsb->Play(0,0,DSBPLAY_LOOPING);
 				sek=FALSE;
@@ -215,7 +220,8 @@ UINT HandleNotifications(LPVOID)
 		if(ps==1) continue;
 		if(m_dsb)m_dsb->GetCurrentPosition(&PlayCursor, &WriteCursor);//再生位置取得
 		int len1=0,len2=0,len3,len4;
-		len1=(int)WriteCursor-(int)oldw;//書き込み範囲取得
+//		oldw = ((oldw / (wavch * 2)) * (wavch * 2));
+		len1=(int)WriteCursor-(int)oldw;//書き込み範囲取得10
 		len2=0;
 		if (len1 == 0 && len2 == 0) continue;
 		if(len1<0){

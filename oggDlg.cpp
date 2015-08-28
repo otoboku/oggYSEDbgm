@@ -3,6 +3,10 @@
 
 //#define _DLL
 #include "stdafx.h"
+
+int wavch = 2;
+
+
 #include "kmp_pi.h"
 //#include "afxdll_.h"
 #include "Dwmapi.h"
@@ -65,7 +69,6 @@
 #include "Id3tagv2.h"
 #include "mp3.h"
 #include "OSVersion.h"
-
 #include "neaacdec.h"
 #include "m4a.h"
 
@@ -436,7 +439,7 @@ ICustomDestinationList *pcdl;
 IObjectCollection *poc; 
  
 int plcnt=0;
-int wavch=2;
+
 int wavsam = 16;
 
 
@@ -1928,7 +1931,7 @@ void COggDlg::play()
 		ff.Open(filen, CFile::modeRead | CFile::shareDenyNone, NULL);
 		int flg, read = ff.Read(bufimage, sizeof(bufimage));
 		ff.Close();
-		tagname = filen.Right(filen.GetLength() - filen.ReverseFind('\\') - 1);
+		tagfile = filen.Right(filen.GetLength() - filen.ReverseFind('\\') - 1);
 		flg = 0;
 		int i;
 		for (i = 0; i < read - 4; i++) {
@@ -3589,7 +3592,6 @@ int readkpi(BYTE*bw,int cnt)
 
 int playwavm4a(BYTE* bw, int old, int l1, int l2)
 {
-	playb += (l1 + l2) /((wavch==1||wavch==2)?4:(wavch*2));
 	//ƒf[ƒ^“Ç‚Ýž‚Ý
 	int rrr = readm4a(bw + old, l1);
 	if (oggsize <= playb*4) {
@@ -3620,6 +3622,7 @@ int playwavm4a(BYTE* bw, int old, int l1, int l2)
 			}
 		}
 	}
+	playb += (l1 + l2) / ((wavch == 1 || wavch == 2) ? 4 : (wavch * 2));
 	return l1 + l2;
 }
 
@@ -3639,7 +3642,8 @@ int readm4a(BYTE*bw, int cnt)
 		if (r == 0) cnt = 0;
 		memcpy(bufkpi2, bufkpi, cnt);
 		unsigned short *bf1, *bf2; bf1 = (unsigned short*)bw; bf2 = (unsigned short*)bufkpi2;
-
+//		int fw = playb % (wavch);
+//		bf2 += fw;
 		int cnt1 = cnt / 2;
 		switch (wavch)
 		{
@@ -4524,7 +4528,8 @@ void COggDlg::timerp()
 		double wavv[] = { 0,1.0,2.0,3.0 / 0.75,4.0 / 0.75,5.0 / 0.75,6.0 / 0.75 };//(double)(wavbit2/wavv[wavch])
 		double wavv2[] = { 0,2.0,1.0,2.0/3.0,2.0/4.0,2.0 /5.0,2.0/6.0 };//(double)(wavbit2/wavv[wavch])
 		t3=(double)oggsize/(double)(wavbit*2*wavv[wavch])/(double)(wavsam/16.0f);
-		if(mode == -10|| mode == -9) t3*=4.0;
+		if(mode == -10) t3*=4.0;
+		if (mode == -9 && wavch > 2) t3 *= wavch / 2.0;
 		tt=(int)(t3*100.0);
 		t1=tt/100;
 		ta=t1/60;
@@ -6859,8 +6864,11 @@ void COggDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 					playb = curpos;
 					if (1) {
 						double wavv2[] = { 0,2.0,1.0,1.0 / 2.0,1.0 / 2.0,1.0 / 2.0,1.0 / 2.0 };
-						m4a_.SetPosition(kmp, (DWORD)((double)playb / (((double)(wavbit2 / wavv2[wavch])) / ((wavch > 2) ? (1069.0*wavch) : 1000.0))));
+						DWORD pla = (DWORD)((double)playb / ((((double)(wavbit2 / wavv2[wavch]))) / ((wavch > 2) ? (1069.1*wavch) : 1000.0)));
+						pla = ((pla / (wavch * 2) * (wavch * 2)));
+						m4a_.SetPosition(kmp, pla);
 						sek = TRUE;
+						cnt3 = 0;
 						timer.SetEvent();
 					}
 				}else{
@@ -6950,8 +6958,11 @@ void COggDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 					playb = curpos;
 					if (1) {
 						double wavv2[] = { 0,2.0,1.0,1.0 / 2.0,1.0 / 2.0,1.0 / 2.0,1.0 / 2.0 };
-						m4a_.SetPosition(kmp, (DWORD)((double)playb / (((double)(wavbit2 / wavv2[wavch])) / ((wavch > 2) ? (1069.0*wavch) : 1000.0))));
+						DWORD pla = (DWORD)((double)playb / ((((double)(wavbit2 / wavv2[wavch]))) / ((wavch > 2) ? (1069.1*wavch) : 1000.0)));
+						pla = ((pla / (wavch * 2) * (wavch * 2)));
+						m4a_.SetPosition(kmp, pla);
 						sek = TRUE;
+						cnt3 = 0;
 						timer.SetEvent();
 					}
 				}else{
@@ -7031,8 +7042,11 @@ void COggDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 				else if (mode == -9) {
 					if (1) {
 						double wavv2[] = { 0,2.0,1.0,1.0 / 3.0,1.0 / 4.0,1.0 / 5.0,1.0 / 6.0 };
-						m4a_.SetPosition(kmp, (DWORD)((double)playb / ((((double)(wavbit2 / wavv2[wavch]))) / ((wavch > 2) ? (1069.0*wavch) : 1000.0))));
+						DWORD pla = (DWORD)((double)playb / ((((double)(wavbit2 / wavv2[wavch]))) / ((wavch > 2) ? (1069.1*wavch) : 1000.0)));
+						pla = ((pla / (wavch * 2) * (wavch * 2)));
+						m4a_.SetPosition(kmp, pla);
 						sek = TRUE;
+						cnt3 = 0;
 						timer.SetEvent();
 					}
 				}else{
