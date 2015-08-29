@@ -2179,7 +2179,7 @@ void COggDlg::play()
 	int i,iii=0;
 	double ik=32.0;
 	for(i=0; i<=88; i++,iii++) { // 低音域用
-		logtbl[i] = (int)(26.71712838 * pow(2.0,(double)(iii)/ik) * (double)BUFSZH / (double)wavbit*2.0 + 1.0);
+		logtbl[i] = (int)(45.71712838 * pow(2.0,(double)(iii)/ik) * (double)BUFSZH / (double)wavbit * 4.0 + 1.0);
 		ik-=0.14;
 		if(i!=0){
 			if(iii>240){
@@ -4527,7 +4527,7 @@ void COggDlg::timerp()
 	}else{
 		double wavv[] = { 0,1.0,2.0,3.0 / 0.75,4.0 / 0.75,5.0 / 0.75,6.0 / 0.75 };//(double)(wavbit2/wavv[wavch])
 		double wavv2[] = { 0,2.0,1.0,2.0/3.0,2.0/4.0,2.0 /5.0,2.0/6.0 };//(double)(wavbit2/wavv[wavch])
-		t3=(double)oggsize/(double)(wavbit*2*wavv[wavch])/(double)(wavsam/16.0f);
+		t3 = (double)oggsize / (double)(wavbit*2.0*wavv[wavch]);// / (double)(wavsam / 16.0f);
 		if(mode == -10) t3*=4.0;
 		if (mode == -9 && wavch > 2) t3 *= wavch / 2.0;
 		tt=(int)(t3*100.0);
@@ -4599,17 +4599,18 @@ void COggDlg::timerp()
 		else			s.Format(_T("file:%s"),filen);
 //		if(fnn.Right(4)=="動画"||fnn.Right(5).Left(4)=="動画")		s.Format("file:動画");
 		if(filen.Left(2)=="★")		s.Format(_T("file:動画"));
-		if(mode==-10){
+		if(mode==-10 || mode == -9){
 			CString g;g=""; g=filen; g.MakeLower();
 			if(g.Right(4)==".mp3") g="(mp3)";
 			if(g.Right(4)==".rmp") g="(rmp)";
 			if(g.Right(4)==".mp2") g="(mp2)";
 			if(g.Right(4)==".mp1") g="(mp1)";
+			if (g.Right(4) == ".m4a") g = "(m4a)";
+			if (g.Right(4) == ".aac") g = "(aac)";
 			s.Format(_T("file:音声ファイル%s"),g);
 		}
-		if(mode==-2||mode==-3||mode==-9) sss=filen.Right(filen.GetLength()-filen.ReverseFind('.')-1);
+		if(mode==-2||mode==-3) sss=filen.Right(filen.GetLength()-filen.ReverseFind('.')-1);
 		if(mode==-3) s.Format(_T("file:kpiファイル(%s)"),sss);
-		if (mode == -9) s.Format(_T("file:m4aファイル(%s)"), sss);
 		if(mode==-1) s.Format(_T("file:oggファイル"),sss);
 		if(mode==-2 && rate==0.0) s.Format(_T("file:音声ファイル(%s)"),sss);
 		if(mode==-2 && rate!=0.0) s.Format(_T("file:動画ファイル(%s)"),sss);
@@ -4676,8 +4677,8 @@ void COggDlg::timerp()
 			moji(s,1,64,0x7fffff);
 		}else if(mode==-3){
 			s.Format(_T("data:%dHz %s %dbit"),wavbit,(wavch==1)?_T("mono"):_T("stereo"),wavsam);
-			if(wavch==3)s.Format(_T("data:%dHz %s %dbit"),wavbit,_T("2.1ch"), wavsam);
-			if(wavch==4)s.Format(_T("data:%dHz %s %dbit"),wavbit,_T("3.1ch"), wavsam);
+			if(wavch==3)s.Format(_T("data:%dHz %s %dbit"),wavbit,_T("3ch"), wavsam);
+			if(wavch==4)s.Format(_T("data:%dHz %s %dbit"),wavbit,_T("4ch"), wavsam);
 			if(wavch==5)s.Format(_T("data:%dHz %s %dbit"),wavbit,_T("4.1ch"), wavsam);
 			if(wavch==6)s.Format(_T("data:%dHz %s %dbit"),wavbit,_T("5.1ch"), wavsam);
 			if(wavch==7)s.Format(_T("data:%dHz %s %dbit"),wavbit,_T("6.1ch"), wavsam);
@@ -4690,7 +4691,10 @@ void COggDlg::timerp()
 			if (Vbr)
 				s.Format(_T("data:%3dk(VBR) %dHz"), (kbps == 0) ? mkps : kbps , si1.dwSamplesPerSec);
 			else
-				s.Format(_T("data:%3dk %dHz"), (kbps == 0) ? mkps : kbps,si1.dwSamplesPerSec);
+				if(mode==-9)
+					s.Format(_T("data:%3dk %dHz %dch"), (kbps == 0) ? mkps : kbps,si1.dwSamplesPerSec,wavch);
+				else
+					s.Format(_T("data:%3dk %dHz"), (kbps == 0) ? mkps : kbps, si1.dwSamplesPerSec);
 			moji(s,1,48,0x7fffff);
 			s="Arti:";
 			moji(s,1,64,0x7fffff);
@@ -6572,7 +6576,7 @@ void COggDlg::Speana()
 
 	//ステレオ44.1k(char)→モノラル44.1k(short)へ
 	short buf2[BUFSZ1*6],bufL[BUFSZ1*6],bufR[BUFSZ1*6],buf3[BUFSZ1*6];
-	Int24 buf324[BUFSZ1 * 6];
+	Int24 *buf324;
 	char *buf4; buf4=(char*)buf3;
 	int bui;
 	//プレイ位置から獲得
@@ -6583,15 +6587,15 @@ void COggDlg::Speana()
 	if(PlayCursor>OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM) PlayCursor=0;
 	memcpy(bufwav3+(OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM),bufwav3,OUTPUT_BUFFER_SIZE*2);
 	memcpy(buf4,bufwav3+PlayCursor,16384);
-	memcpy(buf324, bufwav3 + PlayCursor, 24576);
+	buf324 = (Int24*)(bufwav3 + PlayCursor);
 	if (wavsam == 24) {
 		for (i = 0; i < BUFSZ1 / 4; i++) {
-			bui = (int)buf324[i*2]/8;
-			bui += (int)buf324[i*2 + 1]/8;
+			bui = (int)buf324[i*2]/256;
+			bui += (int)buf324[i*2 + 1]/256;
 			bui /= 2;
 			buf2[i] = bui;
-			bufL[i] = (int)buf324[i*2]/8;
-			bufR[i] = (int)buf324[i*2 + 1]/8;
+			bufL[i] = (int)buf324[i*2]/256;
+			bufR[i] = (int)buf324[i*2 + 1]/256;
 		}
 	}
 	else {
@@ -6836,6 +6840,7 @@ void COggDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 								if(mp3_.seek(playb/(wavch==2?4:1),wavch)==FALSE){fade1=1;if(thn==FALSE){if(m_dsb)m_dsb->Stop();}return;}
 							}
 							poss=0;sek=TRUE;
+							cnt3 = 0;
 							timer.SetEvent();
 							syukai=0;
 							OnPause();
@@ -6849,6 +6854,7 @@ void COggDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 						playb=curpos;
 						seekadpcm((int)playb);
 						sek=TRUE;
+						cnt3 = 0;
 						timer.SetEvent();
 					}
 
@@ -6857,6 +6863,7 @@ void COggDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 					if(mod){
 						if(mod->SetPosition&&sikpi.dwSeekable) mod->SetPosition(kmp,(DWORD)((double)playb/(((double)wavbit*(double)wavch)/2000.0)));
 						sek=TRUE;
+						cnt3 = 0;
 						timer.SetEvent();
 					}
 				}
@@ -6875,6 +6882,7 @@ void COggDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 					playb=curpos;
 					ov_pcm_seek(&vf,(ogg_int64_t)playb);
 					sek=TRUE;
+					cnt3 = 0;
 					timer.SetEvent();
 				}
 				poss=0;
@@ -6930,6 +6938,7 @@ void COggDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 								if(mp3_.seek(playb/(wavch==2?4:1),wavch)==FALSE){fade1=1;if(thn==FALSE){if(m_dsb)m_dsb->Stop();}return;}
 							}
 							poss=0;sek=TRUE;
+							cnt3 = 0;
 							timer.SetEvent();
 							syukai=0;
 							OnPause();
@@ -6943,6 +6952,7 @@ void COggDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 						playb=curpos;
 						seekadpcm((int)playb);
 						sek=TRUE;
+						cnt3 = 0;
 						timer.SetEvent();
 					}
 				}
@@ -6951,6 +6961,7 @@ void COggDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 					if (mod) {
 						if (mod->SetPosition&&sikpi.dwSeekable) mod->SetPosition(kmp, (DWORD)((double)playb / (((double)wavbit*(double)wavch) / 2000.0)));
 						sek = TRUE;
+						cnt3 = 0;
 						timer.SetEvent();
 					}
 				}
@@ -6969,6 +6980,7 @@ void COggDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 					playb=curpos;
 					ov_pcm_seek(&vf,(ogg_int64_t)playb);
 					sek=TRUE;
+					cnt3 = 0;
 					timer.SetEvent();
 				}
 				poss=0;
@@ -7018,6 +7030,7 @@ void COggDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 								if(mp3_.seek(playb/(wavch==2?4:1),wavch)==FALSE){fade1=1;if(thn==FALSE){if(m_dsb)m_dsb->Stop();}return;}
 							}
 							poss=0;sek=TRUE;
+							cnt3 = 0;
 							timer.SetEvent();
 							syukai=0;
 							OnPause();
@@ -7030,12 +7043,14 @@ void COggDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 					}else{
 						seekadpcm((int)playb);
 						sek=TRUE;
+						cnt3 = 0;
 						timer.SetEvent();
 					}
 				}else if(mode==-3){
 					if(mod){
 						if(mod->SetPosition&&sikpi.dwSeekable) mod->SetPosition(kmp,(DWORD)((double)playb/(((double)wavbit*(double)wavch)/2000.0)));
 						sek=TRUE;
+						cnt3 = 0;
 						timer.SetEvent();
 					}
 				}
@@ -7052,6 +7067,7 @@ void COggDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 				}else{
 					ov_pcm_seek(&vf,(ogg_int64_t)playb);
 					sek=TRUE;
+					cnt3 = 0;
 					timer.SetEvent();
 				}
 				poss=0;
