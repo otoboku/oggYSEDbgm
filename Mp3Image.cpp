@@ -218,6 +218,35 @@ void CMp3Image::Load(CString s)
 			return;
 		}
 	}
+	else if (s.Right(4) == "flac") {
+		ZeroMemory(bufimage, sizeof(bufimage));
+		ff.Read(bufimage, sizeof(bufimage));
+		for (i = 0; i < 0x300000; i++) {// 00 06 5D 6A 64 61 74 61
+			if (bufimage[i] == 'i' && bufimage[i + 1] == 'm' && bufimage[i + 2] == 'a' && bufimage[i + 3] == 'g' && bufimage[i + 4] == 'e' && bufimage[i + 5] == '/' && bufimage[i + 6] == 'j' && bufimage[i + 7] == 'p' && bufimage[i + 8] == 'e' && bufimage[i + 9] == 'g') {
+				s1 += _T("111.jpg");
+				break;
+			}
+			if (bufimage[i] == 'i' && bufimage[i + 1] == 'm' && bufimage[i + 2] == 'a' && bufimage[i + 3] == 'g' && bufimage[i + 4] == 'e' && bufimage[i + 5] == '/' && bufimage[i + 6] == 'p' && bufimage[i + 7] == 'n' && bufimage[i + 8] == 'g') {
+				s1 += _T("111.png");
+				break;
+			}
+		}
+		if (i == 0x300000) {
+			DestroyWindow();
+			return;
+		}
+		i += 30;
+		size = (UINT)bufimage[i];
+		size <<= 8;
+		size |= (UINT)bufimage[i + 1];
+		size <<= 8;
+		size |= (UINT)bufimage[i + 2];
+		size <<= 8;
+		size |= (UINT)bufimage[i + 3];
+
+		i += 4;
+		s2 += _T("111.bmp");
+	}
 
 	if (s.Right(3) != "ogg"){
 		int ijk = i;

@@ -596,7 +596,7 @@ BOOL COggDlg::OnInitDialog()
 		m_tooltip.AddTool(GetDlgItem(IDC_CHECK24), _T("‰p—Y“`àIII ”’‚«–‚—"));
 		m_tooltip.AddTool(GetDlgItem(IDC_CHECK25), _T("‰p—Y“`àIV Žég‚¢Ž´"));
 		m_tooltip.AddTool(GetDlgItem(IDC_CHECK26), _T("‰p—Y“`àV ŠC‚ÌŸB‰Ì"));
-		m_tooltip.AddTool(GetDlgItem(IDC_BUTTON58), _T("mp3/m4a/ogg‚É–„‚ßž‚Ü‚ê‚Ä‚¢‚éƒWƒƒƒPƒbƒg‚ð•\Ž¦‚µ‚Ü‚·B"));
+		m_tooltip.AddTool(GetDlgItem(IDC_BUTTON58), _T("mp3/m4a/ogg/flac‚É–„‚ßž‚Ü‚ê‚Ä‚¢‚éƒWƒƒƒPƒbƒg‚ð•\Ž¦‚µ‚Ü‚·B"));
 
 		m_tooltip.AddTool(GetDlgItem(IDC_EDIT1), _T("ŽŸ‚Ì‹È‚Ö‚¢‚­‚½‚ß‚Ìƒ‹[ƒv‰ñ”‚ðÝ’è‚µ‚Ü‚·"));
 		
@@ -2068,26 +2068,65 @@ void COggDlg::play()
 		}
 		wavbit=sikpi.dwSamplesPerSec;	wavch=sikpi.dwChannels;	loop1=0;loop2=(int)((double)sikpi.dwLength*(double)sikpi.dwSamplesPerSec/1000.0);
 		wavsam = sikpi.dwBitsPerSample;
-		if(sikpi.dwLength==(DWORD)-1) loop2=0;	data_size=oggsize=loop2*4;
-		m_time.SetRange(0,(data_size)/4,TRUE);
+		if(sikpi.dwLength==(DWORD)-1) loop2=0;
+		data_size=oggsize=loop2*(wavsam/4);
+		m_time.SetRange(0,(data_size)/(wavsam / 4),TRUE);
 		if(mod->SetPosition) mod->SetPosition(kmp,0);
 		wav_start();
 //		playwavkpi(bufwav3,0,dwDataLen*4,0);
-	}else if (mode == -2){
+		CFile ff;
+		CString ss11 = filen; ss11.MakeLower();
+		if (ss11.Right(3) == "m4a") {
+			if (ff.Open(filen, CFile::modeRead | CFile::shareDenyNone, NULL) == TRUE) {
+				mp3file = filen;
+				ZeroMemory(bufimage, sizeof(bufimage));
+				int i;
+				ff.Read(bufimage, sizeof(bufimage));
+				for (i = 0; i < 0x300000; i++) {// 00 06 5D 6A 64 61 74 61
+					if (bufimage[i] == 0x63 && bufimage[i + 1] == 0x6f && bufimage[i + 2] == 0x76 && bufimage[i + 3] == 0x72 && bufimage[i + 8] == 0x64 && bufimage[i + 9] == 0x61 && bufimage[i + 10] == 0x74 && bufimage[i + 11] == 0x61) {
+						break;
+					}
+				}
+				if (i != 0x300000) {
+					m_mp3jake.EnableWindow(TRUE);
+				}
+			}ff.Close();
+		}
+		if (ss11.Right(4) == "flac") {
+			if (ff.Open(filen, CFile::modeRead | CFile::shareDenyNone, NULL) == TRUE) {
+				mp3file = filen;
+				ZeroMemory(bufimage, sizeof(bufimage));
+				int i;
+				ff.Read(bufimage, sizeof(bufimage));
+				for (i = 0; i < 0x300000; i++) {// 00 06 5D 6A 64 61 74 61
+					if (bufimage[i] == 'i' && bufimage[i + 1] == 'm' && bufimage[i + 2] == 'a' && bufimage[i + 3] == 'g' && bufimage[i + 4] == 'e' && bufimage[i + 5] == '/' && bufimage[i + 6] == 'j' && bufimage[i + 7] == 'p' && bufimage[i + 8] == 'e' && bufimage[i + 9] == 'g') {
+						break;
+					}
+					if (bufimage[i] == 'i' && bufimage[i + 1] == 'm' && bufimage[i + 2] == 'a' && bufimage[i + 3] == 'g' && bufimage[i + 4] == 'e' && bufimage[i + 5] == '/' && bufimage[i + 6] == 'p' && bufimage[i + 7] == 'n' && bufimage[i + 8] == 'g') {
+						break;
+					}
+				}
+				if (i != 0x300000) {
+					m_mp3jake.EnableWindow(TRUE);
+				}
+			}ff.Close();
+		}
+	}
+	else if (mode == -2) {
 		CFile ff;
 		CString ss11 = ss; ss11.MakeLower();
-		if (ss11.Right(3) == "m4a"){
-			if (ff.Open(ss, CFile::modeRead | CFile::shareDenyNone, NULL) == TRUE){
+		if (ss11.Right(3) == "m4a") {
+			if (ff.Open(ss, CFile::modeRead | CFile::shareDenyNone, NULL) == TRUE) {
 				mp3file = ss;
 				ZeroMemory(bufimage, sizeof(bufimage));
 				int i;
 				ff.Read(bufimage, sizeof(bufimage));
-				for (i = 0; i < 0x300000; i++){// 00 06 5D 6A 64 61 74 61
-					if (bufimage[i] == 0x63 && bufimage[i + 1] == 0x6f && bufimage[i + 2] == 0x76 && bufimage[i + 3] == 0x72 && bufimage[i + 8] == 0x64 && bufimage[i + 9] == 0x61 && bufimage[i + 10] == 0x74 && bufimage[i + 11] == 0x61){
+				for (i = 0; i < 0x300000; i++) {// 00 06 5D 6A 64 61 74 61
+					if (bufimage[i] == 0x63 && bufimage[i + 1] == 0x6f && bufimage[i + 2] == 0x76 && bufimage[i + 3] == 0x72 && bufimage[i + 8] == 0x64 && bufimage[i + 9] == 0x61 && bufimage[i + 10] == 0x74 && bufimage[i + 11] == 0x61) {
 						break;
 					}
 				}
-				if (i != 0x300000){
+				if (i != 0x300000) {
 					m_mp3jake.EnableWindow(TRUE);
 				}
 			}ff.Close();
@@ -3359,7 +3398,7 @@ int readadpcmarc(CFile&adpcmf,char* bw,int len)
 int playwavkpi(BYTE* bw,int old,int l1,int l2)
 {
 	if(og->mod==NULL) return 0;  
-	playb+=(l1+l2)/4;
+	playb+=(l1+l2)/(wavsam/4);
     //ƒf[ƒ^“Ç‚Ýž‚Ý
 	int rrr=readkpi(bw+old,l1);
 	if(l1 != rrr){
@@ -4527,7 +4566,7 @@ void COggDlg::timerp()
 	}else{
 		double wavv[] = { 0,1.0,2.0,3.0 / 0.75,4.0 / 0.75,5.0 / 0.75,6.0 / 0.75 };//(double)(wavbit2/wavv[wavch])
 		double wavv2[] = { 0,2.0,1.0,2.0/3.0,2.0/4.0,2.0 /5.0,2.0/6.0 };//(double)(wavbit2/wavv[wavch])
-		t3 = (double)oggsize / (double)(wavbit*2.0*wavv[wavch]);// / (double)(wavsam / 16.0f);
+		t3 = (double)oggsize / (double)(wavbit*2.0*wavv[wavch]) / (double)(wavsam / 16.0f);
 		if(mode == -10) t3*=4.0;
 		if (mode == -9 && wavch > 2) t3 *= wavch / 2.0;
 		tt=(int)(t3*100.0);
@@ -4535,7 +4574,7 @@ void COggDlg::timerp()
 		ta=t1/60;
 		tb=t1%60;
 		tc=tt%100;
-		t3=(double)playb/ (double)(wavbit / wavv2[wavch]) / (double)(wavsam / 16.0f);
+		t3 = (double)playb / (double)(wavbit / wavv2[wavch]);// / (double)(wavsam / 16.0f);
 		if (mode == -10) t3 /= 4.0;
 		if (mode == -9 && wavch > 2) t3 *= wavch / 2.0;
 		tt=(int)(t3*100.0);
@@ -4840,7 +4879,7 @@ void COggDlg::timerp()
 				m_time.SetPos((int)playb);
 				if(ptl){
 					ptl->SetProgressState(m_hWnd, TBPF_NORMAL);
-					ptl->SetProgressValue(m_hWnd, (LONGLONG)playb, (LONGLONG)oggsize/4);
+					ptl->SetProgressValue(m_hWnd, (LONGLONG)playb, (LONGLONG)oggsize/(wavsam/4));
 				}
 			}
 		}
@@ -7048,7 +7087,7 @@ void COggDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 					}
 				}else if(mode==-3){
 					if(mod){
-						if(mod->SetPosition&&sikpi.dwSeekable) mod->SetPosition(kmp,(DWORD)((double)playb/(((double)wavbit*(double)wavch)/2000.0)));
+						if(mod->SetPosition&&sikpi.dwSeekable) mod->SetPosition(kmp,(DWORD)((double)playb/((((double)wavbit )*(double)wavch)/2000.0)));
 						sek=TRUE;
 						cnt3 = 0;
 						timer.SetEvent();
