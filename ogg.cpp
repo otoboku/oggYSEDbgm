@@ -140,7 +140,7 @@ BOOL COggApp::InitInstance()
 	_tcscpy(savedata.font2,_T("ƒƒCƒŠƒI"));
 	savedata.savecheck_mp3 = 1;
 	savedata.savecheck_dshow = 1;
-	savedata.bit24 = 0;
+	savedata.bit24 = 1;
 	savedata.m4a = 1;
 
 #if _UNICODE
