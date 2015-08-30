@@ -2485,7 +2485,7 @@ void COggDlg::play()
 		int plc;
 		if(mode==-10)
 			plc=pl->Add(tagfile,mode,loop1,loop2,tagname,tagalbum,filen,0,(oggsize/(2*wavch*wavbit/4)/((mode==-9)?4:1)),1);
-		else if (mode == -9) {
+		else if (mode == -9 || mode == -8) {
 			double wavv[] = { 0,1.0,2.0,2.0,2.0,2.0,2.0 };//(double)(wavbit2/wavv[wavch])
 			plc = pl->Add(tagfile, mode, loop1, loop2, tagname, tagalbum, filen, 0,(int)(
 			(double)oggsize / (double)(wavbit * 2 * wavv[wavch]) / (double)(wavsam / 16.0f)
