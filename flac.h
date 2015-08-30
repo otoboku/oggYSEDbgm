@@ -50,7 +50,7 @@ private:
 		FLAC__StreamDecoderErrorStatus status);
 
 public:
-	BOOL  __fastcall Open(const char *cszFileName, SOUNDINFO *pInfo);
+	BOOL  __fastcall Open(const _TCHAR *cszFileName, SOUNDINFO *pInfo);
 	void  __fastcall Close(void);
 	DWORD __fastcall SetPosition(DWORD dwPos);
 	DWORD __fastcall Render(BYTE *Buffer, DWORD dwSize);
@@ -77,11 +77,17 @@ KbFlacDecoder::~KbFlacDecoder(void)
 	Close();
 }
 /////////////////////////////////////////////////////////////////////////////
-BOOL __fastcall KbFlacDecoder::Open(const char *cszFileName, SOUNDINFO *pInfo)
+BOOL __fastcall KbFlacDecoder::Open(const _TCHAR *cszFileName, SOUNDINFO *pInfo)
 {
 	ZeroMemory(pInfo, sizeof(SOUNDINFO));
-	HANDLE hFile = CreateFileA(cszFileName, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
+	HANDLE hFile;
+#if UNICODE	
+	hFile = CreateFileW(cszFileName, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
 		OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+#else
+	hFile = CreateFileA(cszFileName, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
+			OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+#endif
 	if (hFile == INVALID_HANDLE_VALUE) {
 		return FALSE;
 	}
@@ -374,7 +380,7 @@ FLAC__bool KbFlacDecoder::eof_callback(const FLAC__StreamDecoder *decoder, void 
 class flac
 {
 public:
-	HKMP WINAPI Open(const char *cszFileName, SOUNDINFO *pInfo)
+	HKMP WINAPI Open(const _TCHAR *cszFileName, SOUNDINFO *pInfo)
 	{
 		KbFlacDecoder *flac = new KbFlacDecoder;
 		if (flac->Open(cszFileName, pInfo)) {

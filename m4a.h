@@ -324,7 +324,7 @@ static int id3v2_tag(unsigned char *buffer)
 class IKbAacDecoder
 {
 public:
-	virtual BOOL  __fastcall Open(const char *cszFileName, SOUNDINFO *pInfo) = 0;
+	virtual BOOL  __fastcall Open(const _TCHAR *cszFileName, SOUNDINFO *pInfo) = 0;
 	virtual void  __fastcall Close(void) = 0;
 	virtual int   __fastcall SetPosition(DWORD dwPos) = 0;
 	virtual DWORD __fastcall Render(BYTE *Buffer, DWORD dwSize) = 0;
@@ -344,7 +344,7 @@ private:
 	DWORD m_dwRemain;
 	BYTE *m_pSample;
 public:
-	BOOL __fastcall Open(const char *cszFileName, SOUNDINFO *pInfo);
+	BOOL __fastcall Open(const _TCHAR *cszFileName, SOUNDINFO *pInfo);
 	void __fastcall Close(void);
 	int __fastcall SetPosition(DWORD dwPos);
 	DWORD __fastcall Render(BYTE *Buffer, DWORD dwSize);
@@ -369,7 +369,7 @@ KbAacDecoder::~KbAacDecoder(void)
 	Close();
 }
 
-BOOL __fastcall KbAacDecoder::Open(const char *cszFileName, SOUNDINFO *pInfo)
+BOOL __fastcall KbAacDecoder::Open(const _TCHAR *cszFileName, SOUNDINFO *pInfo)
 {
 	ZeroMemory(pInfo, sizeof(SOUNDINFO));
 	int buffercount;
@@ -380,7 +380,11 @@ BOOL __fastcall KbAacDecoder::Open(const char *cszFileName, SOUNDINFO *pInfo)
 	unsigned long *seek_table = NULL;
 	int seek_table_length = 0;
 
-	m_pFile = fopen(cszFileName, "rb");
+#if UNICODE	
+	m_pFile = _wfopen(cszFileName, _T("rb"));
+#else
+	m_pFile = fopen(cszFileName, _T("rb"));
+#endif
 	if (!m_pFile) {
 		return FALSE;
 	}
@@ -623,7 +627,7 @@ private:
 	int      m_nCurrentSampleId;
 	int      m_nTrack;
 public:
-	BOOL  __fastcall Open(const char *cszFileName, SOUNDINFO *pInfo);
+	BOOL  __fastcall Open(const _TCHAR *cszFileName, SOUNDINFO *pInfo);
 	void  __fastcall Close(void);
 	int   __fastcall SetPosition(DWORD dwPos);
 	DWORD __fastcall Render(BYTE *Buffer, DWORD dwSize);
@@ -694,10 +698,15 @@ KbMp4AacDecoder::~KbMp4AacDecoder(void)
 }
 
 
-BOOL __fastcall KbMp4AacDecoder::Open(const char *cszFileName, SOUNDINFO *pInfo)
+BOOL __fastcall KbMp4AacDecoder::Open(const _TCHAR *cszFileName, SOUNDINFO *pInfo)
 {
 	ZeroMemory(pInfo, sizeof(SOUNDINFO));
-	FILE *fp = fopen(cszFileName, "rb");
+	FILE *fp;
+#if UNICODE	
+	fp = _wfopen(cszFileName, _T("rb"));
+#else
+	fp = fopen(cszFileName, _T("rb"));
+#endif	
 	if (!fp) {
 		return FALSE;
 	}
@@ -908,11 +917,16 @@ DWORD __fastcall KbMp4AacDecoder::Render(BYTE *Buffer, DWORD dwSize)
 class m4a
 {
 public:
-	static HKMP WINAPI Open(const char *cszFileName, SOUNDINFO *pInfo)
+	static HKMP WINAPI Open(const _TCHAR *cszFileName, SOUNDINFO *pInfo)
 	{//MP4 コンテナに格納されていれば KbMp4AacDecoder
 	 //MP4 コンテナに格納されなければ KbAacDecoder
 	 //を作成し、そのポインタを返す
-		FILE *fp = fopen(cszFileName, "rb");
+		FILE *fp;
+#if UNICODE	
+		fp = _wfopen(cszFileName, _T("rb"));
+#else
+		fp = fopen(cszFileName, _T("rb"));
+#endif	
 		if (!fp) {
 			return NULL;
 		}

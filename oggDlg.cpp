@@ -1894,32 +1894,21 @@ void COggDlg::play()
 	else if (mode == -8) { // flac
 		CString ss;
 		char buf[1024];
-		ss = filen.Left(filen.ReverseFind(':') - 1);
+		ss = "";
 		ZeroMemory(&sikpi, sizeof(sikpi));
 		sikpi.dwSamplesPerSec = 96000; sikpi.dwChannels = 2; sikpi.dwSeekable = 1; sikpi.dwLength = -1; sikpi.dwBitsPerSample = ((savedata.bit24 == 1) ? 24 : 16);
 		if (1) {
 			if (ss == "") {
 #if UNICODE
 				TCHAR *f = filen.GetBuffer();
-				char ff[2048];
-				WideCharToMultiByte(CP_ACP, 0, f, -1, ff, filen.GetLength() * 2 + 2, 0, 0);
-				kmp = flac_.Open(ff, &sikpi);
+				kmp = flac_.Open(f, &sikpi);
+				filen.ReleaseBuffer();
 #else
 				kmp = flac_.Open(filen, &sikpi);
 #endif
 				if (kmp == NULL) { m_saisai.EnableWindow(TRUE); return; }
 			}
 			else {
-#if UNICODE
-				TCHAR *f = ss.GetBuffer();
-				char ff[2048];
-				WideCharToMultiByte(CP_ACP, 0, f, -1, (char*)ff, filen.GetLength() * 2 + 2, 0, 0);
-				kmp = flac_.Open(ff, &sikpi);
-#else
-				kmp = flac_.Open(ss, &sikpi);
-#endif
-				if (kmp == NULL) { m_saisai.EnableWindow(TRUE); return; }
-				flac_.SetPosition(kmp, _tstoi(filen.Right(4)) * 1000);
 			}
 		}
 		wavbit = sikpi.dwSamplesPerSec;	wavch = sikpi.dwChannels;	loop1 = 0; oggsize = loop2 = (int)((double)sikpi.dwLength*(double)sikpi.dwSamplesPerSec / 1000.0 / (wavsam / 16.0));
@@ -2025,32 +2014,21 @@ void COggDlg::play()
 	else if (mode == -9) { // M4a
 		CString ss;
 		char buf[1024];
-		ss = filen.Left(filen.ReverseFind(':') - 1);
+		ss = "";
 		ZeroMemory(&sikpi, sizeof(sikpi));
 		sikpi.dwSamplesPerSec = 96000; sikpi.dwChannels = 2; sikpi.dwSeekable = 1; sikpi.dwLength = -1; sikpi.dwBitsPerSample = ((savedata.bit24 == 1) ? 24 : 16);
 		if (1) {
 			if (ss == "") {
 #if UNICODE
 				TCHAR *f = filen.GetBuffer();
-				char ff[2048];
-				WideCharToMultiByte(CP_ACP, 0, f, -1, ff, filen.GetLength() * 2 + 2, 0, 0);
-				kmp = m4a_.Open(ff, &sikpi);
+				kmp = m4a_.Open(f, &sikpi);
+				filen.ReleaseBuffer();
 #else
 				kmp = m4a_.Open(filen, &sikpi);
 #endif
 				if (kmp == NULL) { m_saisai.EnableWindow(TRUE); return; }
 			}
 			else {
-#if UNICODE
-				TCHAR *f = ss.GetBuffer();
-				char ff[2048];
-				WideCharToMultiByte(CP_ACP, 0, f, -1, ff, filen.GetLength() * 2 + 2, 0, 0);
-				kmp = m4a_.Open(ff, &sikpi);
-#else
-				kmp = m4a_.Open(ss, &sikpi);
-#endif
-				if (kmp == NULL) { m_saisai.EnableWindow(TRUE); return; }
-				m4a_.SetPosition(kmp, _tstoi(filen.Right(4)) * 1000);
 			}
 		}
 		wavbit = sikpi.dwSamplesPerSec;	wavch = sikpi.dwChannels;	loop1 = 0; oggsize=loop2 = (int)((double)sikpi.dwLength*(double)sikpi.dwSamplesPerSec / 1000.0);
