@@ -149,6 +149,7 @@ BOOL COggDlg::ReleaseDXSound(void)
 extern void playwavds2(BYTE* bw,int old,int l1,int l2);
 extern int playwavkpi(BYTE* bw,int old,int l1,int l2);
 extern int playwavmp3(BYTE* bw,int old,int l1,int l2);
+extern int playwavflac(BYTE* bw, int old, int l1, int l2);
 extern int playwavm4a(BYTE* bw, int old, int l1, int l2);
 extern BYTE bufwav3[OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM*6];
 extern int ps;
@@ -203,6 +204,9 @@ UINT HandleNotifications(LPVOID)
 				else if (mode == -3) {
 					playwavkpi(bufwav3, oldw, OUTPUT_BUFFER_SIZE / 12 * wavch * 2, 0);//データ獲得
 				}
+				else if (mode == -8) {
+					playwavflac(bufwav3, oldw, OUTPUT_BUFFER_SIZE / 12 * wavch * 2, 0);//データ獲得
+				}
 				else if (mode == -9) {
 					playwavm4a(bufwav3, oldw, OUTPUT_BUFFER_SIZE / 12 * wavch * 2, 0);//データ獲得
 				}
@@ -237,6 +241,8 @@ UINT HandleNotifications(LPVOID)
 			len4=playwavmp3(bufwav3,oldw,len1,len2);//データ獲得
 		else if(mode==-3)
 			len4=playwavkpi(bufwav3,oldw,len1,len2);//データ獲得
+		else if (mode == -8)
+			playwavflac(bufwav3, oldw, len1, len2);//データ獲得
 		else if (mode == -9)
 			playwavm4a(bufwav3, oldw, len1, len2);//データ獲得
 		else

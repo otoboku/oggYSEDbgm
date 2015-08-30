@@ -346,6 +346,9 @@
     <ClInclude Include="m4a.h">
       <Filter>ライブラリ</Filter>
     </ClInclude>
+    <ClInclude Include="flac.h">
+      <Filter>ライブラリ</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\ico00001.ico">

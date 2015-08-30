@@ -357,6 +357,9 @@ int CPlayList::Add(CString name,int sub,int loop1,int loop2,CString art,CString 
 			ss=fol.Right(fol.GetLength()-fol.ReverseFind('.')-1);
 			s.Format(_T("%sファイル"),ss);break;
 		case -1:s="oggファイル";break;
+		case -8:
+			s = fol; s.MakeLower();
+			if (s.Right(4) == "flac") { s = "flacファイル"; break; }
 		case -9:
 			s = fol; s.MakeLower();
 			if (s.Right(3) == "m4a") { s = "m4aファイル"; break; }
@@ -809,6 +812,8 @@ void CPlayList::Fol(CString fname)
 				p.sub = -3;
 			else
 				p.sub = -2;
+//			if (savedata.m4a == 1)
+				p.sub = -8;
 			_tcscpy(p.name, ft);
 			_tcscpy(p.fol, fname);
 			flg = 0;
@@ -1345,6 +1350,7 @@ void CPlayList::Fol(CString fname)
 						p.sub = -3;
 					else
 						p.sub = -2;
+					p.sub = -8;
 					_tcscpy(p.name, s);
 					_tcscpy(p.fol, ft +L"\\"+ s);
 					flg = 0;
