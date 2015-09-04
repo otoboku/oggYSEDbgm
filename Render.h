@@ -31,6 +31,8 @@ public:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV サポート
 	//}}AFX_VIRTUAL
 
+	BOOL MySetFileType(LPCTSTR lpExt, LPCTSTR lpDocName, LPCTSTR lpDocType, LPCTSTR lpPath, LPCTSTR lpPath1);
+
 // インプリメンテーション
 protected:
 	CToolTipCtrl m_tooltip;
@@ -92,6 +94,7 @@ public:
 	afx_msg void OnBnClicked24bit();
 	CButton m_m4a;
 	afx_msg void OnBnClickedCheck50();
+	afx_msg void OnBnClickedCancel4();
 };
 
 //{{AFX_INSERT_LOCATION}}

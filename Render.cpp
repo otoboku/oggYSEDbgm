@@ -88,6 +88,7 @@ BEGIN_MESSAGE_MAP(CRender, CDialog)
 	ON_BN_CLICKED(IDOK, &CRender::OnBnClickedOk)
 	ON_BN_CLICKED(IDC_CHECK49, &CRender::OnBnClicked24bit)
 	ON_BN_CLICKED(IDC_CHECK50, &CRender::OnBnClickedCheck50)
+	ON_BN_CLICKED(IDCANCEL4, &CRender::OnBnClickedCancel4)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -149,6 +150,7 @@ BOOL CRender::OnInitDialog()
 	m_tooltip.AddTool(GetDlgItem(IDCANCEL),_T("保存せずに閉じます"));
 	m_tooltip.AddTool(GetDlgItem(IDCANCEL2),_T("再生中の使用DirectShowフィルタを表示します。"));
 	m_tooltip.AddTool(GetDlgItem(IDCANCEL3),_T("kpi一覧を表示します。"));
+	m_tooltip.AddTool(GetDlgItem(IDCANCEL4), _T("各種ファイルを簡易プレイヤに関連づけします。\nうまくいかない場合もあります。"));
 	m_tooltip.AddTool(GetDlgItem(IDC_CHECK1), _T("Windows Vista/7以降で有効です。\nIndeoを用いた動画の場合OFFにしてください。\nそれ以外はONでいいです。"));
 	m_tooltip.AddTool(GetDlgItem(IDC_CHECK2), _T("Windows Vista/7以降で有効です。\nデスクトップコンポジション(Aero)を使用するかどうかを選択します。\n使用しないにするとEVRじゃなくても動画画面はきれいになります。"));
 	m_tooltip.AddTool(GetDlgItem(IDC_CHECK3), _T("Windows Vista/7以降で有効です。\nAero Grassを使用するかどうか決めます。\n現時点では使うと文字まで透過しちゃうので見づらいです。"));
@@ -412,6 +414,7 @@ void CRender::Onkpi()
 {
 	// TODO: ここにコントロール通知ハンドラ コードを追加します。
 	CKpilist k;
+	k.status = 0;
 	k.DoModal();
 }
 
@@ -454,3 +457,78 @@ void CRender::OnBnClickedOk()
 
 
 
+BOOL CRender::MySetFileType(LPCTSTR lpExt, LPCTSTR lpDocName, LPCTSTR lpDocType, LPCTSTR lpPath, LPCTSTR lpPath1)
+{
+	CRegKey reg;
+
+	// lpExtをlpDocNameに関連付ける
+	if (reg.SetValue(HKEY_CLASSES_ROOT, lpExt, lpDocName) != ERROR_SUCCESS)
+		return FALSE;
+	// lpDocName作成
+	CString strDocNameTmp = lpDocName;
+	CString strIcon = lpPath1; strIcon += ",0";
+	if (reg.SetValue(HKEY_CLASSES_ROOT, strDocNameTmp, lpDocType) != ERROR_SUCCESS)
+		return FALSE;
+	if (reg.SetValue(HKEY_CLASSES_ROOT, strDocNameTmp + _T("\\shell"), _T("open"))
+		!= ERROR_SUCCESS)
+		return FALSE;
+	if (reg.SetValue(HKEY_CLASSES_ROOT, strDocNameTmp + _T("\\shell\\open\\command"),
+		lpPath) != ERROR_SUCCESS)
+		return FALSE;
+	if (reg.SetValue(HKEY_CLASSES_ROOT, strDocNameTmp + _T("\\DefaultIcon"),
+		strIcon) != ERROR_SUCCESS)
+		return FALSE;
+
+	if (reg.SetValue(HKEY_LOCAL_MACHINE, _T("SOFTWARE\\RegisteredApplications"),
+		_T("SOFTWARE\\PrePrayerPowerSoft\\oggYSEDbgm_uni\\Capabilities"),_T("oggYSEDbgm_uni")) != ERROR_SUCCESS)
+		return FALSE;
+	if (reg.Create(HKEY_LOCAL_MACHINE, _T("SOFTWARE\\PrePrayerPowerSoft\\oggYSEDbgm_uni\\Capabilities")) != ERROR_SUCCESS)
+		return FALSE;
+	if (reg.SetValue(HKEY_LOCAL_MACHINE, _T("SOFTWARE\\PrePrayerPowerSoft\\oggYSEDbgm_uni\\Capabilities"),
+		strDocNameTmp, lpExt) != ERROR_SUCCESS)
+		return FALSE;
+	strIcon = _T("Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\");
+	strIcon += lpExt;
+	strIcon += _T("\\UserChoice");
+	reg.Open(HKEY_CURRENT_USER, _T(""));
+	if(reg.DeleteSubKey(strIcon) != ERROR_SUCCESS)
+		return FALSE;
+	reg.Close();
+	if (reg.SetValue(HKEY_CURRENT_USER, strIcon,
+		lpDocName, _T("Progid")) != ERROR_SUCCESS)
+		return FALSE;
+
+	// 関連付けが変更された事をシステムに通知
+	::SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, NULL, NULL);
+	return TRUE;
+}
+
+extern TCHAR karento2[1024];
+
+void CRender::OnBnClickedCancel4()
+{
+	// TODO: ここにコントロール通知ハンドラー コードを追加します。
+	CString s,ss;
+	s = "\"";
+	s += karento2;
+	s += "oggYSEDbgm_uni.exe\" \"%1\"";
+	ss = karento2;
+	ss += "oggYSEDbgm_uni.exe";
+	MySetFileType(_T(".mp3"), _T("oggYSEDbgm_uni.exe.mp3"), _T("簡易プレイヤで開く"), s, ss);
+	MySetFileType(_T(".mp2"), _T("oggYSEDbgm_uni.exe.mp2"), _T("簡易プレイヤで開く"), s, ss);
+	MySetFileType(_T(".mp1"), _T("oggYSEDbgm_uni.exe.mp1"), _T("簡易プレイヤで開く"), s, ss);
+	MySetFileType(_T(".rmp"), _T("oggYSEDbgm_uni.exe.rmp"), _T("簡易プレイヤで開く"), s, ss);
+	MySetFileType(_T(".flac"), _T("oggYSEDbgm_uni.exe.flac"), _T("簡易プレイヤで開く"), s, ss);
+	MySetFileType(_T(".m4a"), _T("oggYSEDbgm_uni.exe.m4a"), _T("簡易プレイヤで開く"), s, ss);
+	MySetFileType(_T(".aac"), _T("oggYSEDbgm_uni.exe.aac"), _T("簡易プレイヤで開く"), s, ss);
+	MySetFileType(_T(".avi"), _T("oggYSEDbgm_uni.exe.avi"), _T("簡易プレイヤで開く"), s, ss);
+	MySetFileType(_T(".mp4"), _T("oggYSEDbgm_uni.exe.mp4"), _T("簡易プレイヤで開く"), s, ss);
+	MySetFileType(_T(".mkv"), _T("oggYSEDbgm_uni.exe.mkv"), _T("簡易プレイヤで開く"), s, ss);
+	MySetFileType(_T(".wmv"), _T("oggYSEDbgm_uni.exe.wmv"), _T("簡易プレイヤで開く"), s, ss);
+	MySetFileType(_T(".mpg"), _T("oggYSEDbgm_uni.exe.mpg"), _T("簡易プレイヤで開く"), s, ss);
+	// 関連付けが変更された事をシステムに通知
+	::SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, NULL, NULL);
+	MessageBox(_T("一応関連づけを走らせてみました。\nmp1,2,3,rmp,flac,m4a,aac,avi,mp4,mkv,wmv,mpgに関連をつけました。"));
+	// 関連付けが変更された事をシステムに通知
+	::SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, NULL, NULL);
+}

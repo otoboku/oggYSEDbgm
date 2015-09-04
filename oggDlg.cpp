@@ -60,7 +60,7 @@
 #include "Render.h"
 #include "PlayList.h"
 #include "Mp3Image.h"
-
+#include "Kpilist.h"
 #include "Id3tagv1.h"
 #include "Id3tagv2.h"
 #include "mp3.h"
@@ -428,8 +428,10 @@ STARTUPINFO si;
 PROCESS_INFORMATION pi;
 int spc;
 int killw1=0,ttt_;
-CString ext[10000][100];
-CString kpif[10000];
+CString ext[300][20];
+CString kpif[300];
+TCHAR kpifs[300][64];
+BOOL kpichk[300];
 int kpicnt;
 
 /////////////////////////////////////////////////////////////////////////////
@@ -796,6 +798,12 @@ BOOL COggDlg::OnInitDialog()
 	/////////////////////////////////
 	s.Format(_T("%s"), os.GetVersionString());
 	m_OS.SetWindowText(s);
+
+	CKpilist kp;
+	kp.status = 1;
+	kp.Init();
+	kp.Save();
+
 
 	return TRUE;  // TRUE を返すとコントロールに設定したフォーカスは失われません。
 }
@@ -2005,6 +2013,18 @@ void COggDlg::play()
 				break;
 			}
 		}
+
+		for (i = 0; i < 0x300000; i++) {// 00 06 5D 6A 64 61 74 61
+			if (bufimage[i] == 'i' && bufimage[i + 1] == 'm' && bufimage[i + 2] == 'a' && bufimage[i + 3] == 'g' && bufimage[i + 4] == 'e' && bufimage[i + 5] == '/' && bufimage[i + 6] == 'j' && bufimage[i + 7] == 'p' && bufimage[i + 8] == 'e' && bufimage[i + 9] == 'g') {
+				break;
+			}
+			if (bufimage[i] == 'i' && bufimage[i + 1] == 'm' && bufimage[i + 2] == 'a' && bufimage[i + 3] == 'g' && bufimage[i + 4] == 'e' && bufimage[i + 5] == '/' && bufimage[i + 6] == 'p' && bufimage[i + 7] == 'n' && bufimage[i + 8] == 'g') {
+				break;
+			}
+		}
+		if (i != 0x300000) {
+			m_mp3jake.EnableWindow(TRUE);
+		}
 		if (sikpi.dwLength == (DWORD)-1) loop2 = 0;
 		data_size = oggsize = loop2*(wavsam / 4);
 		m_time.SetRange(0, (data_size) / (wavsam / 4), TRUE);
@@ -2129,6 +2149,14 @@ void COggDlg::play()
 					}
 				}
 			}
+		}
+		for (i = 0; i < 0x300000; i++) {// 00 06 5D 6A 64 61 74 61
+			if (bufimage[i] == 0x63 && bufimage[i + 1] == 0x6f && bufimage[i + 2] == 0x76 && bufimage[i + 3] == 0x72 && bufimage[i + 8] == 0x64 && bufimage[i + 9] == 0x61 && bufimage[i + 10] == 0x74 && bufimage[i + 11] == 0x61) {
+				break;
+			}
+		}
+		if (i != 0x300000) {
+			m_mp3jake.EnableWindow(TRUE);
 		}
 
 		if (sikpi.dwLength == (DWORD)-1) loop2 = 0;
@@ -7182,7 +7210,7 @@ void COggDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 				else if (mode == -8) {
 					playb = curpos;
 					if (1) {
-						flac_.SetPosition(kmp, mod->SetPosition(kmp, (DWORD)((double)playb / (((double)wavbit*(double)wavch) / 2000.0))));
+						flac_.SetPosition(kmp, (DWORD)((double)playb / (((double)wavbit*(double)wavch) / 2000.0)));
 						sek = TRUE;
 						cnt3 = 0;
 						timer.SetEvent();
@@ -7290,7 +7318,7 @@ void COggDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 				else if (mode == -8) {
 					playb = curpos;
 					if (1) {
-						flac_.SetPosition(kmp, mod->SetPosition(kmp, (DWORD)((double)playb / (((double)wavbit*(double)wavch) / 2000.0))));
+						flac_.SetPosition(kmp, (DWORD)((double)playb / (((double)wavbit*(double)wavch) / 2000.0)));
 						sek = TRUE;
 						cnt3 = 0;
 						timer.SetEvent();

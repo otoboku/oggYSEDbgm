@@ -11,7 +11,9 @@ class CKpilist : public CDialog
 public:
 	CKpilist(CWnd* pParent = NULL);   // 標準コンストラクタ
 	virtual ~CKpilist();
-
+	void Init();
+	void Save();
+	int status;
 // ダイアログ データ
 	enum { IDD = IDD_KPI };
 protected:
@@ -24,4 +26,5 @@ public:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	CListCtrl m_lc;
 	afx_msg void OnLvnItemchangedList1(NMHDR *pNMHDR, LRESULT *pResult);
+	virtual BOOL DestroyWindow();
 };

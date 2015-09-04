@@ -16,8 +16,9 @@
 
 IMPLEMENT_DYNAMIC(CPlayList, CDialog)
 
-extern 	CString ext[10000][100];
-extern 	CString kpif[10000];
+extern 	CString ext[300][20];
+extern 	CString kpif[300];
+extern  BOOL kpichk[300];
 extern 	int kpicnt;
 
 extern BOOL plw;
@@ -1356,7 +1357,7 @@ void CPlayList::Fol(CString fname)
 					flg = 0;
 					int i=0,j;
 					for (j = i; j < read - 6; j++) {
-						if (bufimage[j] == 'A' && bufimage[j + 1] == 'L' && bufimage[j + 2] == 'B' && bufimage[j + 3] == 'A' && bufimage[j + 4] == 'M' && bufimage[j + 5] == '=') {
+						if (bufimage[j] == 'A' && bufimage[j + 1] == 'L' && bufimage[j + 2] == 'B' && bufimage[j + 3] == 'U' && bufimage[j + 4] == 'M' && bufimage[j + 5] == '=') {
 							j += 6;
 							for (int k = j; k < read - 4; k++) {
 								if (bufimage[k] == 0) {
@@ -1744,7 +1745,12 @@ void CPlayList::plugs(CString fff, playlistdata *p,TCHAR* kpi)
 		for(int j=0;;j++){
 			if(ext[i][j]=="") break;
 			ss=fff.Right(fff.GetLength()-fff.ReverseFind('.'));ss.MakeLower();
-			if(ext[i][j]==ss){ss=kpif[i];flg=1;break;}
+			if(ext[i][j]==ss){
+				ss=kpif[i];
+				if(kpichk[i] == 1)
+					flg=1;
+				break;
+			}
 		}
 		if(flg==1)break;
 	}
