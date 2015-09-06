@@ -428,7 +428,7 @@ STARTUPINFO si;
 PROCESS_INFORMATION pi;
 int spc;
 int killw1=0,ttt_;
-CString ext[300][20];
+CString ext[300][30];
 CString kpif[300];
 TCHAR kpifs[300][64];
 BOOL kpichk[300];
@@ -3662,13 +3662,30 @@ int readkpi(BYTE*bw,int cnt)
 	}
 	cnt4=cnt3;
 	if(r==0) cnt=0;
-	unsigned short *bf1,bf; bf1=(unsigned short*)bw;
-	bf=(unsigned short)bf1[0];
-	memcpy(bw,bufkpi,cnt);
-	for(int i=0;i<cnt/2;i++){
-		bf|=bf1[i];
+	__int64 bfc,bc2;
+	bfc = 0;
+	if (wavsam == 24) {
+		Int24 *bf1; bf1 = (Int24*)bw;
+		bc2 = (int)(Int24)bf1[0]/256;
+		memcpy(bw, bufkpi, cnt);
+		for (int i = 0; i < cnt / 2; i++) {
+			bfc += (__int64)(int)(Int24)bf1[i]/256;
+		}
+		if (cnt)
+			bfc /= (cnt / 2);
+		if ((short)bc2 >= (short)bfc - 10 && (short)bc2 <= (short)bfc + 10) bufzero++; else bufzero = 0;
 	}
-	if((short)bf>=(short)bf1[0]-10 && (short)bf<=(short)bf1[0]+10) bufzero++; else bufzero=0;
+	else {
+		unsigned short *bf1; bf1 = (unsigned short*)bw;
+		bc2 = (short)bf1[0];
+		memcpy(bw, bufkpi, cnt);
+		for (int i = 0; i < cnt / 2; i++) {
+			bfc += (__int64)(short)bf1[i];
+		}
+		if (cnt)
+			bfc /= (cnt / 2);
+		if ((short)bc2 >= (short)bfc - 10 && (short)bc2 <= (short)bfc + 10) bufzero++; else bufzero = 0;
+	}
 	int looping=loop2/100000;
 	if(looping<20) looping=20;
 	if(looping>80) looping=80;

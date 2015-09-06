@@ -16,7 +16,7 @@
 
 IMPLEMENT_DYNAMIC(CPlayList, CDialog)
 
-extern 	CString ext[300][20];
+extern 	CString ext[300][30];
 extern 	CString kpif[300];
 extern  BOOL kpichk[300];
 extern 	int kpicnt;
@@ -1747,9 +1747,10 @@ void CPlayList::plugs(CString fff, playlistdata *p,TCHAR* kpi)
 			ss=fff.Right(fff.GetLength()-fff.ReverseFind('.'));ss.MakeLower();
 			if(ext[i][j]==ss){
 				ss=kpif[i];
-				if(kpichk[i] == 1)
-					flg=1;
-				break;
+				if (kpichk[i] == 1) {
+					flg = 1;
+					break;
+				}
 			}
 		}
 		if(flg==1)break;
