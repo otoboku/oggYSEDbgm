@@ -61,6 +61,8 @@
 #include "PlayList.h"
 #include "Mp3Image.h"
 #include "Kpilist.h"
+#include "CInt24.h"
+
 #include "Id3tagv1.h"
 #include "Id3tagv2.h"
 #include "mp3.h"
@@ -3567,82 +3569,7 @@ int playwavkpi(BYTE* bw,int old,int l1,int l2)
 	return l1+l2;
 }
 
-class Int24
-{
-protected:
-	unsigned char value[3];
-public:
-	Int24() {}
 
-	Int24(const Int24& val)
-	{
-		*this = val;
-	}
-
-	operator int() const
-	{
-		/* Sign extend negative quantities */
-		if (value[2] & 0x80) {
-			return (0xff << 24) | (value[2] << 16)
-				| (value[1] << 8)
-				| value[0];
-		}
-		else {
-			return (value[2] << 16)
-				| (value[1] << 8)
-				| value[0];
-		}
-	}
-
-	Int24& operator= (const Int24& input)
-	{
-		value[0] = input.value[0];
-		value[1] = input.value[1];
-		value[2] = input.value[2];
-
-		return *this;
-	}
-
-	Int24& operator= (const int input)
-	{
-		value[0] = ((unsigned char*)&input)[0];
-		value[1] = ((unsigned char*)&input)[1];
-		value[2] = ((unsigned char*)&input)[2];
-
-		return *this;
-	}
-
-
-	operator bool() const
-	{
-		return (int)*this != 0;
-	}
-
-	bool operator! () const
-	{
-		return !((int)*this);
-	}
-
-	bool operator== (const Int24& val) const
-	{
-		return (int)*this == (int)val;
-	}
-
-	bool operator!= (const Int24& val) const
-	{
-		return (int)*this != (int)val;
-	}
-
-	bool operator>= (const Int24& val) const
-	{
-		return (int)*this >= (int)val;
-	}
-
-	bool operator<= (const Int24& val) const
-	{
-		return (int)*this <= (int)val;
-	}
-};
 
 BYTE bufkpi[OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM * 3];
 BYTE bufkpi2[OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM * 3];

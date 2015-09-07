@@ -349,6 +349,9 @@
     <ClInclude Include="flac.h">
       <Filter>ライブラリ</Filter>
     </ClInclude>
+    <ClInclude Include="CInt24.h">
+      <Filter>ライブラリ</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\ico00001.ico">

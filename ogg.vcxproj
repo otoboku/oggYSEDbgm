@@ -1182,6 +1182,7 @@
     <ClInclude Include="Arc.h" />
     <ClInclude Include="AudioSelect.h" />
     <ClInclude Include="Br4.h" />
+    <ClInclude Include="CInt24.h" />
     <ClInclude Include="Dino.h" />
     <ClInclude Include="Douga.h" />
     <ClInclude Include="ED3.h" />
