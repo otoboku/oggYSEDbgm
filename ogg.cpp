@@ -48,7 +48,7 @@ BOOL CALLBACK ew(HWND hwnd , LPARAM lp);
 BOOL CALLBACK ew(HWND hwnd,LPARAM lParam) {
 	TCHAR a[1024];CString s;
 	::GetWindowText(hwnd,a,sizeof(a));s=a; 
-	if(s.Find(_T("ogg/wav簡易プレイヤ"))==-1) return TRUE;
+	if(s.Find(_T("mp3/m4a簡易プレイヤ"))==-1) return TRUE;
 	COPYDATASTRUCT cd;
 	cd.cbData=ndd.GetLength()*sizeof(TCHAR)+sizeof(TCHAR);
 	cd.dwData=0;

@@ -430,7 +430,7 @@ STARTUPINFO si;
 PROCESS_INFORMATION pi;
 int spc;
 int killw1=0,ttt_;
-CString ext[300][30];
+CString ext[300][40];
 CString kpif[300];
 TCHAR kpifs[300][64];
 BOOL kpichk[300];
@@ -690,8 +690,6 @@ BOOL COggDlg::OnInitDialog()
 	m_lpDS3DBuffer = NULL;
 	CString sr = init(GetSafeHwnd());
 
-	SetTimer(9998, 400, NULL);
-
 
 	RegisterHotKey(GetSafeHwnd(), ID_HOTKEY0, 0, VK_UP);
 	RegisterHotKey(GetSafeHwnd(), ID_HOTKEY1, 0, VK_DOWN);
@@ -779,6 +777,7 @@ BOOL COggDlg::OnInitDialog()
 	}
 
 	SetTimer(5211, 20, NULL);
+	SetTimer(9998, 1000, NULL);
 
 	ttt_ = 5;
 	//	uTimerId = timeSetEvent(1, 0, TimeCallback, NULL, TIME_PERIODIC);
@@ -5579,6 +5578,12 @@ void timerog1(UINT nIDEvent)
 				int plc;
 				if(mode==-10)
 					plc=pl->Add(tagfile,mode,loop1,loop2,tagname,tagalbum,filen,0,oggsize/(2*wavch*wavbit/4),1);
+				else if (mode == -9 || mode == -8) {
+					double wavv[] = { 0,1.0,2.0,2.0,2.0,2.0,2.0 };//(double)(wavbit2/wavv[wavch])
+					plc = pl->Add(tagfile, mode, loop1, loop2, tagname, tagalbum, filen, 0, (int)(
+						(double)oggsize / (double)(wavbit * 2 * wavv[wavch]) / (double)(wavsam / 16.0f)
+						), 1);
+				}
 				else if(mode==-3){
 					if(oggsize==0)
 						plc=pl->Add(tagfile,mode,loop1,loop2,tagname,tagalbum,filen,0,-1,1);
