@@ -448,6 +448,204 @@ int plcnt=0;
 int wavsam = 16;
 
 
+
+BOOL COggDlg::OnCommand(WPARAM wParam, LPARAM lParam)
+{
+	if(HIWORD(wParam) == THBN_CLICKED){
+		UINT CommandID = LOWORD( wParam );
+        if( 0 == CommandID )
+            OnRestart();
+        else if( 1 == CommandID )
+			OnPause();
+        else if( 2 == CommandID )
+			stop();
+        else if( 3 == CommandID )
+			OnPlayList();
+	}
+    return CDialog::OnCommand(wParam, lParam);
+}
+
+void COggDlg::OnSysCommand(UINT nID, LPARAM lParam)
+{
+	if ((nID & 0xFFF0) == IDM_ABOUTBOX)
+	{
+		CAboutDlg dlgAbout;
+		dlgAbout.DoModal();
+	}
+	else
+	{
+		CDialog::OnSysCommand(nID, lParam);
+	}
+}
+
+#define MDC (88*2+170-8*5)
+#define MDCP (88*2+175)
+
+// もしダイアログボックスに最小化ボタンを追加するならば、アイコンを描画する
+// コードを以下に記述する必要があります。MFC アプリケーションは document/view
+// モデルを使っているので、この処理はフレームワークにより自動的に処理されます。
+
+void COggDlg::OnPaint() 
+{
+		CPaintDC dcc(this); // 描画用のデバイス コンテキスト
+	if (IsIconic())
+	{
+
+		SendMessage(WM_ICONERASEBKGND, (WPARAM) dcc.GetSafeHdc(), 0);
+
+		// クライアントの矩形領域内の中央
+		int cxIcon = GetSystemMetrics(SM_CXICON);
+		int cyIcon = GetSystemMetrics(SM_CYICON);
+		CRect rect;
+		GetClientRect(&rect);
+		int x = (rect.Width() - cxIcon + 1) / 2;
+		int y = (rect.Height() - cyIcon + 1) / 2;
+
+		// アイコンを描画します。
+		dcc.DrawIcon(x, y, m_hIcon);
+	}
+	else
+	{
+		//if(plf!=0) 
+			dcc.BitBlt(5,0,MDCP,81+16,&dc,0,0,SRCCOPY);
+		CDialog::OnPaint();
+	}
+}
+
+// システムは、ユーザーが最小化ウィンドウをドラッグしている間、
+// カーソルを表示するためにここを呼び出します。
+HCURSOR COggDlg::OnQueryDragIcon()
+{
+	return (HCURSOR) m_hIcon;
+}
+
+void COggDlg::Resize()
+{
+	CString s;
+	m_ue.GetWindowText(s);
+	if(s=="▼"){
+		m_ue.SetWindowText(_T("▲"));
+		CRect rect_1,rect_2;
+		GetWindowRect(&rect_1);
+		m_ue.GetWindowRect(&rect_2);
+		rect_1.bottom = rect_2.bottom + 3;
+		rect_1.right = rect_2.right+5;
+		MoveWindow(&rect_1);
+	}else{
+		m_ue.SetWindowText(_T("▼"));
+		CRect rect_1,rect_2;
+		GetWindowRect(&rect_1);
+		m_sita.GetWindowRect(&rect_2);
+		rect_1.bottom = rect_2.bottom + 3;
+		rect_1.right = rect_2.right+5;
+		MoveWindow(&rect_1);
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////M A I N/////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+//PCMWAVEFORMAT fm;
+
+/* WAVEファイルのヘッダ */
+typedef struct{
+	char ckidRIFF[4];
+	int ckSizeRIFF;
+	char fccType[4];
+	char ckidFmt[4];
+	int ckSizeFmt;
+	PCMWAVEFORMAT WaveFmt;
+	char ckidData[4];
+	int ckSizeData;
+} WAVEFILEHEADER;
+WAVEFILEHEADER wh;
+
+int mcopy(char* a,int len);
+long LoadOggVorbis(const TCHAR *file_name, int word, char **ogg,CSliderCtrl &m_time);
+void ReleaseOggVorbis(char **);
+void DoEvent();
+VOID CALLBACK waveOutProc(HWAVEOUT hwo,UINT uMsg, DWORD dwInstance, DWORD dwParam1, DWORD dwParam2);
+BOOL AllocOutputBuffer();
+void FreeOutputBuffer(void);
+void playwav();
+void playwavds(char*bw);
+
+CDouga *pMainFrame1=NULL;
+OggVorbis_File vf;
+DWORD hw;
+PCMWAVEFORMAT p;
+CFile cc;
+CString filen=_T("");
+CSemaphore	m_Smp;
+
+PCMWAVEFORMAT    wfx;
+UINT ttt;
+int cc1,wl,t,oggsize,dd,loop1,loop2;//,oggsize1,oggsize2;
+__int64 playb;
+int ru2=0,ru;
+int lo,loc,endf,ps=0,locs;
+int poss=0,loopcnt,pl_no;
+int current_section;
+long whsize;
+int ret2;
+
+//#define OUTPUT_BUFFER_NUM   10
+#define OUTPUT_BUFFER_SIZE  BUFSZ
+BYTE bufwav[OUTPUT_BUFFER_SIZE*6];
+BYTE buf[OUTPUT_BUFFER_NUM][OUTPUT_BUFFER_SIZE];
+LPWAVEHDR  g_OutputBuffer[OUTPUT_BUFFER_NUM];
+	long data_size;
+
+CString ti;
+CString s,ss;
+int tt=0;
+int killw;
+ULONG PlayCursora,WriteCursora;
+double oggsize2=0;
+BYTE bufwav3[OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM*2];
+
+
+char abuf[28];
+char bbuf[2048];
+ULONGLONG gp; int sep;
+int lenl = 0;
+
+
+WCHAR douga[2050];
+extern IGraphBuilder *pGraphBuilder;
+extern IMediaControl *pMediaControl;
+extern IMediaPosition *pMediaPosition;
+CString ply = _T("");
+int plym = -1;
+
+SOUNDINFO si1;
+int kbps = 0;
+int Vbr = 0;
+DWORD cnt3 = 0;
+
+int loop3;
+CString tagname, tagfile, tagalbum;
+int playy = 1;
+void st1();
+void st2();
+int bufzero = 0;
+extern 	int syukai;
+
+//////////////////////////////////////////////////////////////////////////////
 BOOL COggDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
@@ -779,6 +977,43 @@ BOOL COggDlg::OnInitDialog()
 	SetTimer(5211, 20, NULL);
 	SetTimer(9998, 1000, NULL);
 
+	if (savedata.pl == 1) {
+		pl = new CPlayList;
+		pl->Create(og);
+		if (!plw) {
+			for (;;) DoEvent();
+		}
+		if (pl&&plw&&filen != "") {
+			int plc;
+			if (mode == -10)
+				plc = pl->Add(tagfile, mode, loop1, loop2, tagname, tagalbum, filen, 0, oggsize / (2 * wavch*wavbit / 4), 1);
+			else if (mode == -9 || mode == -8) {
+				double wavv[] = { 0,1.0,2.0,2.0,2.0,2.0,2.0 };//(double)(wavbit2/wavv[wavch])
+				plc = pl->Add(tagfile, mode, loop1, loop2, tagname, tagalbum, filen, 0, (int)(
+					(double)oggsize / (double)(wavbit * 2 * wavv[wavch]) / (double)(wavsam / 16.0f)
+					), 1);
+			}
+			else if (mode == -3) {
+				if (oggsize == 0)
+					plc = pl->Add(tagfile, mode, loop1, loop2, tagname, tagalbum, filen, 0, -1, 1);
+				else
+					plc = pl->Add(tagfile, mode, loop1, loop2, tagname, tagalbum, filen, 0, oggsize / (2 * wavch*wavbit), 1);
+			}
+			else
+				plc = pl->Add(fnn, mode, loop1, loop2, tagname, tagalbum, filen, ret2, oggsize / (2 * wavch*wavbit));
+			if (plc == -1) {
+				int i = pl->m_lc.GetItemCount() - 1;
+				plcnt = i;
+				pl->SIcon(i);
+			}
+			else {
+				plcnt = plc;
+				pl->SIcon(plc);
+			}
+		}
+	}
+
+
 	ttt_ = 5;
 	//	uTimerId = timeSetEvent(1, 0, TimeCallback, NULL, TIME_PERIODIC);
 #if WIN64
@@ -808,175 +1043,6 @@ BOOL COggDlg::OnInitDialog()
 
 	return TRUE;  // TRUE を返すとコントロールに設定したフォーカスは失われません。
 }
-
-BOOL COggDlg::OnCommand(WPARAM wParam, LPARAM lParam)
-{
-	if(HIWORD(wParam) == THBN_CLICKED){
-		UINT CommandID = LOWORD( wParam );
-        if( 0 == CommandID )
-            OnRestart();
-        else if( 1 == CommandID )
-			OnPause();
-        else if( 2 == CommandID )
-			stop();
-        else if( 3 == CommandID )
-			OnPlayList();
-	}
-    return CDialog::OnCommand(wParam, lParam);
-}
-
-void COggDlg::OnSysCommand(UINT nID, LPARAM lParam)
-{
-	if ((nID & 0xFFF0) == IDM_ABOUTBOX)
-	{
-		CAboutDlg dlgAbout;
-		dlgAbout.DoModal();
-	}
-	else
-	{
-		CDialog::OnSysCommand(nID, lParam);
-	}
-}
-
-#define MDC (88*2+170-8*5)
-#define MDCP (88*2+175)
-
-// もしダイアログボックスに最小化ボタンを追加するならば、アイコンを描画する
-// コードを以下に記述する必要があります。MFC アプリケーションは document/view
-// モデルを使っているので、この処理はフレームワークにより自動的に処理されます。
-
-void COggDlg::OnPaint() 
-{
-		CPaintDC dcc(this); // 描画用のデバイス コンテキスト
-	if (IsIconic())
-	{
-
-		SendMessage(WM_ICONERASEBKGND, (WPARAM) dcc.GetSafeHdc(), 0);
-
-		// クライアントの矩形領域内の中央
-		int cxIcon = GetSystemMetrics(SM_CXICON);
-		int cyIcon = GetSystemMetrics(SM_CYICON);
-		CRect rect;
-		GetClientRect(&rect);
-		int x = (rect.Width() - cxIcon + 1) / 2;
-		int y = (rect.Height() - cyIcon + 1) / 2;
-
-		// アイコンを描画します。
-		dcc.DrawIcon(x, y, m_hIcon);
-	}
-	else
-	{
-		//if(plf!=0) 
-			dcc.BitBlt(5,0,MDCP,81+16,&dc,0,0,SRCCOPY);
-		CDialog::OnPaint();
-	}
-}
-
-// システムは、ユーザーが最小化ウィンドウをドラッグしている間、
-// カーソルを表示するためにここを呼び出します。
-HCURSOR COggDlg::OnQueryDragIcon()
-{
-	return (HCURSOR) m_hIcon;
-}
-
-void COggDlg::Resize()
-{
-	CString s;
-	m_ue.GetWindowText(s);
-	if(s=="▼"){
-		m_ue.SetWindowText(_T("▲"));
-		CRect rect_1,rect_2;
-		GetWindowRect(&rect_1);
-		m_ue.GetWindowRect(&rect_2);
-		rect_1.bottom = rect_2.bottom + 3;
-		rect_1.right = rect_2.right+5;
-		MoveWindow(&rect_1);
-	}else{
-		m_ue.SetWindowText(_T("▼"));
-		CRect rect_1,rect_2;
-		GetWindowRect(&rect_1);
-		m_sita.GetWindowRect(&rect_2);
-		rect_1.bottom = rect_2.bottom + 3;
-		rect_1.right = rect_2.right+5;
-		MoveWindow(&rect_1);
-	}
-}
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////M A I N/////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-//PCMWAVEFORMAT fm;
-
-/* WAVEファイルのヘッダ */
-typedef struct{
-	char ckidRIFF[4];
-	int ckSizeRIFF;
-	char fccType[4];
-	char ckidFmt[4];
-	int ckSizeFmt;
-	PCMWAVEFORMAT WaveFmt;
-	char ckidData[4];
-	int ckSizeData;
-} WAVEFILEHEADER;
-WAVEFILEHEADER wh;
-
-int mcopy(char* a,int len);
-long LoadOggVorbis(const TCHAR *file_name, int word, char **ogg,CSliderCtrl &m_time);
-void ReleaseOggVorbis(char **);
-void DoEvent();
-VOID CALLBACK waveOutProc(HWAVEOUT hwo,UINT uMsg, DWORD dwInstance, DWORD dwParam1, DWORD dwParam2);
-BOOL AllocOutputBuffer();
-void FreeOutputBuffer(void);
-void playwav();
-void playwavds(char*bw);
-
-CDouga *pMainFrame1=NULL;
-OggVorbis_File vf;
-DWORD hw;
-PCMWAVEFORMAT p;
-CFile cc;
-CString filen=_T("");
-CSemaphore	m_Smp;
-
-PCMWAVEFORMAT    wfx;
-UINT ttt;
-int cc1,wl,t,oggsize,dd,loop1,loop2;//,oggsize1,oggsize2;
-__int64 playb;
-int ru2=0,ru;
-int lo,loc,endf,ps=0,locs;
-int poss=0,loopcnt,pl_no;
-int current_section;
-long whsize;
-int ret2;
-
-//#define OUTPUT_BUFFER_NUM   10
-#define OUTPUT_BUFFER_SIZE  BUFSZ
-BYTE bufwav[OUTPUT_BUFFER_SIZE*6];
-BYTE buf[OUTPUT_BUFFER_NUM][OUTPUT_BUFFER_SIZE];
-LPWAVEHDR  g_OutputBuffer[OUTPUT_BUFFER_NUM];
-	long data_size;
-
-CString ti;
-CString s,ss;
-int tt=0;
-int killw;
-ULONG PlayCursora,WriteCursora;
-double oggsize2=0;
-	BYTE bufwav3[OUTPUT_BUFFER_SIZE*OUTPUT_BUFFER_NUM*2];
 //////////////////////////////////////////////////////////////////////////////
 long LoadOggVorbis(const TCHAR *file_name, int word, char **ogg,CSliderCtrl &m_time)
 {
@@ -1140,24 +1206,6 @@ DWORD COggDlg::GetVol()
 	return v;
 }
 
-char abuf[28];
-char bbuf[2048];
-ULONGLONG gp;int sep;
-int lenl=0;
-
-
-WCHAR douga[2050];
-extern IGraphBuilder *pGraphBuilder;
-extern IMediaControl *pMediaControl;
-extern IMediaPosition *pMediaPosition;
-CString ply=_T("");
-int plym=-1;
-
-SOUNDINFO si1;
-int kbps=0;
-int Vbr=0;
-DWORD cnt3=0;
-
 void COggDlg::Modec(){
 	int ret;
 	ret=_tchdir(savedata.ed6sc);
@@ -1246,14 +1294,6 @@ void COggDlg::Modec(){
 	ret+=_chdir("music");
 	if(ret!=0){d_san2.EnableWindow(FALSE);}else{d_san2.EnableWindow(TRUE);}
 }
-
-int loop3;
-CString tagname,tagfile,tagalbum;
-int playy=1;
-void st1();
-void st2();
-int bufzero=0;
-extern 	int syukai;
 
 void COggDlg::play()
 {
@@ -5569,38 +5609,40 @@ void timerog1(UINT nIDEvent)
 	if(nIDEvent==5211){
 		og->Modec();
 		og->KillTimer(5211);
-		if(savedata.pl==1){
+		if (savedata.pl == 1) {
 			pl = new CPlayList;
 			pl->Create(og);
-			if(!plw)
-				DoEvent();
-			if(pl&&plw&&filen!=""){
+			if (!plw) {
+				for (;;) DoEvent();
+			}
+			if (pl&&plw&&filen != "") {
 				int plc;
-				if(mode==-10)
-					plc=pl->Add(tagfile,mode,loop1,loop2,tagname,tagalbum,filen,0,oggsize/(2*wavch*wavbit/4),1);
+				if (mode == -10)
+					plc = pl->Add(tagfile, mode, loop1, loop2, tagname, tagalbum, filen, 0, oggsize / (2 * wavch*wavbit / 4), 1);
 				else if (mode == -9 || mode == -8) {
 					double wavv[] = { 0,1.0,2.0,2.0,2.0,2.0,2.0 };//(double)(wavbit2/wavv[wavch])
 					plc = pl->Add(tagfile, mode, loop1, loop2, tagname, tagalbum, filen, 0, (int)(
 						(double)oggsize / (double)(wavbit * 2 * wavv[wavch]) / (double)(wavsam / 16.0f)
 						), 1);
 				}
-				else if(mode==-3){
-					if(oggsize==0)
-						plc=pl->Add(tagfile,mode,loop1,loop2,tagname,tagalbum,filen,0,-1,1);
+				else if (mode == -3) {
+					if (oggsize == 0)
+						plc = pl->Add(tagfile, mode, loop1, loop2, tagname, tagalbum, filen, 0, -1, 1);
 					else
-						plc=pl->Add(tagfile,mode,loop1,loop2,tagname,tagalbum,filen,0,oggsize/(2*wavch*wavbit),1);
-				}else
-					plc=pl->Add(fnn,mode,loop1,loop2,tagname,tagalbum,filen,ret2,oggsize/(2*wavch*wavbit));
-				if(plc==-1){
-					int i=pl->m_lc.GetItemCount()-1;
-					plcnt=i;
+						plc = pl->Add(tagfile, mode, loop1, loop2, tagname, tagalbum, filen, 0, oggsize / (2 * wavch*wavbit), 1);
+				}
+				else
+					plc = pl->Add(fnn, mode, loop1, loop2, tagname, tagalbum, filen, ret2, oggsize / (2 * wavch*wavbit));
+				if (plc == -1) {
+					int i = pl->m_lc.GetItemCount() - 1;
+					plcnt = i;
 					pl->SIcon(i);
-				}else{
-					plcnt=plc;
+				}
+				else {
+					plcnt = plc;
 					pl->SIcon(plc);
 				}
 			}
-
 		}
 	}
 
