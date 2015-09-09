@@ -977,43 +977,6 @@ BOOL COggDlg::OnInitDialog()
 	SetTimer(5211, 20, NULL);
 	SetTimer(9998, 1000, NULL);
 
-	if (savedata.pl == 1) {
-		pl = new CPlayList;
-		pl->Create(og);
-		if (!plw) {
-			for (;;) DoEvent();
-		}
-		if (pl&&plw&&filen != "") {
-			int plc;
-			if (mode == -10)
-				plc = pl->Add(tagfile, mode, loop1, loop2, tagname, tagalbum, filen, 0, oggsize / (2 * wavch*wavbit / 4), 1);
-			else if (mode == -9 || mode == -8) {
-				double wavv[] = { 0,1.0,2.0,2.0,2.0,2.0,2.0 };//(double)(wavbit2/wavv[wavch])
-				plc = pl->Add(tagfile, mode, loop1, loop2, tagname, tagalbum, filen, 0, (int)(
-					(double)oggsize / (double)(wavbit * 2 * wavv[wavch]) / (double)(wavsam / 16.0f)
-					), 1);
-			}
-			else if (mode == -3) {
-				if (oggsize == 0)
-					plc = pl->Add(tagfile, mode, loop1, loop2, tagname, tagalbum, filen, 0, -1, 1);
-				else
-					plc = pl->Add(tagfile, mode, loop1, loop2, tagname, tagalbum, filen, 0, oggsize / (2 * wavch*wavbit), 1);
-			}
-			else
-				plc = pl->Add(fnn, mode, loop1, loop2, tagname, tagalbum, filen, ret2, oggsize / (2 * wavch*wavbit));
-			if (plc == -1) {
-				int i = pl->m_lc.GetItemCount() - 1;
-				plcnt = i;
-				pl->SIcon(i);
-			}
-			else {
-				plcnt = plc;
-				pl->SIcon(plc);
-			}
-		}
-	}
-
-
 	ttt_ = 5;
 	//	uTimerId = timeSetEvent(1, 0, TimeCallback, NULL, TIME_PERIODIC);
 #if WIN64
@@ -2001,7 +1964,61 @@ void COggDlg::play()
 			}
 		}
 		for (j = i; j < read - 6; j++) {
+			if (bufimage[j] == 'A' && bufimage[j + 1] == 'l' && bufimage[j + 2] == 'b' && bufimage[j + 3] == 'u' && bufimage[j + 4] == 'm' && bufimage[j + 5] == '=') {
+			j += 6;
+			for (int k = j; k < read - 4; k++) {
+				if (bufimage[k] == 0) {
+					flg = 1;
+					buf[k - j] = 0;
+					buf[k - j + 1] = 0;
+					buf[k - j + 2] = 0;
+					break;
+				}
+				buf[k - j] = bufimage[k];
+			}
+		}
+		if (flg == 1) {
+			const int wlen = ::MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf), NULL, 0) - 1;
+			TCHAR* buff = new TCHAR[wlen + 1];
+			if (::MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf) - 1, buff, wlen))
+			{
+				buff[wlen] = 0;
+			}
+			tagalbum = buff;
+			delete[] buff;
+			flg = 0;
+			break;
+		}
+	}
+	for (j = i; j < read - 6; j++) {
 			if (bufimage[j] == 'A' && bufimage[j + 1] == 'R' && bufimage[j + 2] == 'T' && bufimage[j + 3] == 'I' && bufimage[j + 4] == 'S' && bufimage[j + 5] == 'T' && bufimage[j + 6] == '=') {
+				j += 7;
+				for (int k = j; k < read - 4; k++) {
+					if (bufimage[k] == 0) {
+						flg = 1;
+						buf[k - j] = 0;
+						buf[k - j + 1] = 0;
+						buf[k - j + 2] = 0;
+						break;
+					}
+					buf[k - j] = bufimage[k];
+				}
+			}
+			if (flg == 1) {
+				const int wlen = ::MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf), NULL, 0) - 1;
+				TCHAR* buff = new TCHAR[wlen + 1];
+				if (::MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf) - 1, buff, wlen))
+				{
+					buff[wlen] = _T('\0');
+				}
+				tagname = buff;
+				delete[] buff;
+				flg = 0;
+				break;
+			}
+		}
+		for (j = i; j < read - 6; j++) {
+			if (bufimage[j] == 'A' && bufimage[j + 1] == 'r' && bufimage[j + 2] == 't' && bufimage[j + 3] == 'i' && bufimage[j + 4] == 's' && bufimage[j + 5] == 't' && bufimage[j + 6] == '=') {
 				j += 7;
 				for (int k = j; k < read - 4; k++) {
 					if (bufimage[k] == 0) {
@@ -2029,6 +2046,33 @@ void COggDlg::play()
 		}
 		for (j = i; j < read - 4; j++) {
 			if (bufimage[j] == 'T' && bufimage[j + 1] == 'I' && bufimage[j + 2] == 'T' && bufimage[j + 3] == 'L' && bufimage[j + 4] == 'E' && bufimage[j + 5] == '=') {
+				j += 6;
+				for (int k = j; k < read - 4; k++) {
+					if (bufimage[k] == 0) {
+						flg = 1;
+						buf[k - j] = 0;
+						buf[k - j + 1] = 0;
+						buf[k - j + 2] = 0;
+						break;
+					}
+					buf[k - j] = bufimage[k];
+				}
+			}
+			if (flg == 1) {
+				const int wlen = ::MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf), NULL, 0) - 1;
+				TCHAR* buff = new TCHAR[wlen + 1];
+				if (::MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf) - 1, buff, wlen))
+				{
+					buff[wlen] = _T('\0');
+				}
+				tagfile = buff;
+				delete[] buff;
+				flg = 0;
+				break;
+			}
+		}
+		for (j = i; j < read - 4; j++) {
+			if (bufimage[j] == 'T' && bufimage[j + 1] == 'i' && bufimage[j + 2] == 't' && bufimage[j + 3] == 'l' && bufimage[j + 4] == 'e' && bufimage[j + 5] == '=') {
 				j += 6;
 				for (int k = j; k < read - 4; k++) {
 					if (bufimage[k] == 0) {
@@ -4989,7 +5033,7 @@ void COggDlg::timerp()
 			int si = mojisub(tagname, 1, 0, 0x7fffff);
 			if (si>MDC) {
 				ss = fnn + _T("》---《");
-				if (mode == -10) ss = tagname + _T("》---《");
+				if (mode == -8) ss = tagname + _T("》---《");
 				si = mojisub(ss, 1, 0, 0x7fffff);
 			}
 			//枠はみ出し時スクロール処理
@@ -5010,7 +5054,7 @@ void COggDlg::timerp()
 			if (Vbr)
 				s.Format(_T("data:%3dk(VBR) %dHz"), (kbps == 0) ? mkps : kbps , si1.dwSamplesPerSec);
 			else
-				if(mode==-9 || mode == -8)
+				if(mode==-9)
 					s.Format(_T("data:%3dk %dHz %dch"), (kbps == 0) ? mkps : kbps,si1.dwSamplesPerSec,wavch);
 				else
 					s.Format(_T("data:%3dk %dHz"), (kbps == 0) ? mkps : kbps, si1.dwSamplesPerSec);
@@ -5021,7 +5065,7 @@ void COggDlg::timerp()
 			int si=mojisub(tagname,1,0,0x7fffff);
 			if(si>MDC){
 				ss=fnn+_T("》---《");
-				if(mode==-10) ss=tagname+_T("》---《");
+				if(mode==-10 || mode == -9) ss=tagname+_T("》---《");
 				si=mojisub(ss,1,0,0x7fffff);
 			}
 			//枠はみ出し時スクロール処理
@@ -5613,7 +5657,7 @@ void timerog1(UINT nIDEvent)
 			pl = new CPlayList;
 			pl->Create(og);
 			if (!plw) {
-				for (;;) DoEvent();
+				for (;;) { if (plw) break; DoEvent(); }
 			}
 			if (pl&&plw&&filen != "") {
 				int plc;

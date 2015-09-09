@@ -847,6 +847,33 @@ void CPlayList::Fol(CString fname)
 				}
 			}
 			for (j = i; j < read - 6; j++) {
+				if (bufimage[j] == 'A' && bufimage[j + 1] == 'l' && bufimage[j + 2] == 'b' && bufimage[j + 3] == 'u' && bufimage[j + 4] == 'm' && bufimage[j + 5] == '=') {
+					j += 6;
+					for (int k = j; k < read - 4; k++) {
+						if (bufimage[k] == 0) {
+							flg = 1;
+							buf[k - j] = 0;
+							buf[k - j + 1] = 0;
+							buf[k - j + 2] = 0;
+							break;
+						}
+						buf[k - j] = bufimage[k];
+					}
+				}
+				if (flg == 1) {
+					const int wlen = ::MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf), NULL, 0) - 1;
+					TCHAR* buff = new TCHAR[wlen + 1];
+					if (::MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf) - 1, buff, wlen))
+					{
+						buff[wlen] = 0;
+					}
+					wcscpy(p.alb, buff);
+					delete[] buff;
+					flg = 0;
+					break;
+				}
+			}
+			for (j = i; j < read - 6; j++) {
 				if (bufimage[j] == 'A' && bufimage[j + 1] == 'R' && bufimage[j + 2] == 'T' && bufimage[j + 3] == 'I' && bufimage[j + 4] == 'S' && bufimage[j + 5] == 'T' && bufimage[j + 6] == '=') {
 					j += 7;
 					for (int k = j; k < read - 4; k++) {
@@ -864,6 +891,33 @@ void CPlayList::Fol(CString fname)
 					const int wlen = ::MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf), NULL, 0)-1;
 					TCHAR* buff = new TCHAR[wlen + 1];
 					if (::MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf)-1, buff, wlen))
+					{
+						buff[wlen] = _T('\0');
+					}
+					wcscpy(p.art, buff);
+					delete[] buff;
+					flg = 0;
+					break;
+				}
+			}
+			for (j = i; j < read - 6; j++) {
+				if (bufimage[j] == 'A' && bufimage[j + 1] == 'r' && bufimage[j + 2] == 't' && bufimage[j + 3] == 'i' && bufimage[j + 4] == 's' && bufimage[j + 5] == 't' && bufimage[j + 6] == '=') {
+					j += 7;
+					for (int k = j; k < read - 4; k++) {
+						if (bufimage[k] == 0) {
+							flg = 1;
+							buf[k - j] = 0;
+							buf[k - j + 1] = 0;
+							buf[k - j + 2] = 0;
+							break;
+						}
+						buf[k - j] = bufimage[k];
+					}
+				}
+				if (flg == 1) {
+					const int wlen = ::MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf), NULL, 0) - 1;
+					TCHAR* buff = new TCHAR[wlen + 1];
+					if (::MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf) - 1, buff, wlen))
 					{
 						buff[wlen] = _T('\0');
 					}
@@ -891,6 +945,33 @@ void CPlayList::Fol(CString fname)
 					const int wlen = ::MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf), NULL, 0)-1;
 					TCHAR* buff = new TCHAR[wlen + 1];
 					if (::MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf)-1, buff, wlen))
+					{
+						buff[wlen] = _T('\0');
+					}
+					wcscpy(p.name, buff);
+					delete[] buff;
+					flg = 0;
+					break;
+				}
+			}
+			for (j = i; j < read - 4; j++) {
+				if (bufimage[j] == 'T' && bufimage[j + 1] == 'i' && bufimage[j + 2] == 't' && bufimage[j + 3] == 'l' && bufimage[j + 4] == 'e' && bufimage[j + 5] == '=') {
+					j += 6;
+					for (int k = j; k < read - 4; k++) {
+						if (bufimage[k] == 0) {
+							flg = 1;
+							buf[k - j] = 0;
+							buf[k - j + 1] = 0;
+							buf[k - j + 2] = 0;
+							break;
+						}
+						buf[k - j] = bufimage[k];
+					}
+				}
+				if (flg == 1) {
+					const int wlen = ::MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf), NULL, 0) - 1;
+					TCHAR* buff = new TCHAR[wlen + 1];
+					if (::MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf) - 1, buff, wlen))
 					{
 						buff[wlen] = _T('\0');
 					}
@@ -1248,7 +1329,7 @@ void CPlayList::Fol(CString fname)
 					if (savedata.m4a == 1)
 						p.sub = -9;
 					_tcscpy(p.name, s);
-					_tcscpy(p.fol, ft + L"\\" + s);
+					_tcscpy(p.fol, fname + L"\\" + s);
 					flg = 0;
 					int i;
 					for (i = 0; i < read - 4; i++) {
@@ -1353,7 +1434,7 @@ void CPlayList::Fol(CString fname)
 						p.sub = -2;
 					p.sub = -8;
 					_tcscpy(p.name, s);
-					_tcscpy(p.fol, ft +L"\\"+ s);
+					_tcscpy(p.fol, fname +L"\\"+ s);
 					flg = 0;
 					int i=0,j;
 					for (j = i; j < read - 6; j++) {
@@ -1374,6 +1455,33 @@ void CPlayList::Fol(CString fname)
 							const int wlen = ::MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf), NULL, 0)-1;
 							TCHAR* buff = new TCHAR[wlen + 1];
 							if (::MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf)-1, buff, wlen))
+							{
+								buff[wlen] = _T('\0');
+							}
+							wcscpy(p.alb, buff);
+							delete[] buff;
+							flg = 0;
+							break;
+						}
+					}
+					for (j = i; j < read - 6; j++) {
+						if (bufimage[j] == 'A' && bufimage[j + 1] == 'l' && bufimage[j + 2] == 'b' && bufimage[j + 3] == 'u' && bufimage[j + 4] == 'm' && bufimage[j + 5] == '=') {
+							j += 6;
+							for (int k = j; k < read - 4; k++) {
+								if (bufimage[k] == 0) {
+									flg = 1;
+									buf[k - j] = 0;
+									buf[k - j + 1] = 0;
+									buf[k - j + 2] = 0;
+									break;
+								}
+								buf[k - j] = bufimage[k];
+							}
+						}
+						if (flg == 1) {
+							const int wlen = ::MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf), NULL, 0) - 1;
+							TCHAR* buff = new TCHAR[wlen + 1];
+							if (::MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf) - 1, buff, wlen))
 							{
 								buff[wlen] = _T('\0');
 							}
@@ -1410,6 +1518,33 @@ void CPlayList::Fol(CString fname)
 							break;
 						}
 					}
+					for (j = i; j < read - 6; j++) {
+						if (bufimage[j] == 'A' && bufimage[j + 1] == 'r' && bufimage[j + 2] == 't' && bufimage[j + 3] == 'i' && bufimage[j + 4] == 's' && bufimage[j + 5] == 't' && bufimage[j + 6] == '=') {
+							j += 7;
+							for (int k = j; k < read - 4; k++) {
+								if (bufimage[k] == 0) {
+									flg = 1;
+									buf[k - j] = 0;
+									buf[k - j + 1] = 0;
+									buf[k - j + 2] = 0;
+									break;
+								}
+								buf[k - j] = bufimage[k];
+							}
+						}
+						if (flg == 1) {
+							const int wlen = ::MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf), NULL, 0) - 1;
+							TCHAR* buff = new TCHAR[wlen + 1];
+							if (::MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf) - 1, buff, wlen))
+							{
+								buff[wlen] = _T('\0');
+							}
+							wcscpy(p.art, buff);
+							delete[] buff;
+							flg = 0;
+							break;
+						}
+					}
 					for (j = i; j < read - 4; j++) {
 						if (bufimage[j] == 'T' && bufimage[j + 1] == 'I' && bufimage[j + 2] == 'T' && bufimage[j + 3] == 'L' && bufimage[j + 4] == 'E' && bufimage[j + 5] == '=') {
 							j += 6;
@@ -1428,6 +1563,33 @@ void CPlayList::Fol(CString fname)
 							const int wlen = ::MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf), NULL, 0)-1;
 							TCHAR* buff = new TCHAR[wlen + 1];
 							if (::MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf)-1, buff, wlen))
+							{
+								buff[wlen] = _T('\0');
+							}
+							wcscpy(p.name, buff);
+							delete[] buff;
+							flg = 0;
+							break;
+						}
+					}
+					for (j = i; j < read - 4; j++) {
+						if (bufimage[j] == 'T' && bufimage[j + 1] == 'i' && bufimage[j + 2] == 't' && bufimage[j + 3] == 'l' && bufimage[j + 4] == 'e' && bufimage[j + 5] == '=') {
+							j += 6;
+							for (int k = j; k < read - 4; k++) {
+								if (bufimage[k] == 0) {
+									flg = 1;
+									buf[k - j] = 0;
+									buf[k - j + 1] = 0;
+									buf[k - j + 2] = 0;
+									break;
+								}
+								buf[k - j] = bufimage[k];
+							}
+						}
+						if (flg == 1) {
+							const int wlen = ::MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf), NULL, 0) - 1;
+							TCHAR* buff = new TCHAR[wlen + 1];
+							if (::MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf) - 1, buff, wlen))
 							{
 								buff[wlen] = _T('\0');
 							}
