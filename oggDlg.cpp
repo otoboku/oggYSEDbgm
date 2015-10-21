@@ -1908,7 +1908,7 @@ void COggDlg::play()
 		char buf[1024];
 		ss = "";
 		ZeroMemory(&sikpi, sizeof(sikpi));
-		sikpi.dwSamplesPerSec = 96000; sikpi.dwChannels = 2; sikpi.dwSeekable = 1; sikpi.dwLength = -1; sikpi.dwBitsPerSample = ((savedata.bit24 == 1) ? 24 : 16);
+		sikpi.dwSamplesPerSec = 192000; sikpi.dwChannels = 8; sikpi.dwSeekable = 1; sikpi.dwLength = -1; sikpi.dwBitsPerSample = ((savedata.bit24 == 1) ? 24 : 16);
 		if (1) {
 			if (ss == "") {
 #if UNICODE
@@ -2262,7 +2262,7 @@ void COggDlg::play()
 		CString ss;
 		ss=filen.Left(filen.ReverseFind(':')-1);
 		ZeroMemory(&sikpi,sizeof(sikpi));
-		sikpi.dwSamplesPerSec=96000; sikpi.dwChannels=2; sikpi.dwSeekable=1; sikpi.dwLength=-1; sikpi.dwBitsPerSample=((savedata.bit24==1)?24:16);
+		sikpi.dwSamplesPerSec=192000; sikpi.dwChannels=8; sikpi.dwSeekable=1; sikpi.dwLength=-1; sikpi.dwBitsPerSample=((savedata.bit24==1)?24:16);
 		if(mod){
 			if(ss==""){
 				if(mod->Init) mod->Init();
