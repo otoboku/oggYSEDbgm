@@ -320,8 +320,9 @@ void CMp3Image::OnPaint()
 */		//if(plf!=0) 
 		RECT r;
 		GetClientRect(&r);
-		SetStretchBltMode(dcc , COLORONCOLOR);
-		dcc.StretchBlt(0,0,r.bottom,r.bottom,&dc,0,0,x,y,SRCCOPY);
+		SetStretchBltMode(dcc.m_hDC , HALFTONE); //高画質モード
+		SetBrushOrgEx(dcc.m_hDC, 0, 0, NULL); //ブラシのずれを防止
+		dcc.StretchBlt(0,0,r.bottom,r.bottom,&dc,0,0,x,y,SRCCOPY); //伸縮
 		CDialog::OnPaint();
 //	}
 }

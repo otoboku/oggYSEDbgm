@@ -1964,7 +1964,7 @@ void COggDlg::play()
 			}
 		}
 		for (j = i; j < read - 6; j++) {
-			if (bufimage[j] == 'A' && bufimage[j + 1] == 'l' && bufimage[j + 2] == 'b' && bufimage[j + 3] == 'u' && bufimage[j + 4] == 'm' && bufimage[j + 5] == '=') {
+			if ((bufimage[j] == 'A' || bufimage[j] == 'a') && bufimage[j + 1] == 'l' && bufimage[j + 2] == 'b' && bufimage[j + 3] == 'u' && bufimage[j + 4] == 'm' && bufimage[j + 5] == '=') {
 			j += 6;
 			for (int k = j; k < read - 4; k++) {
 				if (bufimage[k] == 0) {
@@ -2018,7 +2018,7 @@ void COggDlg::play()
 			}
 		}
 		for (j = i; j < read - 6; j++) {
-			if (bufimage[j] == 'A' && bufimage[j + 1] == 'r' && bufimage[j + 2] == 't' && bufimage[j + 3] == 'i' && bufimage[j + 4] == 's' && bufimage[j + 5] == 't' && bufimage[j + 6] == '=') {
+			if ((bufimage[j] == 'A' || bufimage[j] == 'a') && bufimage[j + 1] == 'r' && bufimage[j + 2] == 't' && bufimage[j + 3] == 'i' && bufimage[j + 4] == 's' && bufimage[j + 5] == 't' && bufimage[j + 6] == '=') {
 				j += 7;
 				for (int k = j; k < read - 4; k++) {
 					if (bufimage[k] == 0) {
@@ -2072,7 +2072,7 @@ void COggDlg::play()
 			}
 		}
 		for (j = i; j < read - 4; j++) {
-			if (bufimage[j] == 'T' && bufimage[j + 1] == 'i' && bufimage[j + 2] == 't' && bufimage[j + 3] == 'l' && bufimage[j + 4] == 'e' && bufimage[j + 5] == '=') {
+			if ((bufimage[j] == 'T' || bufimage[j] == 't') && bufimage[j + 1] == 'i' && bufimage[j + 2] == 't' && bufimage[j + 3] == 'l' && bufimage[j + 4] == 'e' && bufimage[j + 5] == '=') {
 				j += 6;
 				for (int k = j; k < read - 4; k++) {
 					if (bufimage[k] == 0) {
